@@ -110,7 +110,25 @@ Before starting the containers, ensure the following directories exist in the ro
 ## ⚙️ 3. Environment Variables Configuration
 You need to create and configure environment files to pass secrets and settings to the containers.
 
-### A. Backend Environment (`./fastapi/.env.docker`)
+
+### A. Root Environment File (`./.env`)
+Create a `.env` file in the project root. Docker Compose uses this to configure the services and volumes.
+```env
+# Database Credentials
+DB_USER=clm_user
+DB_PASSWORD=change_me_secure_password
+DB_NAME=clm_db
+
+# Domain Configuration
+DOMAIN=localhost
+# DOMAIN=yourdomain.com # Use your real domain for production
+
+# pgAdmin Credentials
+PGADMIN_EMAIL=admin@example.com
+PGADMIN_PASSWORD=change_me_admin_password
+```
+
+### B. Backend Environment (`./fastapi/.env.docker`)
 Create `.env.docker` inside the `./fastapi` directory. FastAPI will read these variables at runtime.
 ```env
 # Database Connection
@@ -147,7 +165,7 @@ FRONTEND_BASE_URL=http://localhost
 LOCALE=ru
 ```
 
-### B. Frontend Environment (`./.env.docker`)
+### C. Frontend Environment (`./.env.docker`)
 Create `.env.docker` in the project root. Next.js will read these variables during the build process.
 ```env
 PYTHON_BIN=/usr/local/bin/python3
