@@ -1,0 +1,79 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Andrey Soloduhin
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.dropdown-menu {
+}
+
+.dropdown-menu.active {
+  display: block;
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 9999;
+}
+
+.context-menu.active {
+  display: block;
+}
+
+.modal-overlay {
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+tr.selected td {
+  background-color: #eff6ff;
+}
+
+.table-row:hover {
+  background-color: #f8fafc;
+}
+
+.table-row.selected {
+  background-color: #eff6ff;
+}
+
+.breadcrumb-sep {
+  color: #cbd5e1;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  transition: background 0.12s, color 0.12s;
+}
+
+.sidebar-item:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.sidebar-item.active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+

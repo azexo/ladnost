@@ -1,0 +1,38 @@
+<VirtualHost *:80>
+    ServerName ladnost.ru
+    ServerAlias www.ladnost.ru
+
+    # 1. ПРОКСИРОВАНИЕ FASTAPI
+    ProxyPass /api/ http://127.0.0.1:8001/api/
+    ProxyPassReverse /api/ http://127.0.0.1:8001/api/
+    
+    # 👉 ДОБАВЛЕНО: Проксирование загруженных файлов на FastAPI (ОБЯЗАТЕЛЬНО до общего правила "/")
+    ProxyPass /uploads/ http://127.0.0.1:8001/uploads/
+    ProxyPassReverse /uploads/ http://127.0.0.1:8001/uploads/
+
+    # 2. Проксирование на Next.js (порт 3001)
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:3001/
+    ProxyPassReverse / http://127.0.0.1:3001/
+
+    # Поддержка WebSocket для Next.js (ИСКЛЮЧАЕМ /api/ и /uploads/)
+    RewriteEngine On
+    
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/uploads/
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule /(.*) ws://127.0.0.1:3001/$1 [P,L]
+    
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/uploads/
+    RewriteCond %{HTTP:Upgrade} !=websocket [NC]
+    RewriteRule /(.*) http://127.0.0.1:3001/$1 [P,L]
+
+    ErrorLog ${APACHE_LOG_DIR}/ladnost-error.log
+    CustomLog ${APACHE_LOG_DIR}/ladnost-access.log combined
+
+    # Редирект всего остального на HTTPS
+    RewriteCond %{SERVER_NAME} =ladnost.ru [OR]
+    RewriteCond %{SERVER_NAME} =www.ladnost.ru
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>

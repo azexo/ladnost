@@ -1,0 +1,120 @@
+services:
+  # 1. База данных PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: clm_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-clm_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password_change_me}
+      POSTGRES_DB: ${DB_NAME:-clm_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - clm_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-clm_user} -d ${DB_NAME:-clm_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. FastAPI Backend
+  fastapi:
+    build:
+      context: ./fastapi
+      dockerfile: Dockerfile
+    container_name: clm_fastapi
+    restart: always
+    env_file:
+      - ./fastapi/.env.docker
+    volumes:
+      - uploads_data:/app/uploads
+      - ./plugins:/app/plugins 
+      - ./plugins:/plugins
+      - ./messages:/app/messages:ro 
+      - ./content:/app/content:ro 
+    networks:
+      - clm_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. Next.js Frontend
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+      args:
+        NEXT_PUBLIC_API_URL: https://${DOMAIN:-ladnost.ru}/api/v1
+    container_name: clm_nextjs
+    restart: always
+    env_file:
+      - .env.docker
+    environment:
+      - PYTHON_BIN=python3
+      - INTERNAL_API_URL=http://fastapi:8000/api/v1
+      - PUPPETEER_CACHE_DIR=/opt/puppeteer-cache
+    volumes:
+      - ./extensions:/app/extensions:ro 
+    networks:
+      - clm_network
+    depends_on:
+      - fastapi
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+
+  # 4. Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: clm_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-ladnost.ru}
+      - SSL_DIR=/etc/letsencrypt/live/${DOMAIN:-ladnost.ru}
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - uploads_data:/var/www/uploads:ro
+    networks:
+      - clm_network
+    depends_on:
+      - nextjs
+      - fastapi
+
+  # 5. pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: clm_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ladnost.ru}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin_password}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - clm_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  clm_network:
+    driver: bridge

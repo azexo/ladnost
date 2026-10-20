@@ -1,0 +1,23 @@
+[Unit]
+Description=CLM FastAPI Service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/clm/fastapi
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME=/var/www/clm/fastapi"
+
+# Запускаем через gunicorn, используя uvicorn в качестве воркеров
+ExecStart=/var/www/clm/fastapi/venv/bin/gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 127.0.0.1:8001
+
+# Команда для атомарной перезагрузки (отправляет сигнал SIGHUP мастер-процессу)
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

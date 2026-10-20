@@ -1,0 +1,50 @@
+================================================================================
+NOTICE
+================================================================================
+
+Project Name: Ladnost
+Copyright 2026 Andrey Soloduhin. All rights reserved.
+
+This project is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License in the LICENSE file at the root of this 
+repository or at: http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+--------------------------------------------------------------------------------
+1. THIRD-PARTY SOFTWARE AND FRAMEWORKS
+--------------------------------------------------------------------------------
+
+This project actively uses the following third-party frameworks and libraries:
+
+- Next.js (and the React ecosystem)
+  Copyright (c) 2016 Vercel, Inc. and other contributors.
+  License: MIT
+
+- FastAPI
+  Copyright (c) 2018 Sebastián Ramírez and other contributors.
+  License: MIT
+
+A complete list of all dependencies (npm and pip packages), their versions, 
+and licenses is available in the project configuration files:
+- package.json and package-lock.json (for the Next.js frontend)
+- pyproject.toml / requirements.txt and poetry.lock (for the FastAPI backend)
+
+Copyrights for the mentioned third-party components belong to their 
+respective copyright holders.
+
+--------------------------------------------------------------------------------
+2. NOTICES FOR PLUGINS AND MODULES
+--------------------------------------------------------------------------------
+
+The project has a modular architecture. The code located in the `plugins/` 
+directory, may include both original project code and third-party extensions.
+
+If a third-party plugin has its own attribution requirements or a specific 
+NOTICE file, they are included directly in the corresponding plugin's directory 
+(e.g., `plugins/plugin_name/NOTICE`) or specified in the headers of its source 
+files in SPDX format.
+
+================================================================================

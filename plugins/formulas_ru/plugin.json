@@ -1,0 +1,11 @@
+{
+  "name": "formulas_ru",
+  "version": "1.0.0",
+  "enabled": true,
+  "backend": {
+    "module": "formulas_ru.backend.main"
+  },
+  "frontend": {
+    "logic": "logic.ts"
+  }
+}

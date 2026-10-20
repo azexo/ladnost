@@ -1,0 +1,234 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Andrey Soloduhin
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.doc-page {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Custom Scrollbar for canvas area */
+.canvas-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.canvas-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.canvas-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.canvas-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.bg-canvas_bg {
+    --tw-bg-opacity: 1;
+    background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
+}
+
+.bg-primary {
+    --tw-bg-opacity: 1;
+    background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-primary_hover:hover {
+    --tw-bg-opacity: 1;
+    background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+}
+
+.bg-sidebar_bg {
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+
+
+
+/* Базовые стили для контейнера редактора */
+.doc-content-render {
+  outline: none;
+}
+
+/* Заголовки */
+.doc-content-render h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+.doc-content-render h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.doc-content-render h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.doc-content-render h4 {
+  font-size: 1.15em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.doc-content-render h5 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.doc-content-render h6 {
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+/* Абзацы и Списки */
+.doc-content-render p {
+  margin-bottom: 0.5em;
+}
+
+.doc-content-render ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.doc-content-render ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.doc-content-render li {
+  margin-bottom: 0.25em;
+}
+
+.doc-content-render li p {
+  margin-bottom: 0.25em;
+}
+
+/* Цитаты */
+.doc-content-render blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1em;
+  margin-left: 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Ссылки */
+.doc-content-render a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.doc-content-render a:hover {
+  color: #1d4ed8;
+}
+
+/* Горизонтальная линия */
+.doc-content-render hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}
+
+/* Плейсхолдер (если будете использовать extension-placeholder) */
+.doc-content-render p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+
+/* ==========================================
+   СТИЛИ ДЛЯ ТАБЛИЦ TIPTAP
+   ========================================== */
+
+/* Базовые стили таблицы */
+.doc-content-render table {
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+/* Стили для ячеек и заголовков */
+.doc-content-render td,
+.doc-content-render th {
+  border: 1px solid #eee;
+  border-collapse: collapse;
+  min-width: 1em;
+  padding: 6px 8px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  font-size: 0.875rem;
+  /* text-sm */
+  line-height: 1.5;
+}
+
+/* Стили специально для заголовков таблицы (шапки) */
+.doc-content-render th {
+  background-color: #f1f5f9;
+  /* Цвет slate-100 */
+  font-weight: 600;
+  text-align: left;
+  color: #334155;
+  /* slate-700 */
+}
+
+/* Стиль для выделенных ячеек (когда кликаешь и тянешь для выделения) */
+.doc-content-render .selectedCell:after {
+  background: rgba(59, 130, 246, 0.15);
+  /* Полупрозрачный синий (blue-500) */
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+/* Ручка для изменения ширины колонок (появляется при наведении на границу) */
+.doc-content-render .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #3b82f6;
+  /* Цвет blue-500 */
+  pointer-events: none;
+}
+
+/* Убираем лишние отступы у параграфов внутри ячеек, чтобы таблица не "плыла" */
+.doc-content-render td p,
+.doc-content-render th p {
+  margin: 0;
+}
+
+.doc-content-render td.bordered,
+.doc-content-render th.bordered {
+  border: 1px solid #444;
+}

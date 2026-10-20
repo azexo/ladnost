@@ -1,0 +1,1289 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "loadingPackage": "Loading package...",
+        "loadingPage": "Loading page...",
+        "loadingPlugin": "Loading plugin...",
+        "loading": "Loading...",
+        "error": "Error"
+    },
+    "layout": {
+        "title": "Ladnost - Contract Process Automation",
+        "description": "Ladnost - Legal workflow automation. Document creation, review and management, variable tagging, approval routing, collaboration, and much more."
+    },
+    "Auth": {
+        "brand": {
+            "name": "Ladnost"
+        },
+        "header": {
+            "checkContract": "Check contract",
+            "becomePartner": "Become a partner",
+            "consultation": "Consultation"
+        },
+        "hero": {
+            "badge": "Smart contract management"
+        },
+        "auth": {
+            "title": {
+                "register": "Create an account",
+                "forgot": "Password recovery",
+                "reset": "Set a new password",
+                "activate": "Account activation",
+                "login": "Welcome back!"
+            },
+            "subtitle": {
+                "register": "Register in Ladnost",
+                "forgot": "Enter your email to reset your password",
+                "reset": "Create a strong password for your account",
+                "activate": "Please wait...",
+                "login": "Log in to your Ladnost account"
+            }
+        },
+        "tabs": {
+            "login": "Log in",
+            "register": "Register"
+        },
+        "login": {
+            "email": "Email",
+            "password": "Password",
+            "forgot": "Forgot password?",
+            "remember": "Remember me",
+            "submit": "Log in to Ladnost",
+            "loading": "Loading...",
+            "placeholders": {
+                "email": "your@email.com",
+                "password": "Enter password"
+            },
+            "errors": {
+                "email": "Enter a valid email",
+                "password": "Enter a password",
+                "general": "Invalid email or password. Please try again."
+            }
+        },
+        "register": {
+            "firstName": "First name",
+            "lastName": "Last name",
+            "workEmail": "Work email",
+            "password": "Password",
+            "confirmPassword": "Confirm password",
+            "termsText": "I accept the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy> of Ladnost",
+            "submit": "Create account",
+            "loading": "Creating...",
+            "placeholders": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "your@company.com",
+                "password": "Minimum 8 characters",
+                "confirmPassword": "Repeat password"
+            },
+            "errors": {
+                "firstName": "Enter first name",
+                "lastName": "Enter last name",
+                "email": "Enter a valid email",
+                "password": "Minimum 8 characters",
+                "confirm": "Passwords do not match",
+                "terms": "You must accept the terms",
+                "general": "Registration error"
+            },
+            "strength": {
+                "weak": "Weak",
+                "medium": "Medium",
+                "good": "Good",
+                "strong": "Strong"
+            }
+        },
+        "forgot": {
+            "info": "Enter the email you used to register. We will send you a password reset link.",
+            "email": "Email",
+            "submit": "Send link",
+            "loading": "Sending...",
+            "back": "Back to login",
+            "placeholders": {
+                "email": "your@email.com"
+            },
+            "errors": {
+                "email": "Enter a valid email",
+                "general": "Failed to send link. Please try again later."
+            }
+        },
+        "reset": {
+            "info": "Create a new strong password for your account.",
+            "password": "New password",
+            "confirmPassword": "Confirm password",
+            "submit": "Set new password",
+            "loading": "Saving...",
+            "back": "Back to login",
+            "placeholders": {
+                "password": "Minimum 8 characters",
+                "confirmPassword": "Repeat password"
+            },
+            "errors": {
+                "password": "Minimum 8 characters",
+                "confirm": "Passwords do not match",
+                "general": "Failed to reset password. The link may have expired."
+            }
+        },
+        "activate": {
+            "loadingTitle": "Activating account...",
+            "loadingText": "Please wait, we are verifying your link.",
+            "successTitle": "Success!",
+            "successDefault": "Account successfully activated! Redirecting to login...",
+            "errorTitle": "Activation error",
+            "errorDefault": "Activation error. The link may have expired or already been used.",
+            "back": "Back to login"
+        },
+        "success": {
+            "title": "Check your email!",
+            "text": "We have sent a password reset link to your email. The link is valid for 24 hours.",
+            "back": "Back to login"
+        },
+        "modal": {
+            "termsTitle": "Terms of Service",
+            "privacyTitle": "Privacy Policy",
+            "close": "Close"
+        },
+        "footer": {
+            "copyright": "© 2026 Ladnost."
+        }
+    },
+    "viewer": {
+        "exportError": "Export error",
+        "conversionError": "Error converting to {extension}",
+        "generateError": "Failed to generate {extension}.",
+        "loadingPackage": "Loading package...",
+        "documentNotGenerated": "Document is not yet generated or is empty.",
+        "stepFilling": "Filling",
+        "stepSigning": "Signing",
+        "stepDone": "Done",
+        "zoomOut": "Zoom out",
+        "zoomIn": "Zoom in",
+        "downloadPdf": "Download PDF",
+        "generatingDocument": "Generating document...",
+        "documentEmpty": "Document is empty or failed to load data.",
+        "collapse": "Collapse",
+        "form": "Form",
+        "noDataRequired": "No data required",
+        "noDataRequiredDesc": "No additional data needs to be filled out to generate this document.",
+        "fillData": "Fill in the data",
+        "noSection": "No section",
+        "yes": "Yes",
+        "consent": "By clicking the button, I accept the <offer>offer agreement</offer> and consent to the <privacy>processing of personal data</privacy>.",
+        "sign": "Sign",
+        "testingAlert": "This feature is in the testing phase.",
+        "protectedDocument": "Protected document"
+    },
+    "TrialExpired": {
+        "title": "Subscription period has ended",
+        "description": "Access to your workspace is temporarily restricted. To continue working and gain access to all features, please contact one of our authorized partners to purchase a license or subscribe directly.",
+        "partnersLoading": "Loading partner list...",
+        "refreshButton": "I have already paid, refresh page",
+        "subscribeButton": "Buy subscription"
+    },
+    "templateImport": {
+        "title": "Import template from YAML",
+        "subtitle": "Paste the YAML template description and Markdown document for automatic generation",
+        "yamlSection": {
+            "title": "YAML template description",
+            "placeholder": "template_metadata:\nname:  \"Service Agreement\"\n...",
+            "clear": "Clear",
+            "chars": "{count} characters"
+        },
+        "markdownSection": {
+            "title": "Markdown document",
+            "placeholder": "SERVICE AGREEMENT NO. {{ contract_number }}\n...",
+            "clear": "Clear",
+            "chars": "{count} characters"
+        },
+        "button": {
+            "generate": "Generate template",
+            "generating": "Generating..."
+        },
+        "notifications": {
+            "yamlRequired": "Please paste the YAML template description",
+            "markdownRequired": "Please paste the Markdown document",
+            "success": "✅ Template successfully imported and converted!",
+            "error": "❌ Import error: {message}",
+            "unknownError": "Unknown error"
+        },
+        "logs": {
+            "title": "Debug information (Console)",
+            "clear": "Clear",
+            "starting": "Starting processAndSaveTemplateFromYaml function..."
+        },
+        "validation": {
+            "startAnalysis": "🔍 [TEMPLATE VALIDATION] Starting deep analysis of parsed JSON...",
+            "tokenWithoutId": "Token without identifier (UUID: {uuid})",
+            "tokenNotFoundInProps": "Token with identifier=\"{identifier}\" not found in the properties list from the backend!",
+            "tokenMissingType": "Token \"{identifier}\" is missing the type attribute",
+            "tokenMissingLabel": "Token \"{identifier}\" is missing the label attribute",
+            "slotWithoutId": "FormulationSlot without slotIdentifier/identifier",
+            "slotNotFoundInVariants": "FormulationSlot with identifier=\"{identifier}\" not found in the variants list from the backend!",
+            "templateRowNoTokens": "Row is marked as a template (isTemplate: true), but contains no tokens!",
+            "placeholderMismatch": "Placeholder count mismatch: {mdCount} in Markdown, but {total} parsed in JSON (Tokens: {tokens}, Slots: {slots}). Some placeholders may not have been replaced with HTML or were parsed as plain text.",
+            "unusedProperties": "Properties defined in YAML but NOT included in the final JSON (not used in MD or parsing error): {list}",
+            "unusedVariants": "Variants (slots) defined in YAML but NOT included in the final JSON: {list}",
+            "statsTitle": "📊 [JSON STATISTICS]",
+            "statsTokens": "   - Tokens (properties): {count}",
+            "statsSlots": "   - Slots (formulations): {count}",
+            "statsTables": "   - Tables: {total} (Dynamic: {dynamic})",
+            "statsTemplateRows": "   - Template rows: {count}",
+            "statsMdPlaceholders": "   - Placeholders in original MD: {count}",
+            "errorsTitle": "❌ [VALIDATION ERRORS] ({count}):",
+            "errorsNone": "✅ [VALIDATION ERRORS] None found.",
+            "warningsTitle": "⚠️ [VALIDATION WARNINGS] ({count}):",
+            "warningsNone": "✅ [VALIDATION WARNINGS] None found.",
+            "analysisComplete": "🔍 [TEMPLATE VALIDATION] Analysis complete."
+        },
+        "prepare": {
+            "insertProperty": "[Insert #{count}] Property: \"{{ {identifier} }}\" -> TokenNode{tableSuffix}",
+            "isTableColumn": " [TABLE COLUMN]",
+            "insertVariant": "[Insert #{count}] Variant/Slot: \"{{ {identifier} }}\" -> FormulationSlot",
+            "entityNotFound": "[Insert #{count}] ⚠️ ERROR: Entity \"{{ {identifier} }}\" NOT FOUND.",
+            "totalProcessed": "[Parsing] Total placeholders processed: {count}"
+        },
+        "tables": {
+            "rowMarkedTemplate": "📊 [TABLE] Row marked as template (all cells contain tokens). sectionId: {sectionId}",
+            "dynamicTableFound": "📊 [TABLE] Dynamic table detected (isDynamic: true)"
+        },
+        "import": {
+            "start": "🚀 Starting import process...",
+            "sendingToBackend": "📡 Sending YAML and Markdown to backend...",
+            "debugRawResponse": "[DEBUG FRONT] Raw response from backend:",
+            "backendSuccess": "✅ Backend responded successfully. Document ID created: {documentId}",
+            "statsSections": "   Sections: {count}",
+            "statsProperties": "   Properties: {count}",
+            "statsVariants": "   Variants: {count}",
+            "backendWarning": "⚠️ [BACKEND WARNING] {message}",
+            "preparingMarkdown": "🛠️ Preparing Markdown: replacing placeholders with HTML tags...",
+            "debugProcessedMd": "- [DEBUG] Processed Markdown (fragment) -",
+            "initEditor": "🧠 Initializing editor...",
+            "extractJsonHtml": "📄 Extracting JSON and HTML from editor...",
+            "debugEditorHtml": "- [DEBUG] HTML from editor (fragment) -",
+            "postProcessingTables": "📊 Post-processing: searching and marking dynamic tables...",
+            "savingToDb": "💾 Saving content to DB...",
+            "success": "🎉 Content successfully converted and saved!",
+            "criticalError": "❌ CRITICAL ERROR: {message}",
+            "editorDestroyed": "🧹 Editor destroyed."
+        }
+    },
+    "files": {
+        "breadcrumbs": {
+            "myFiles": "My files",
+            "shared": "Shared",
+            "trash": "Trash"
+        },
+        "notifications": {
+            "archiveDownloaded": "Archive successfully downloaded",
+            "archiveDownloadError": "Error downloading archive",
+            "templateCloned": "Template successfully cloned as a standard package",
+            "templateCloneError": "Error cloning template",
+            "setCreated": "Package \"{name}\" successfully created",
+            "fileUploadError": "Error uploading file",
+            "uploadedWithWarnings": "Uploaded with warnings:\n{warnings}",
+            "itemRestored": "Item restored",
+            "itemDeleted": "Item permanently deleted",
+            "itemsRestored": "Items restored",
+            "itemsDeleted": "Items permanently deleted"
+        },
+        "errors": {
+            "noMarkdown": "Server did not return markdown content",
+            "serverError": "Server returned error {status}",
+            "networkError": "Failed to connect to the server. Check your network connection.",
+            "timeoutError": "Conversion took too long (>300 sec). Try a smaller file.",
+            "conversionError": "Error processing conversion result"
+        }
+    },
+    "formulations": {
+        "errors": {
+            "type": {
+                "move_failed": "Error changing type order",
+                "delete_failed": "Failed to delete type",
+                "delete_failed_log": "Error deleting type",
+                "fetch_failed": "Error loading types",
+                "create_failed": "Error creating type"
+            },
+            "formulation": {
+                "delete_failed": "Failed to delete formulation",
+                "delete_failed_log": "Error deleting formulation",
+                "fetch_failed": "Error loading formulations",
+                "create_failed": "Error creating formulation",
+                "update_failed": "Error updating formulation"
+            },
+            "usage": {
+                "fetch_failed": "Error loading usage statistics"
+            }
+        }
+    },
+    "AuthInitializer": {
+        "loading": "Loading...",
+        "userNotFoundRedirect": "User not found, redirecting to /"
+    },
+    "ContactFormModal": {
+        "title": "Contact us",
+        "subtitle": "Leave a request and we will contact you",
+        "successSubtitle": "Message successfully sent",
+        "labels": {
+            "name": "Your name",
+            "email": "Email",
+            "phone": "Phone",
+            "phoneOptional": "(optional)",
+            "message": "Message"
+        },
+        "placeholders": {
+            "name": "John Doe",
+            "email": "john@example.com",
+            "phone": "+1 (555) 123-45-67",
+            "message": "Describe your question or task..."
+        },
+        "buttons": {
+            "cancel": "Cancel",
+            "submit": "Send",
+            "submitting": "Sending..."
+        },
+        "success": {
+            "title": "Thank you for reaching out!",
+            "description": "We have received your message and will reply to the provided email shortly."
+        },
+        "errors": {
+            "required": "Please fill in all required fields",
+            "invalidEmail": "Please enter a valid email",
+            "submitError": "Error sending message. Please try again later."
+        }
+    },
+    "Formulations": {
+        "common": {
+            "noType": "No type"
+        },
+        "sidebar": {
+            "library": "Library",
+            "allFormulations": "All formulations",
+            "favorites": "Favorites",
+            "recentlyModified": "Recently modified",
+            "types": "Types"
+        },
+        "topBar": {
+            "title": "Formulations library",
+            "searchPlaceholder": "Search formulations...",
+            "editTypes": "Edit types",
+            "newFormulation": "New formulation"
+        },
+        "statsBar": {
+            "total": "Total: {count, plural, one {# formulation} other {# formulations}}",
+            "usedIn": "Used in {count, plural, one {# document} other {# documents}}"
+        },
+        "table": {
+            "type": "Type",
+            "name": "Name",
+            "text": "Formulation text",
+            "usage": "Usage",
+            "loading": "Loading data...",
+            "notFound": "Formulations not found",
+            "formulationsCount": "{count, plural, one {# formulation} other {# formulations}}",
+            "addToFavorites": "Add to favorites",
+            "modified": "Modified:"
+        },
+        "popup": {
+            "usedInDocuments": "Used in documents",
+            "notUsedYet": "Not used yet",
+            "loading": "Loading data..."
+        },
+        "panel": {
+            "newFormulation": "New formulation"
+        },
+        "form": {
+            "type": "Type",
+            "selectType": "Select type...",
+            "name": "Name",
+            "namePlaceholder": "Formulation name...",
+            "text": "Text",
+            "textPlaceholder": "Enter formulation text...",
+            "changeReason": "Reason for change",
+            "requiredForSubmit": "— required for submission",
+            "changeReasonPlaceholder": "Specify the reason for changing the formulation..."
+        },
+        "typeManager": {
+            "title": "Type management",
+            "subtitle": "Add, edit, and delete formulation types",
+            "newTypePlaceholder": "New type name...",
+            "existingTypes": "Existing types",
+            "typesCount": "{count, plural, one {# type} other {# types}}"
+        },
+        "actions": {
+            "save": "Save",
+            "cancel": "Cancel",
+            "edit": "Edit",
+            "delete": "Delete",
+            "add": "Add",
+            "moveUp": "Move up",
+            "moveDown": "Move down",
+            "close": "Close"
+        },
+        "alerts": {
+            "fillRequired": "Fill in required fields",
+            "specifyReason": "Please specify the reason for changing the formulation"
+        },
+        "confirmations": {
+            "deleteFormulation": "Are you sure you want to delete the formulation \"{name}\"?",
+            "deleteType": "Are you sure you want to delete the type \"{name}\"?\n\nIf this type is used in formulations, deletion will be canceled."
+        }
+    },
+    "Navbar": {
+        "brand": "Ladnost",
+        "nav": {
+            "myFiles": "My files",
+            "formulations": "Formulations",
+            "myTasks": "My tasks",
+            "neuralNetwork": "AI"
+        },
+        "modes": {
+            "template": "Template",
+            "standard": "Standard",
+            "nonStandard": "Non-standard"
+        },
+        "actions": {
+            "sendForApproval": "Send for approval",
+            "access": "Access",
+            "support": "Support",
+            "supportTitle": "Contact support"
+        },
+        "approval": {
+            "title": "Send for approval",
+            "subtitle": "Configure the route and add participants",
+            "taskNameLabel": "Task name",
+            "taskNamePlaceholder": "Service agreement approval",
+            "commentLabel": "Comment",
+            "commentPlaceholder": "Add a note for participants...",
+            "routeLabel": "Approval route",
+            "routeParallel": "Parallel",
+            "routeSequential": "Sequential",
+            "deadlineLabel": "Deadline",
+            "participantsLabel": "Approval participants",
+            "searchPlaceholder": "Search by email or name...",
+            "addButton": "Add",
+            "tableIndex": "#",
+            "tableParticipant": "Participant",
+            "tableAccess": "Access",
+            "emptyParticipants": "List is empty. Add participants by email.",
+            "notRegistered": "Not registered",
+            "invitationSent": "Invitation sent",
+            "accessReview": "Review",
+            "accessFull": "Full access",
+            "accessComment": "Commenting",
+            "accessView": "View",
+            "cancelButton": "Cancel",
+            "sending": "Sending...",
+            "sendButton": "Send"
+        },
+        "access": {
+            "title": "Access settings",
+            "subtitle": "Manage document participant permissions",
+            "searchPlaceholder": "Invite by email or name...",
+            "typeFull": "Full access",
+            "typeReview": "Review",
+            "typeComment": "Commenting",
+            "typeView": "View",
+            "inviteButton": "Invite",
+            "tableUser": "User",
+            "tableEmail": "Email",
+            "tableType": "Access type",
+            "tableTerm": "Term",
+            "loading": "Loading...",
+            "emptyList": "List is empty. Invite participants by email.",
+            "ownerBadge": "Owner",
+            "termIndefinite": "Indefinite",
+            "revokeTitle": "Revoke access",
+            "anonymousLabel": "Anonymous access",
+            "copyLinkTitle": "Copy full link",
+            "copied": "Copied",
+            "copy": "Copy",
+            "closeButton": "Close"
+        },
+        "alerts": {
+            "enterTaskName": "Enter task name",
+            "addParticipant": "Add at least one participant",
+            "approvalSuccess": "Document successfully sent for approval!",
+            "approvalError": "An error occurred while sending",
+            "userAlreadyAdded": "User is already added to the list",
+            "inviteError": "Error sending invitation",
+            "enterEmail": "Enter email",
+            "grantAccessError": "Error granting access",
+            "updateAccessError": "Error updating access",
+            "confirmRevoke": "Are you sure you want to revoke access?",
+            "revokeAccessError": "Error revoking access",
+            "anonymousAccessError": "Error updating anonymous access",
+            "copyLinkError": "Failed to copy link"
+        }
+    },
+    "SubscriptionGuard": {
+        "subscriptionActive": "Subscription is active",
+        "noSubscriptionObject": "No subscription object (currentSubscription = null)",
+        "subscriptionStatus": "Subscription status: {status}",
+        "expirationDatePassed": "Expiration date ({date}) < now",
+        "fetchingWorkspaces": "Running fetchMyWorkspaces()",
+        "initializingSkip": "Initializing, skipping.",
+        "workspaceNotLoadedSkip": "Workspace not loaded, skipping.",
+        "expiredAndBlockedRedirect": "Subscription expired + path blocked → redirecting to /trial-expired",
+        "renderingChildren": "Skipping, rendering children."
+    },
+    "SubscriptionModal": {
+        "title": "Plans and subscription",
+        "currentStatus": "Current status:",
+        "noSubscription": "No subscription",
+        "loginRequiredHint": "You must log in to purchase a subscription.",
+        "loginRequiredAlert": "To subscribe, you must create or select a workspace.",
+        "paymentError": "Payment creation error",
+        "status": {
+            "trial": "Trial",
+            "active": "Active",
+            "pastDue": "Past due",
+            "canceled": "Canceled",
+            "expired": "Expired"
+        },
+        "billingPeriod": {
+            "monthly": "Monthly",
+            "yearly": "Yearly",
+            "yearlyDiscount": "-20%"
+        },
+        "periodSuffix": {
+            "monthly": "mo",
+            "yearly": "yr"
+        },
+        "loading": "Loading plans...",
+        "basicFeatures": "Basic features",
+        "badge": {
+            "current": "Current",
+            "yourTariff": "Your plan",
+            "trial": "Trial"
+        },
+        "details": {
+            "billingPeriodLabel": "Billing period:",
+            "activeUntilLabel": "Active until:",
+            "billingPeriodMonthly": "Monthly",
+            "billingPeriodYearly": "Yearly",
+            "expiresAt": "(until {date})"
+        },
+        "button": {
+            "loginToPay": "Log in to pay",
+            "processing": "Processing...",
+            "currentTariff": "Current plan",
+            "subscribe": "Subscribe",
+            "resume": "Resume",
+            "pay": "Pay"
+        }
+    },
+    "UserDropdown": {
+        "moreThanNine": "9+",
+        "guest": "Guest",
+        "guestEmail": "guest@example.com",
+        "notifications": "Notifications",
+        "markAllAsRead": "Mark all as read",
+        "noNotifications": "No new notifications",
+        "profileSettings": "Profile settings",
+        "billingAndSubscription": "Plans and subscription",
+        "apiKeys": "API keys",
+        "logout": "Log out",
+        "settings": {
+            "title": "Profile settings",
+            "subtitle": "Manage your account",
+            "avatar": "Avatar",
+            "lastName": "Last name",
+            "firstName": "First name",
+            "middleName": "Middle name",
+            "changePassword": "Change password",
+            "currentPassword": "Current password",
+            "currentPasswordPlaceholder": "Enter current password",
+            "newPassword": "New password",
+            "newPasswordPlaceholder": "Minimum 6 characters",
+            "confirmPassword": "Confirmation",
+            "confirmPasswordPlaceholder": "Repeat password",
+            "cancel": "Cancel",
+            "saving": "Saving...",
+            "save": "Save"
+        },
+        "alerts": {
+            "nameRequired": "First and Last name are required",
+            "passwordsMismatch": "New passwords do not match",
+            "currentPasswordRequired": "Enter current password to change password",
+            "settingsSaved": "Settings successfully saved!",
+            "settingsSaveError": "Error saving settings",
+            "apiKeysLoadError": "Error loading API keys",
+            "apiKeyCreateError": "Error creating API key",
+            "apiKeyDeleteConfirm": "Are you sure you want to permanently delete this API key? This action cannot be undone.",
+            "apiKeyUpdateError": "Error updating API key",
+            "apiKeyDeleteError": "Error deleting API key"
+        },
+        "apiKeysModal": {
+            "title": "API keys",
+            "subtitle": "Manage keys for external access",
+            "createNewLabel": "Create new key",
+            "createPlaceholder": "Key name (e.g., Production)",
+            "createButton": "Create",
+            "creating": "Creating...",
+            "createdSuccess": "Key successfully created! Copy it, it will not be shown again.",
+            "copy": "Copy",
+            "copied": "Copied",
+            "existingKeys": "Existing keys",
+            "table": {
+                "name": "Name",
+                "prefix": "Prefix",
+                "status": "Status",
+                "created": "Created"
+            },
+            "loading": "Loading...",
+            "noKeys": "No keys found.",
+            "deleteTitle": "Delete key",
+            "close": "Close"
+        }
+    },
+    "UserEmailInput": {
+        "placeholder": "Search by email or name...",
+        "loading": "Loading...",
+        "useEmail": "Use email: <b>{value}</b>",
+        "noRelatedUsers": "No related users"
+    },
+    "VideoModal": {
+        "title": "Video player",
+        "closeAriaLabel": "Close video"
+    },
+    "FileModals": {
+        "contextMenu": {
+            "restore": "Restore",
+            "permanentlyDelete": "Delete permanently",
+            "rename": "Rename",
+            "move": "Move",
+            "configureAccess": "Configure access",
+            "open": "Open",
+            "copyLink": "Copy link",
+            "cloneDocumentSet": "Clone package",
+            "moveToTrash": "Move to trash",
+            "linkCopied": "Link copied to clipboard",
+            "cloneDocumentSetNamePrompt": "Package copy name:",
+            "documentSetCloned": "Package successfully cloned",
+            "copySuffix": "(Copy)",
+            "defaultCopyName": "Package copy"
+        },
+        "renameModal": {
+            "title": "Rename",
+            "newNameLabel": "New name",
+            "cancel": "Cancel",
+            "save": "Save",
+            "success": "Successfully renamed"
+        },
+        "moveModal": {
+            "title": "Move to...",
+            "myFiles": "My files",
+            "loading": "Loading...",
+            "noSubfolders": "No subfolders in this folder",
+            "cancel": "Cancel",
+            "moveHere": "Move here",
+            "cannotMoveIntoItself": "Cannot move a folder into itself"
+        },
+        "createModal": {
+            "newFolder": "New folder",
+            "newTemplate": "New template",
+            "folderNamePlaceholder": "Folder name",
+            "templateNamePlaceholder": "Template name",
+            "nameLabel": "Name",
+            "cancel": "Cancel",
+            "create": "Create",
+            "folderCreated": "Folder successfully created",
+            "documentSetCreated": "Package successfully created"
+        },
+        "cloneTemplateModal": {
+            "title": "Clone template",
+            "newNameLabel": "New name",
+            "myFiles": "My files",
+            "selectFolder": "Select folder to clone into",
+            "loading": "Loading...",
+            "noSubfolders": "No subfolders in this folder",
+            "cancel": "Cancel",
+            "clone": "Clone",
+            "copySuffix": "(Copy)"
+        },
+        "folderAccessModal": {
+            "title": "Folder access settings",
+            "subtitle": "«{name}» and all its contents",
+            "invitePlaceholder": "Invite by email or name...",
+            "accessFull": "Full access",
+            "accessReview": "Review",
+            "accessComment": "Commenting",
+            "accessView": "View",
+            "invite": "Invite",
+            "user": "User",
+            "email": "Email",
+            "accessType": "Access type",
+            "term": "Term",
+            "owner": "Owner",
+            "indefinitely": "Indefinitely",
+            "revokeAccess": "Revoke access",
+            "emptyList": "List is empty. Invite participants.",
+            "loading": "Loading...",
+            "accessGranted": "Access granted",
+            "inviteError": "Error sending invitation",
+            "grantAccessError": "Error granting access",
+            "accessUpdated": "Access updated",
+            "updateAccessError": "Error updating access",
+            "revokeAccessConfirm": "Revoke user access for all packages in the folder?",
+            "accessRevoked": "Access revoked",
+            "revokeAccessError": "Error revoking access",
+            "close": "Close"
+        }
+    },
+    "FilesTable": {
+        "total": "Total:",
+        "objects": "objects",
+        "filterAll": "All",
+        "filterTemplate": "Templates",
+        "filterStandard": "Standard",
+        "filterNonStandard": "Non-standard",
+        "selected": "selected",
+        "restore": "Restore",
+        "deleteForever": "Delete permanently",
+        "move": "Move",
+        "moveToTrash": "To trash",
+        "columnName": "Name",
+        "columnDate": "Date modified",
+        "columnAuthor": "Author",
+        "columnStage": "Stage",
+        "columnComment": "Comment",
+        "loading": "Loading...",
+        "unknownAuthor": "Unknown",
+        "stageFolder": "Folder",
+        "emptyTrash": "Trash is empty",
+        "emptyShared": "No shared files",
+        "emptyDefault": "No objects",
+        "statusInApproval": "In approval",
+        "statusApproved": "Approved",
+        "statusDraft": "Draft",
+        "statusRejected": "Rejected",
+        "modeTemplate": "Template",
+        "modeStandard": "Standard",
+        "modeNonStandard": "Non-standard",
+        "modeFile": "File"
+    },
+    "MyFiles": {
+        "workspace": "Workspace",
+        "myFiles": "My files",
+        "shared": "Shared",
+        "recent": "Recent",
+        "favorites": "Favorites",
+        "recentInDev": "«Recent» section is under development",
+        "favoritesInDev": "«Favorites» section is under development",
+        "folders": "Folders",
+        "noFolders": "No folders",
+        "trash": "Trash",
+        "searchPlaceholder": "Search files...",
+        "newFolder": "New folder",
+        "newTemplate": "New template",
+        "uploadFile": "Upload file",
+        "clearTrash": "Empty trash",
+        "confirmClearTrash": "Are you sure you want to permanently delete all objects from the trash?",
+        "trashIsEmpty": "Trash is already empty"
+    },
+    "ConversionModal": {
+        "errorTitle": "Conversion error",
+        "successTitle": "Done!",
+        "defaultTitle": "File conversion",
+        "uploadingStatus": "Uploading file... {progress}%",
+        "convertingStatus": "Converting to Markdown...",
+        "elapsedTime": "{elapsed} sec",
+        "slowConversionWarning": "Conversion is taking longer than usual. Large files may take up to 300 seconds to process.",
+        "successMessage": "File successfully processed",
+        "closeButton": "Close"
+    },
+    "DocumentEditor": {
+        "documentNotSelected": "No document selected",
+        "uploadDocument": "Upload document (DOCX, PDF, RTF)",
+        "downloadDocx": "Download document (DOCX)",
+        "downloadPdf": "Download document (PDF)",
+        "documentsInPackage": "Documents in package",
+        "documentsCount": "{count} documents",
+        "roleMain": "Main",
+        "roleAppendix": "Appendix",
+        "rename": "Rename",
+        "delete": "Delete",
+        "confirmDelete": "Delete \"{name}\"?",
+        "documentName": "Document name",
+        "cancel": "Cancel",
+        "addDocumentToPackage": "Add document to package",
+        "undo": "Undo (Ctrl+Z)",
+        "redo": "Redo (Ctrl+Y)",
+        "blockStyles": "Block styles",
+        "normalText": "Normal text",
+        "heading1": "Heading 1",
+        "heading2": "Heading 2",
+        "heading3": "Heading 3",
+        "heading4": "Heading 4",
+        "heading5": "Heading 5",
+        "heading6": "Heading 6",
+        "bold": "Bold (Ctrl+B)",
+        "italic": "Italic (Ctrl+I)",
+        "underline": "Underline (Ctrl+U)",
+        "highlight": "Highlight",
+        "clearFormatting": "Clear formatting",
+        "enterUrl": "Enter URL",
+        "link": "Link",
+        "insertTable": "Insert table",
+        "pageBreak": "Page break",
+        "alignment": "Alignment",
+        "alignLeft": "Align left",
+        "alignCenter": "Align center",
+        "alignRight": "Align right",
+        "alignJustify": "Justify",
+        "bulletList": "Bulleted list",
+        "insertPoint": "Insert point (same level)",
+        "outdent": "Decrease indent (Shift+Tab)",
+        "indent": "Increase indent (Tab)",
+        "insertCrossRef": "Insert cross-reference",
+        "selectTextForComment": "Select text to comment",
+        "loadingDocument": "Loading document...",
+        "noDocumentsInPackage": "No documents in package",
+        "addFirstDocumentToStart": "Add the first document to start working",
+        "addDocument": "Add document",
+        "uploadSuccessWithWarnings": "Document successfully uploaded, but warnings occurred:\n\n{warnings}"
+    },
+    "editorExtensions": {
+        "pageBreak": "Page break",
+        "formulationSlotTitle": "Formulation slot: {identifier}"
+    },
+    "LegalPointsExtension": {
+        "clauseRefFallback": "[reference]",
+        "clauseRefText": "clause {number}",
+        "clauseRefHidden": "[clause hidden/deleted]",
+        "dropdownSearchPlaceholder": "Search clause by number or text...",
+        "dropdownNoResults": "Nothing found",
+        "dropdownNoPoints": "No visible clauses in the document",
+        "pointPrefix": "cl.",
+        "dropdownEmptyPoint": "(empty clause)",
+        "dropdownTotalPoints": "Total clauses: {count}",
+        "dropdownFoundPoints": "Found: {count}"
+    },
+    "SelectionMenu": {
+        "selectProperty": "Select property",
+        "selectFormulation": "Select formulation",
+        "newProperty": "New property",
+        "newFormulation": "New formulation",
+        "selectType": "Select type",
+        "noAvailableTypes": "No available types",
+        "back": "← Back",
+        "properties": "Properties",
+        "formulations": "Formulations",
+        "searchByName": "Search by name...",
+        "nothingFound": "Nothing found",
+        "refineQuery": "Refine query... showing {shown} of {total}",
+        "enterNameTypeAndText": "Enter name, type, and formulation text",
+        "formulationType": "Formulation type",
+        "selectTypePlaceholder": "Select type...",
+        "formulationName": "Formulation name",
+        "exampleFormulationName": "e.g., Party liability",
+        "formulationText": "Formulation text",
+        "enterFormulationText": "Enter formulation text...",
+        "cancel": "Cancel",
+        "create": "Create",
+        "enterPropertyName": "Enter property name",
+        "propertyName": "Property name",
+        "examplePropertyName": "e.g., Contract date",
+        "unknown": "Unknown",
+        "noType": "No type"
+    },
+    "TableDataInjector": {
+        "formulaError": "Formula error for {identifier}:",
+        "criticalError": "❌ CRITICAL ERROR during chain.run():"
+    },
+    "TableHoverMenu": {
+        "deleteRow": "Delete row",
+        "addRowBelow": "Add row below",
+        "removeTemplateStatus": "Remove template status",
+        "makeTemplate": "Make row a template",
+        "increaseHeight": "Increase height",
+        "decreaseHeight": "Decrease height",
+        "deleteColumn": "Delete column",
+        "addColumnRight": "Add column to the right",
+        "mergeCells": "Merge cells",
+        "splitCells": "Split cells",
+        "verticalAlign": "Vertical alignment",
+        "toggleBorder": "Toggle border",
+        "copyTable": "Copy table",
+        "deleteTable": "Delete table",
+        "copyTableError": "Failed to copy table:"
+    },
+    "ModeRail": {
+        "markup": "Markup",
+        "edit": "Editing",
+        "review": "Review",
+        "comment": "Commenting",
+        "history": "Version history"
+    },
+    "CommentView": {
+        "title": "Comments",
+        "cancel": "Cancel",
+        "fallbackUser": "User",
+        "avatar": "Avatar",
+        "usersLoading": "Loading users…",
+        "attach": {
+            "add": "Add to text",
+            "cancelTitle": "Cancel selection"
+        },
+        "newComment": {
+            "title": "New comment",
+            "placeholder": "Write a comment...",
+            "submit": "Send"
+        },
+        "reply": {
+            "placeholder": "Reply...",
+            "action": "Reply"
+        },
+        "empty": {
+            "title": "No comments yet.",
+            "hint": "Click \"{action}\" to add one."
+        },
+        "time": {
+            "justNow": "just now",
+            "minutes": "{count} min ago",
+            "hours": "{count} hr ago",
+            "days": "{count} days ago"
+        }
+    },
+    "EditView": {
+        "title": "Data entry",
+        "yamlEditTooltip": "Bulk edit responses (YAML)",
+        "yamlEditTitle": "Bulk edit responses (YAML)",
+        "progress": "Progress",
+        "progressText": "{filledCount} of {requiredCount} required",
+        "noSection": "No section",
+        "yamlPlaceholder": "Paste YAML here...",
+        "yamlHint": "Change the <code>answer</code> value and click \"Fill form\"",
+        "cancel": "Cancel",
+        "fillForm": "Fill form",
+        "yes": "Yes",
+        "editTable": "Edit",
+        "columnsCount": "{count, plural, one {# column} other {# columns}}",
+        "rowsCount": "{count, plural, one {# row} other {# rows}}",
+        "noColumns": "No columns",
+        "noColumnsHint": "Add properties to this section to make them table columns",
+        "tableEmpty": "Table is empty. Click \"Add row\"",
+        "deleteRow": "Delete row",
+        "autoSaveHint": "Changes are saved when the window is closed",
+        "addRow": "Add row",
+        "done": "Done",
+        "saveError": "Error saving data"
+    },
+    "HistoryView": {
+        "title": "Version history",
+        "noVersions": "No versions",
+        "unknownAuthor": {
+            "firstName": "Unknown",
+            "lastName": "author",
+            "email": "email not specified"
+        },
+        "current": "Current",
+        "makeCurrent": "Make current"
+    },
+    "MarkupView": {
+        "propertiesTab": "Properties and conditions",
+        "formulationsTab": "Formulations"
+    },
+    "ReviewView": {
+        "title": "Review",
+        "editsCount": "{count, plural, =0 {no edits} one {# edit} other {# edits}}",
+        "noActiveEdits": "No active edits",
+        "unknown": "Unknown",
+        "author": "author",
+        "emailNotSpecified": "email not specified",
+        "accept": "Accept",
+        "reject": "Reject"
+    },
+    "FormulationsMarkupTab": {
+        "variantsCount": "{count, plural, one {# variant} other {# variants}}",
+        "noBaseFormulation": "No base formulation",
+        "noUsedFormulations": "No formulations used in the document",
+        "avatarAlt": "avatar"
+    },
+    "PropertiesTab": {
+        "condition": "Condition",
+        "text": "Text",
+        "money": "Amount",
+        "number": "Number",
+        "date": "Date",
+        "property": "Property",
+        "confirmDeleteSection": "Delete section? Items will be moved to \"No section\".",
+        "rename": "Rename",
+        "tableModeActive": "Table mode (active)",
+        "tableModeInactive": "Normal mode (click to enable table)",
+        "delete": "Delete",
+        "dropHere": "Drag and drop properties or conditions here",
+        "sectionNamePlaceholder": "Section name",
+        "save": "Save",
+        "cancel": "Cancel",
+        "addSection": "Add section",
+        "unassigned": "Unassigned",
+        "empty": "Empty"
+    },
+    "SettingsPanel": {
+        "propertyTitle": "Property settings",
+        "conditionTitle": "Condition settings",
+        "formulationTitle": "Formulation settings",
+        "formulationGroupTitle": "Formulation group settings"
+    },
+    "ConditionSettings": {
+        "and": "AND",
+        "or": "OR",
+        "deleteGroupTooltip": "Delete group",
+        "selectProperty": "— Property —",
+        "selectValue": "— Select value —",
+        "emptyPlaceholder": "empty",
+        "deleteTooltip": "Delete",
+        "addRule": "Rule",
+        "addGroup": "Group",
+        "addRuleToGroup": "Add rule to group",
+        "conditionNameLabel": "Condition name",
+        "conditionNamePlaceholder": "e.g., Include VAT?",
+        "enabledByDefault": "Enabled by default",
+        "applicationLogic": "Application logic",
+        "loadingLogic": "Loading logic...",
+        "failedToLoadLogic": "Failed to load logic",
+        "warningText": "Ensure conditions do not overlap or contradict each other — otherwise, the block will never be applied.",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "save": "Save",
+        "createCondition": "Create condition"
+    },
+    "FormulationSettings": {
+        "selectFormulation": "Select formulation...",
+        "selectType": "Select type",
+        "noTypesAvailable": "No available types",
+        "formulations": "Formulations",
+        "back": "Back",
+        "search": "Search...",
+        "nothingFound": "Nothing found",
+        "groupNotFound": "Formulation group not found",
+        "variantsCount": "{count, plural, one {# variant} other {# variants}}",
+        "checkOrder": "Check order from top to bottom",
+        "elseIf": "else if",
+        "always": "Always",
+        "alwaysFallback": "— base (fallback)",
+        "condition": "Condition",
+        "makeConditional": "Make conditional",
+        "makeAlways": "Make unconditional (Always)",
+        "delete": "Delete",
+        "selectCondition": "Select condition...",
+        "editCondition": "Edit condition",
+        "newConditionalVariant": "New conditional variant",
+        "newCondition": "New condition",
+        "add": "Add",
+        "cancel": "Cancel",
+        "addConditionalVariant": "Add conditional variant"
+    },
+    "PropertySettings": {
+        "main": "Main",
+        "name": "Name",
+        "identifier": "Identifier",
+        "hint": "Hint",
+        "hintPlaceholder": "e.g., Enter full name",
+        "dataType": "Data type",
+        "types": {
+            "text": "Text",
+            "number": "Number",
+            "money": "Currency",
+            "date": "Date"
+        },
+        "textFormat": "Text format",
+        "textInputTypes": {
+            "short": "Short",
+            "long": "Long",
+            "list": "List"
+        },
+        "availableValues": "Available values (each on a new line)",
+        "optionsPlaceholder": "Option 1\nOption 2\nOption 3",
+        "value": "Value",
+        "valueType": "Value type",
+        "valueSources": {
+            "user_input": "Filled by user",
+            "formula": "Calculated by formula",
+            "database": "Filled from DB",
+            "readonly": "Read-only"
+        },
+        "formula": "Calculation formula",
+        "formulaPlaceholder": "Enter formula...",
+        "defaultValue": "Initial value",
+        "defaultValuePlaceholder": "Default value...",
+        "parameters": "Parameters",
+        "isRequired": "Required field",
+        "hideInForm": "Hide in form",
+        "conditions": "Conditions",
+        "conditionalDisplay": "Conditional display in form",
+        "alwaysDisplay": "Always display",
+        "conditionDescription": "The property will only be displayed in the form if the selected condition is met.",
+        "outputFormat": "Output format",
+        "displayTemplate": "Display template in document",
+        "templatePlaceholder": "e.g., {value} USD",
+        "cancel": "Cancel",
+        "saveChanges": "Save changes",
+        "createProperty": "Create property"
+    },
+    "navbar": {
+        "auth": {
+            "loginError": "Login error",
+            "registerError": "Registration error",
+            "updateProfileError": "Profile update error"
+        },
+        "notifications": {
+            "fetchError": "Failed to load notifications",
+            "markReadError": "Failed to mark notification as read",
+            "markAllReadError": "Failed to mark all notifications as read"
+        },
+        "access": {
+            "fetchError": "Error loading access list",
+            "grantError": "Error granting access",
+            "updateError": "Error updating access",
+            "revokeError": "Error revoking access"
+        }
+    },
+    "tasks": {
+        "statuses": {
+            "pending": "Pending",
+            "inReview": "In review",
+            "approved": "Approved",
+            "needsRevision": "Needs revision",
+            "rejected": "Rejected",
+            "completed": "Completed",
+            "canceled": "Canceled"
+        },
+        "sidebar": {
+            "title": "Tasks",
+            "all": "All tasks",
+            "my": "My tasks",
+            "assignedByMe": "Assigned by me",
+            "statusTitle": "Status",
+            "inReview": "In review",
+            "needsRevision": "Needs revision",
+            "completed": "Completed"
+        },
+        "topbar": {
+            "searchPlaceholder": "Search tasks...",
+            "newTask": "New task"
+        },
+        "tabs": {
+            "all": "All",
+            "incoming": "Incoming",
+            "outgoing": "Outgoing",
+            "inReview": "In review",
+            "completed": "Completed"
+        },
+        "table": {
+            "task": "Task",
+            "status": "Status",
+            "assignee": "Assignee",
+            "deadline": "Deadline",
+            "updatedAt": "Date modified",
+            "loading": "Loading tasks...",
+            "empty": "No tasks found",
+            "noDescription": "No description",
+            "notAssigned": "Not assigned",
+            "subtask": "Subtask"
+        },
+        "panel": {
+            "actions": {
+                "approve": "Approve",
+                "requestRevision": "Request revision",
+                "reject": "Reject",
+                "resubmit": "Resubmit",
+                "withdraw": "Withdraw"
+            },
+            "tabs": {
+                "details": "Details",
+                "comments": "Comments",
+                "route": "Route",
+                "history": "History"
+            },
+            "details": {
+                "author": "Author",
+                "assignee": "Assignee",
+                "deadline": "Deadline",
+                "description": "Description",
+                "noDescription": "No description",
+                "attachmentsTitle": "Attached documents",
+                "document": "Document",
+                "updated": "Updated",
+                "noAttachments": "No documents attached"
+            },
+            "comments": {
+                "titleCount": "Comments · {count}",
+                "placeholder": "Write a comment...",
+                "send": "Send",
+                "reply": "Reply",
+                "replyPlaceholder": "Write a reply...",
+                "cancel": "Cancel",
+                "repliesCount": "{count, plural, one {# reply} other {# replies}}"
+            },
+            "route": {
+                "title": "Approval route",
+                "notStarted": "Not started",
+                "approved": "Approved {date}",
+                "awaitingDecision": "Awaiting decision",
+                "returned": "Returned to initiator",
+                "rejected": "Rejected",
+                "canceled": "Canceled",
+                "approvedShort": "Approved",
+                "awaiting": "Awaiting"
+            },
+            "history": {
+                "title": "Change history",
+                "action": "Action",
+                "approved": "Approved",
+                "sentForApproval": "Sent for approval",
+                "created": "Task created",
+                "rejected": "Rejected",
+                "needsRevision": "Needs revision"
+            }
+        },
+        "errors": {
+            "unauthorized": "User is not authorized",
+            "loadCommentsFailed": "Failed to load comments for task",
+            "createSubtaskFailed": "Error creating subtask"
+        }
+    },
+    "workspace": {
+        "fetchStart": "Starting workspace fetch...",
+        "fetchSuccess": "Successfully fetched workspaces: {count}",
+        "setCurrentStart": "Current not selected. Setting workspace ID: {id} (saved ID: {savedId})",
+        "noWorkspacesOrAlreadySet": "No workspaces or current already selected. Removing isInitializing flag.",
+        "fetchError": "Error fetching workspaces",
+        "switching": "Switching to workspace ID: {id}",
+        "requestingSub": "Requesting subscription for workspace ID: {id}",
+        "subReceived": "Subscription received. Status: {status}, Expires: {expiresAt}",
+        "subError": "Failed to get subscription (trial may not be activated). Error",
+        "atomicUpdate": "Atomic store update. Removing isInitializing flag."
+    },
+    "storage": {
+        "fetchError": "Error reading data from server",
+        "saveError": "Error writing data to server",
+        "deleteError": "Error deleting data on server",
+        "sizeLimit": "Skipping save: data size exceeds network limit (5 MB)"
+    },
+    "idb": {
+        "serverError": "indexedDB is not available on the server",
+        "readError": "⚠️ Error reading from IndexedDB:",
+        "skipSaveSize": "⚠️ Skipping save: size ({size} MB) exceeds limit.",
+        "writeError": "⚠️ Error writing to IndexedDB",
+        "exception": "⚠️ IndexedDB exception:",
+        "deleteError": "⚠️ Error deleting from IndexedDB:",
+        "backupRestored": "✅ Backup successfully restored to IndexedDB!"
+    },
+    "markdown": {
+        "notFound": "Content for {slug} not found"
+    },
+    "api": {
+        "errors": {
+            "session_expired": "Session expired. Please log in again.",
+            "access_limited_sales": "Access limited. Please contact the sales department.",
+            "access_limited": "Access limited.",
+            "activation_error": "Activation error",
+            "http_error": "HTTP error! status: {status}"
+        },
+        "warnings": {
+            "jwt_parse_failed": "Failed to parse JWT to get user ID"
+        }
+    }
+}

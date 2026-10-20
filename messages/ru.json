@@ -1,0 +1,1289 @@
+{
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отменить",
+    "loadingPackage": "Загрузка комплекта...",
+    "loadingPage": "Загрузка страницы...",
+    "loadingPlugin": "Загрузка плагина...",
+    "loading": "Загрузка...",
+    "error": "Ошибка"
+  },
+  "layout": {
+    "title": "Ladnost - автоматизация договорных процессов",
+    "description": "Ladnost - автоматизация юридической работы. Создание, согласования и управления документами, разметка переменных, маршруты согласования, совместная работа и многое другое."
+  },
+  "Auth": {
+    "brand": {
+      "name": "Ladnost"
+    },
+    "header": {
+      "checkContract": "Проверить договор",
+      "becomePartner": "Стать партнёром",
+      "consultation": "Консультация"
+    },
+    "hero": {
+      "badge": "Умная работа с договорами"
+    },
+    "auth": {
+      "title": {
+        "register": "Создайте аккаунт",
+        "forgot": "Восстановление пароля",
+        "reset": "Установка нового пароля",
+        "activate": "Активация аккаунта",
+        "login": "С возвращением!"
+      },
+      "subtitle": {
+        "register": "Зарегистрируйтесь в Ladnost",
+        "forgot": "Введите email для сброса пароля",
+        "reset": "Придумайте надежный пароль для вашего аккаунта",
+        "activate": "Пожалуйста, подождите...",
+        "login": "Войдите в свой аккаунт Ladnost"
+      }
+    },
+    "tabs": {
+      "login": "Войти",
+      "register": "Регистрация"
+    },
+    "login": {
+      "email": "Email",
+      "password": "Пароль",
+      "forgot": "Забыли пароль?",
+      "remember": "Запомнить меня",
+      "submit": "Войти в Ladnost",
+      "loading": "Загрузка...",
+      "placeholders": {
+        "email": "your@email.com",
+        "password": "Введите пароль"
+      },
+      "errors": {
+        "email": "Введите корректный email",
+        "password": "Введите пароль",
+        "general": "Неверный email или пароль. Попробуйте снова."
+      }
+    },
+    "register": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "workEmail": "Рабочий email",
+      "password": "Пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "termsText": "Я принимаю <terms>Условия использования</terms> и <privacy>Политику конфиденциальности</privacy> Ladnost",
+      "submit": "Создать аккаунт",
+      "loading": "Создание...",
+      "placeholders": {
+        "firstName": "Иван",
+        "lastName": "Иванов",
+        "email": "your@company.ru",
+        "password": "Минимум 8 символов",
+        "confirmPassword": "Повторите пароль"
+      },
+      "errors": {
+        "firstName": "Введите имя",
+        "lastName": "Введите фамилию",
+        "email": "Введите корректный email",
+        "password": "Минимум 8 символов",
+        "confirm": "Пароли не совпадают",
+        "terms": "Необходимо принять условия",
+        "general": "Ошибка регистрации"
+      },
+      "strength": {
+        "weak": "Слабый",
+        "medium": "Средний",
+        "good": "Хороший",
+        "strong": "Сильный"
+      }
+    },
+    "forgot": {
+      "info": "Введите email, указанный при регистрации. Мы отправим ссылку для сброса пароля.",
+      "email": "Email",
+      "submit": "Отправить ссылку",
+      "loading": "Отправка...",
+      "back": "Вернуться к входу",
+      "placeholders": {
+        "email": "your@email.com"
+      },
+      "errors": {
+        "email": "Введите корректный email",
+        "general": "Не удалось отправить ссылку. Попробуйте позже."
+      }
+    },
+    "reset": {
+      "info": "Придумайте новый надежный пароль для вашего аккаунта.",
+      "password": "Новый пароль",
+      "confirmPassword": "Подтвердите пароль",
+      "submit": "Установить новый пароль",
+      "loading": "Сохранение...",
+      "back": "Вернуться к входу",
+      "placeholders": {
+        "password": "Минимум 8 символов",
+        "confirmPassword": "Повторите пароль"
+      },
+      "errors": {
+        "password": "Минимум 8 символов",
+        "confirm": "Пароли не совпадают",
+        "general": "Не удалось сбросить пароль. Возможно, ссылка устарела."
+      }
+    },
+    "activate": {
+      "loadingTitle": "Активация аккаунта...",
+      "loadingText": "Пожалуйста, подождите, мы проверяем вашу ссылку.",
+      "successTitle": "Успешно!",
+      "successDefault": "Аккаунт успешно активирован! Перенаправляем на вход...",
+      "errorTitle": "Ошибка активации",
+      "errorDefault": "Ошибка активации. Возможно, ссылка устарела или уже использовалась.",
+      "back": "Вернуться к входу"
+    },
+    "success": {
+      "title": "Проверьте почту!",
+      "text": "Мы отправили ссылку для сброса пароля на ваш email. Ссылка действует 24 часа.",
+      "back": "Вернуться к входу"
+    },
+    "modal": {
+      "termsTitle": "Условия использования",
+      "privacyTitle": "Политика конфиденциальности",
+      "close": "Закрыть"
+    },
+    "footer": {
+      "copyright": "© 2026 Ladnost."
+    }
+  },
+  "viewer": {
+    "exportError": "Ошибка экспорта",
+    "conversionError": "Ошибка при конвертации в {extension}",
+    "generateError": "Не удалось сгенерировать {extension}.",
+    "loadingPackage": "Загрузка комплекта...",
+    "documentNotGenerated": "Документ еще не сгенерирован или пуст.",
+    "stepFilling": "Заполнение",
+    "stepSigning": "Подписание",
+    "stepDone": "Готово",
+    "zoomOut": "Уменьшить",
+    "zoomIn": "Увеличить",
+    "downloadPdf": "Скачать PDF",
+    "generatingDocument": "Генерация документа...",
+    "documentEmpty": "Документ пуст или не удалось загрузить данные.",
+    "collapse": "Свернуть",
+    "form": "Анкета",
+    "noDataRequired": "Данные не требуются",
+    "noDataRequiredDesc": "Для формирования этого документа заполнение дополнительных данных не нужно.",
+    "fillData": "Заполните данные",
+    "noSection": "Без секции",
+    "yes": "Да",
+    "consent": "Нажимая кнопку, я принимаю условия <offer>договора оферты</offer> и даю согласие на <privacy>обработку персональных данных</privacy>.",
+    "sign": "Подписать",
+    "testingAlert": "Функционал находится в стадии тестирования.",
+    "protectedDocument": "Защищенный документ"
+  },
+  "TrialExpired": {
+    "title": "Период подписки завершен",
+    "description": "Доступ к вашему рабочему пространству временно ограничен. Чтобы продолжить работу и получить доступ ко всем функциям, пожалуйста, свяжитесь с одним из наших авторизованных партнеров для покупки лицензии или оформите подписку напрямую.",
+    "partnersLoading": "Загрузка списка партнеров...",
+    "refreshButton": "Я уже оплатил, обновить страницу",
+    "subscribeButton": "Купить подписку"
+  },
+  "templateImport": {
+    "title": "Импорт шаблона из YAML",
+    "subtitle": "Вставьте YAML-описание шаблона и Markdown-документ для автоматической генерации",
+    "yamlSection": {
+      "title": "YAML-описание шаблона",
+      "placeholder": "template_metadata:\nname: \"Договор оказания услуг\"\n...",
+      "clear": "Очистить",
+      "chars": "{count} символов"
+    },
+    "markdownSection": {
+      "title": "Markdown-документ",
+      "placeholder": "ДОГОВОР ОКАЗАНИЯ УСЛУГ № {{ contract_number }}\n...",
+      "clear": "Очистить",
+      "chars": "{count} символов"
+    },
+    "button": {
+      "generate": "Сгенерировать шаблон",
+      "generating": "Генерация..."
+    },
+    "notifications": {
+      "yamlRequired": "Пожалуйста, вставьте YAML-описание шаблона",
+      "markdownRequired": "Пожалуйста, вставьте Markdown-документ",
+      "success": "✅ Шаблон успешно импортирован и сконвертирован!",
+      "error": "❌ Ошибка при импорте: {message}",
+      "unknownError": "Неизвестная ошибка"
+    },
+    "logs": {
+      "title": "Отладочная информация (Console)",
+      "clear": "Очистить",
+      "starting": "Запуск функции processAndSaveTemplateFromYaml..."
+    },
+    "validation": {
+      "startAnalysis": "🔍 [ВАЛИДАЦИЯ ШАБЛОНА] Начинаем глубокий анализ распарсенного JSON...",
+      "tokenWithoutId": "Token без identifier (UUID: {uuid})",
+      "tokenNotFoundInProps": "Token с identifier=\"{identifier}\" не найден в списке properties от бэкенда!",
+      "tokenMissingType": "Token \"{identifier}\" не имеет атрибута type",
+      "tokenMissingLabel": "Token \"{identifier}\" не имеет атрибута label",
+      "slotWithoutId": "FormulationSlot без slotIdentifier/identifier",
+      "slotNotFoundInVariants": "FormulationSlot с identifier=\"{identifier}\" не найден в списке variants от бэкенда!",
+      "templateRowNoTokens": "Строка помечена как шаблон (isTemplate: true), но не содержит ни одного токена!",
+      "placeholderMismatch": "Несоответствие количества плейсхолдеров: в Markdown их {mdCount}, а в JSON распарсилось {total} (Tokens: {tokens}, Slots: {slots}). Возможно, некоторые плейсхолдеры не были заменены на HTML или распарсились как обычный текст.",
+      "unusedProperties": "Свойства, определенные в YAML, но НЕ попавшие в итоговый JSON (не использованы в MD или ошибка парсинга): {list}",
+      "unusedVariants": "Варианты (слоты), определенные в YAML, но НЕ попавшие в итоговый JSON: {list}",
+      "statsTitle": "📊 [СТАТИСТИКА JSON]",
+      "statsTokens": "   - Токенов (свойств): {count}",
+      "statsSlots": "   - Слотов (формулировок): {count}",
+      "statsTables": "   - Таблиц: {total} (Динамических: {dynamic})",
+      "statsTemplateRows": "   - Строк-шаблонов: {count}",
+      "statsMdPlaceholders": "   - Плейсхолдеров в исходном MD: {count}",
+      "errorsTitle": "❌ [ОШИБКИ ВАЛИДАЦИИ] ({count}):",
+      "errorsNone": "✅ [ОШИБКИ ВАЛИДАЦИИ] Не обнаружено.",
+      "warningsTitle": "⚠️ [ПРЕДУПРЕЖДЕНИЯ ВАЛИДАЦИИ] ({count}):",
+      "warningsNone": "✅ [ПРЕДУПРЕЖДЕНИЯ ВАЛИДАЦИИ] Не обнаружено.",
+      "analysisComplete": "🔍 [ВАЛИДАЦИЯ ШАБЛОНА] Анализ завершен."
+    },
+    "prepare": {
+      "insertProperty": "[Вставка #{count}] Property: \"{{ {identifier} }}\" -> TokenNode{tableSuffix}",
+      "isTableColumn": " [КОЛОНКА ТАБЛИЦЫ]",
+      "insertVariant": "[Вставка #{count}] Variant/Slot: \"{{ {identifier} }}\" -> FormulationSlot",
+      "entityNotFound": "[Вставка #{count}] ⚠️ ОШИБКА: Сущность \"{{ {identifier} }}\" НЕ НАЙДЕНА.",
+      "totalProcessed": "[Парсинг] Всего обработано плейсхолдеров: {count}"
+    },
+    "tables": {
+      "rowMarkedTemplate": "📊 [ТАБЛИЦА] Строка помечена как шаблон (все ячейки содержат токены). sectionId: {sectionId}",
+      "dynamicTableFound": "📊 [ТАБЛИЦА] Обнаружена динамическая таблица (isDynamic: true)"
+    },
+    "import": {
+      "start": "🚀 Начало процесса импорта...",
+      "sendingToBackend": "📡 Отправка YAML и Markdown на бэкенд...",
+      "debugRawResponse": "[DEBUG FRONT] Сырой ответ от бэкенда:",
+      "backendSuccess": "✅ Бэкенд ответил успешно. Создан Document ID: {documentId}",
+      "statsSections": "   Секций: {count}",
+      "statsProperties": "   Свойств: {count}",
+      "statsVariants": "   Вариантов: {count}",
+      "backendWarning": "⚠️ [BACKEND WARNING] {message}",
+      "preparingMarkdown": "🛠️ Подготовка Markdown: замена плейсхолдеров на HTML-теги...",
+      "debugProcessedMd": "- [ОТЛАДКА] Обработанный Markdown (фрагмент) -",
+      "initEditor": "🧠 Инициализация редактора...",
+      "extractJsonHtml": "📄 Извлечение JSON и HTML из редактора...",
+      "debugEditorHtml": "- [ОТЛАДКА] HTML от редактора (фрагмент) -",
+      "postProcessingTables": "📊 Пост-обработка: поиск и пометка динамических таблиц...",
+      "savingToDb": "💾 Сохранение контента в БД...",
+      "success": "🎉 Контент успешно сконвертирован и сохранён!",
+      "criticalError": "❌ КРИТИЧЕСКАЯ ОШИБКА: {message}",
+      "editorDestroyed": "🧹 Редактор уничтожен."
+    }
+  },
+  "files": {
+    "breadcrumbs": {
+      "myFiles": "Мои файлы",
+      "shared": "Общий доступ",
+      "trash": "Корзина"
+    },
+    "notifications": {
+      "archiveDownloaded": "Архив успешно скачан",
+      "archiveDownloadError": "Ошибка при скачивании архива",
+      "templateCloned": "Шаблон успешно клонирован как типовой комплект",
+      "templateCloneError": "Ошибка при клонировании шаблона",
+      "setCreated": "Комплект \"{name}\" успешно создан",
+      "fileUploadError": "Ошибка при загрузке файла",
+      "uploadedWithWarnings": "Загружено с предупреждениями:\n{warnings}",
+      "itemRestored": "Объект восстановлен",
+      "itemDeleted": "Объект удален навсегда",
+      "itemsRestored": "Объекты восстановлены",
+      "itemsDeleted": "Объекты удалены навсегда"
+    },
+    "errors": {
+      "noMarkdown": "Сервер не вернул markdown-контент",
+      "serverError": "Сервер вернул ошибку {status}",
+      "networkError": "Не удалось связаться с сервером. Проверьте подключение к сети.",
+      "timeoutError": "Конвертация заняла слишком долго (>300 сек). Попробуйте файл меньшего размера.",
+      "conversionError": "Ошибка обработки результата конвертации"
+    }
+  },
+  "formulations": {
+    "errors": {
+      "type": {
+        "move_failed": "Ошибка изменения порядка типов",
+        "delete_failed": "Не удалось удалить тип",
+        "delete_failed_log": "Ошибка удаления типа",
+        "fetch_failed": "Ошибка загрузки типов",
+        "create_failed": "Ошибка создания типа"
+      },
+      "formulation": {
+        "delete_failed": "Не удалось удалить формулировку",
+        "delete_failed_log": "Ошибка удаления формулировки",
+        "fetch_failed": "Ошибка загрузки формулировок",
+        "create_failed": "Ошибка создания формулировки",
+        "update_failed": "Ошибка обновления формулировки"
+      },
+      "usage": {
+        "fetch_failed": "Ошибка загрузки статистики использования"
+      }
+    }
+  },
+  "AuthInitializer": {
+    "loading": "Загрузка...",
+    "userNotFoundRedirect": "Пользователь не найден, редирект на /"
+  },
+  "ContactFormModal": {
+    "title": "Связаться с нами",
+    "subtitle": "Оставьте заявку, и мы свяжемся с вами",
+    "successSubtitle": "Сообщение успешно отправлено",
+    "labels": {
+      "name": "Ваше имя",
+      "email": "Email",
+      "phone": "Телефон",
+      "phoneOptional": "(необязательно)",
+      "message": "Сообщение"
+    },
+    "placeholders": {
+      "name": "Иван Иванов",
+      "email": "ivan@example.com",
+      "phone": "+7 (999) 123-45-67",
+      "message": "Опишите ваш вопрос или задачу..."
+    },
+    "buttons": {
+      "cancel": "Отмена",
+      "submit": "Отправить",
+      "submitting": "Отправка..."
+    },
+    "success": {
+      "title": "Спасибо за обращение!",
+      "description": "Мы получили ваше сообщение и ответим на указанный email в ближайшее время."
+    },
+    "errors": {
+      "required": "Пожалуйста, заполните все обязательные поля",
+      "invalidEmail": "Пожалуйста, введите корректный email",
+      "submitError": "Ошибка отправки сообщения. Попробуйте позже."
+    }
+  },
+  "Formulations": {
+    "common": {
+      "noType": "Без типа"
+    },
+    "sidebar": {
+      "library": "Библиотека",
+      "allFormulations": "Все формулировки",
+      "favorites": "Избранные",
+      "recentlyModified": "Недавно изменённые",
+      "types": "Типы"
+    },
+    "topBar": {
+      "title": "Библиотека формулировок",
+      "searchPlaceholder": "Поиск формулировок...",
+      "editTypes": "Редактировать типы",
+      "newFormulation": "Новая формулировка"
+    },
+    "statsBar": {
+      "total": "Всего: {count, plural, one {# формулировка} few {# формулировки} other {# формулировок}}",
+      "usedIn": "Используются в {count, plural, one {# документе} other {# документах}}"
+    },
+    "table": {
+      "type": "Тип",
+      "name": "Наименование",
+      "text": "Текст формулировки",
+      "usage": "Использование",
+      "loading": "Загрузка данных...",
+      "notFound": "Формулировки не найдены",
+      "formulationsCount": "{count, plural, one {# формулировка} few {# формулировки} other {# формулировок}}",
+      "addToFavorites": "В избранное",
+      "modified": "Изменено:"
+    },
+    "popup": {
+      "usedInDocuments": "Используется в документах",
+      "notUsedYet": "Пока не используется",
+      "loading": "Загрузка данных..."
+    },
+    "panel": {
+      "newFormulation": "Новая формулировка"
+    },
+    "form": {
+      "type": "Тип",
+      "selectType": "Выберите тип...",
+      "name": "Наименование",
+      "namePlaceholder": "Название формулировки...",
+      "text": "Текст",
+      "textPlaceholder": "Введите текст формулировки...",
+      "changeReason": "Причина изменения",
+      "requiredForSubmit": "— обязательно для отправки",
+      "changeReasonPlaceholder": "Укажите причину изменения формулировки..."
+    },
+    "typeManager": {
+      "title": "Управление типами",
+      "subtitle": "Добавляйте, редактируйте и удаляйте типы формулировок",
+      "newTypePlaceholder": "Название нового типа...",
+      "existingTypes": "Существующие типы",
+      "typesCount": "{count, plural, one {# тип} few {# типа} other {# типов}}"
+    },
+    "actions": {
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "add": "Добавить",
+      "moveUp": "Переместить вверх",
+      "moveDown": "Переместить вниз",
+      "close": "Закрыть"
+    },
+    "alerts": {
+      "fillRequired": "Заполните обязательные поля",
+      "specifyReason": "Пожалуйста, укажите причину изменения формулировки"
+    },
+    "confirmations": {
+      "deleteFormulation": "Вы уверены, что хотите удалить формулировку \"{name}\"?",
+      "deleteType": "Вы уверены, что хотите удалить тип \"{name}\"?\n\nЕсли этот тип используется в формулировках, удаление будет отменено."
+    }
+  },
+  "Navbar": {
+    "brand": "Ladnost",
+    "nav": {
+      "myFiles": "Мои файлы",
+      "formulations": "Формулировки",
+      "myTasks": "Мои задачи",
+      "neuralNetwork": "Нейросеть"
+    },
+    "modes": {
+      "template": "Шаблон",
+      "standard": "Типовой",
+      "nonStandard": "Нетиповой"
+    },
+    "actions": {
+      "sendForApproval": "Отправить на согласование",
+      "access": "Доступ",
+      "support": "Поддержка",
+      "supportTitle": "Связаться с поддержкой"
+    },
+    "approval": {
+      "title": "Отправить на согласование",
+      "subtitle": "Настройте маршрут и добавьте участников",
+      "taskNameLabel": "Наименование задачи",
+      "taskNamePlaceholder": "Согласование договора оказания услуг",
+      "commentLabel": "Комментарий",
+      "commentPlaceholder": "Добавьте пояснение для участников...",
+      "routeLabel": "Маршрут согласования",
+      "routeParallel": "Параллельное",
+      "routeSequential": "Последовательное",
+      "deadlineLabel": "Дедлайн",
+      "participantsLabel": "Участники согласования",
+      "searchPlaceholder": "Найти по email или имени...",
+      "addButton": "Добавить",
+      "tableIndex": "#",
+      "tableParticipant": "Участник",
+      "tableAccess": "Доступ",
+      "emptyParticipants": "Список пуст. Добавьте участников по email.",
+      "notRegistered": "Не зарегистрирован",
+      "invitationSent": "Приглашение отправлено",
+      "accessReview": "Рецензирование",
+      "accessFull": "Полный доступ",
+      "accessComment": "Комментирование",
+      "accessView": "Просмотр",
+      "cancelButton": "Отмена",
+      "sending": "Отправка...",
+      "sendButton": "Отправить"
+    },
+    "access": {
+      "title": "Настройка доступа",
+      "subtitle": "Управляйте правами участников документа",
+      "searchPlaceholder": "Пригласить по email или имени...",
+      "typeFull": "Полный доступ",
+      "typeReview": "Рецензирование",
+      "typeComment": "Комментирование",
+      "typeView": "Просмотр",
+      "inviteButton": "Пригласить",
+      "tableUser": "Пользователь",
+      "tableEmail": "Email",
+      "tableType": "Тип доступа",
+      "tableTerm": "Срок",
+      "loading": "Загрузка...",
+      "emptyList": "Список пуст. Пригласите участников по email.",
+      "ownerBadge": "Владелец",
+      "termIndefinite": "Бессрочно",
+      "revokeTitle": "Отозвать доступ",
+      "anonymousLabel": "Анонимный доступ",
+      "copyLinkTitle": "Копировать полную ссылку",
+      "copied": "Скопировано",
+      "copy": "Копировать",
+      "closeButton": "Закрыть"
+    },
+    "alerts": {
+      "enterTaskName": "Введите наименование задачи",
+      "addParticipant": "Добавьте хотя бы одного участника",
+      "approvalSuccess": "Документ успешно отправлен на согласование!",
+      "approvalError": "Произошла ошибка при отправке",
+      "userAlreadyAdded": "Пользователь уже добавлен в список",
+      "inviteError": "Ошибка отправки приглашения",
+      "enterEmail": "Введите email",
+      "grantAccessError": "Ошибка выдачи доступа",
+      "updateAccessError": "Ошибка обновления доступа",
+      "confirmRevoke": "Вы уверены, что хотите отозвать доступ?",
+      "revokeAccessError": "Ошибка отзыва доступа",
+      "anonymousAccessError": "Ошибка обновления анонимного доступа",
+      "copyLinkError": "Не удалось скопировать ссылку"
+    }
+  },
+  "SubscriptionGuard": {
+    "subscriptionActive": "Подписка активна",
+    "noSubscriptionObject": "Нет объекта подписки (currentSubscription = null)",
+    "subscriptionStatus": "Статус подписки: {status}",
+    "expirationDatePassed": "Дата истечения ({date}) < now",
+    "fetchingWorkspaces": "Запускаем fetchMyWorkspaces()",
+    "initializingSkip": "Идёт инициализация, пропускаем.",
+    "workspaceNotLoadedSkip": "Workspace не загружен, пропускаем.",
+    "expiredAndBlockedRedirect": "Подписка истекла + путь заблокирован → редирект на /trial-expired",
+    "renderingChildren": "Пропускаем, рендерим children."
+  },
+  "SubscriptionModal": {
+    "title": "Тарифы и подписка",
+    "currentStatus": "Текущий статус:",
+    "noSubscription": "Нет подписки",
+    "loginRequiredHint": "Для покупки подписки необходимо войти в аккаунт.",
+    "loginRequiredAlert": "Для оформления подписки необходимо создать или выбрать рабочее пространство.",
+    "paymentError": "Ошибка создания платежа",
+    "status": {
+      "trial": "Триал",
+      "active": "Активна",
+      "pastDue": "Просрочена",
+      "canceled": "Отменена",
+      "expired": "Истекла"
+    },
+    "billingPeriod": {
+      "monthly": "Ежемесячно",
+      "yearly": "Ежегодно",
+      "yearlyDiscount": "-20%"
+    },
+    "periodSuffix": {
+      "monthly": "мес",
+      "yearly": "год"
+    },
+    "loading": "Загрузка тарифов...",
+    "basicFeatures": "Базовый функционал",
+    "badge": {
+      "current": "Текущий",
+      "yourTariff": "Ваш тариф",
+      "trial": "Триал"
+    },
+    "details": {
+      "billingPeriodLabel": "Период оплаты:",
+      "activeUntilLabel": "Активна до:",
+      "billingPeriodMonthly": "Ежемесячно",
+      "billingPeriodYearly": "Ежегодно",
+      "expiresAt": "(до {date})"
+    },
+    "button": {
+      "loginToPay": "Войти, чтобы оплатить",
+      "processing": "Переход...",
+      "currentTariff": "Текущий тариф",
+      "subscribe": "Оформить подписку",
+      "resume": "Возобновить",
+      "pay": "Оплатить"
+    }
+  },
+  "UserDropdown": {
+    "moreThanNine": "9+",
+    "guest": "Гость",
+    "guestEmail": "guest@example.com",
+    "notifications": "Уведомления",
+    "markAllAsRead": "Прочитать все",
+    "noNotifications": "Нет новых уведомлений",
+    "profileSettings": "Настройки профиля",
+    "billingAndSubscription": "Тарифы и подписка",
+    "apiKeys": "API-ключи",
+    "logout": "Выйти",
+    "settings": {
+      "title": "Настройки профиля",
+      "subtitle": "Управляйте своей учетной записью",
+      "avatar": "Аватар",
+      "lastName": "Фамилия",
+      "firstName": "Имя",
+      "middleName": "Отчество",
+      "changePassword": "Смена пароля",
+      "currentPassword": "Текущий пароль",
+      "currentPasswordPlaceholder": "Введите текущий пароль",
+      "newPassword": "Новый пароль",
+      "newPasswordPlaceholder": "Минимум 6 символов",
+      "confirmPassword": "Подтверждение",
+      "confirmPasswordPlaceholder": "Повторите пароль",
+      "cancel": "Отмена",
+      "saving": "Сохранение...",
+      "save": "Сохранить"
+    },
+    "alerts": {
+      "nameRequired": "Имя и Фамилия обязательны для заполнения",
+      "passwordsMismatch": "Новые пароли не совпадают",
+      "currentPasswordRequired": "Введите текущий пароль для смены пароля",
+      "settingsSaved": "Настройки успешно сохранены!",
+      "settingsSaveError": "Ошибка сохранения настроек",
+      "apiKeysLoadError": "Ошибка загрузки API ключей",
+      "apiKeyCreateError": "Ошибка создания API ключа",
+      "apiKeyDeleteConfirm": "Вы уверены, что хотите полностью удалить этот API-ключ? Это действие необратимо.",
+      "apiKeyUpdateError": "Ошибка обновления API ключа",
+      "apiKeyDeleteError": "Ошибка удаления API ключа"
+    },
+    "apiKeysModal": {
+      "title": "API-ключи",
+      "subtitle": "Управление ключами для внешнего доступа",
+      "createNewLabel": "Создать новый ключ",
+      "createPlaceholder": "Название ключа (например, Production)",
+      "createButton": "Создать",
+      "creating": "Создание...",
+      "createdSuccess": "Ключ успешно создан! Скопируйте его, больше он не покажется.",
+      "copy": "Копировать",
+      "copied": "Скопировано",
+      "existingKeys": "Существующие ключи",
+      "table": {
+        "name": "Название",
+        "prefix": "Префикс",
+        "status": "Статус",
+        "created": "Создан"
+      },
+      "loading": "Загрузка...",
+      "noKeys": "Ключи не найдены.",
+      "deleteTitle": "Удалить ключ",
+      "close": "Закрыть"
+    }
+  },
+  "UserEmailInput": {
+    "placeholder": "Найти по email или имени...",
+    "loading": "Загрузка...",
+    "useEmail": "Использовать email: <b>{value}</b>",
+    "noRelatedUsers": "Нет связанных пользователей"
+  },
+  "VideoModal": {
+    "title": "Видео плеер",
+    "closeAriaLabel": "Закрыть видео"
+  },
+  "FileModals": {
+    "contextMenu": {
+      "restore": "Восстановить",
+      "permanentlyDelete": "Удалить навсегда",
+      "rename": "Переименовать",
+      "move": "Переместить",
+      "configureAccess": "Настроить доступ",
+      "open": "Открыть",
+      "copyLink": "Скопировать ссылку",
+      "cloneDocumentSet": "Клонировать комплект",
+      "moveToTrash": "Переместить в корзину",
+      "linkCopied": "Ссылка скопирована в буфер обмена",
+      "cloneDocumentSetNamePrompt": "Название копии комплекта:",
+      "documentSetCloned": "Комплект успешно клонирован",
+      "copySuffix": "(Копия)",
+      "defaultCopyName": "Копия комплекта"
+    },
+    "renameModal": {
+      "title": "Переименовать",
+      "newNameLabel": "Новое название",
+      "cancel": "Отмена",
+      "save": "Сохранить",
+      "success": "Успешно переименовано"
+    },
+    "moveModal": {
+      "title": "Переместить в...",
+      "myFiles": "Мои файлы",
+      "loading": "Загрузка...",
+      "noSubfolders": "В этой папке нет подпапок",
+      "cancel": "Отмена",
+      "moveHere": "Переместить сюда",
+      "cannotMoveIntoItself": "Нельзя переместить папку саму в себя"
+    },
+    "createModal": {
+      "newFolder": "Новая папка",
+      "newTemplate": "Новый шаблон",
+      "folderNamePlaceholder": "Название папки",
+      "templateNamePlaceholder": "Название шаблона",
+      "nameLabel": "Название",
+      "cancel": "Отмена",
+      "create": "Создать",
+      "folderCreated": "Папка успешно создана",
+      "documentSetCreated": "Комплект успешно создан"
+    },
+    "cloneTemplateModal": {
+      "title": "Клонировать шаблон",
+      "newNameLabel": "Новое название",
+      "myFiles": "Мои файлы",
+      "selectFolder": "Выберите папку для клонирования",
+      "loading": "Загрузка...",
+      "noSubfolders": "В этой папке нет подпапок",
+      "cancel": "Отмена",
+      "clone": "Клонировать",
+      "copySuffix": "(Копия)"
+    },
+    "folderAccessModal": {
+      "title": "Настройка доступа к папке",
+      "subtitle": "«{name}» и всем её содержимым",
+      "invitePlaceholder": "Пригласить по email или имени...",
+      "accessFull": "Полный доступ",
+      "accessReview": "Рецензирование",
+      "accessComment": "Комментирование",
+      "accessView": "Просмотр",
+      "invite": "Пригласить",
+      "user": "Пользователь",
+      "email": "Email",
+      "accessType": "Тип доступа",
+      "term": "Срок",
+      "owner": "Владелец",
+      "indefinitely": "Бессрочно",
+      "revokeAccess": "Отозвать доступ",
+      "emptyList": "Список пуст. Пригласите участников.",
+      "loading": "Загрузка...",
+      "accessGranted": "Доступ выдан",
+      "inviteError": "Ошибка отправки приглашения",
+      "grantAccessError": "Ошибка выдачи доступа",
+      "accessUpdated": "Доступ обновлен",
+      "updateAccessError": "Ошибка обновления доступа",
+      "revokeAccessConfirm": "Отозвать доступ у пользователя для всех комплектов в папке?",
+      "accessRevoked": "Доступ отозван",
+      "revokeAccessError": "Ошибка отзыва доступа",
+      "close": "Закрыть"
+    }
+  },
+  "FilesTable": {
+    "total": "Всего:",
+    "objects": "объектов",
+    "filterAll": "Все",
+    "filterTemplate": "Шаблоны",
+    "filterStandard": "Типовые",
+    "filterNonStandard": "Нетиповые",
+    "selected": "выбрано",
+    "restore": "Восстановить",
+    "deleteForever": "Удалить навсегда",
+    "move": "Переместить",
+    "moveToTrash": "В корзину",
+    "columnName": "Название",
+    "columnDate": "Дата изменения",
+    "columnAuthor": "Автор",
+    "columnStage": "Стадия",
+    "columnComment": "Комментарий",
+    "loading": "Загрузка...",
+    "unknownAuthor": "Неизвестно",
+    "stageFolder": "Папка",
+    "emptyTrash": "Корзина пуста",
+    "emptyShared": "Нет файлов в общем доступе",
+    "emptyDefault": "Нет объектов",
+    "statusInApproval": "На согласовании",
+    "statusApproved": "Согласован",
+    "statusDraft": "Черновик",
+    "statusRejected": "Отклонён",
+    "modeTemplate": "Шаблон",
+    "modeStandard": "Типовой",
+    "modeNonStandard": "Нетиповой",
+    "modeFile": "Файл"
+  },
+  "MyFiles": {
+    "workspace": "Рабочее пространство",
+    "myFiles": "Мои файлы",
+    "shared": "Общий доступ",
+    "recent": "Недавние",
+    "favorites": "Избранное",
+    "recentInDev": "Раздел «Недавние» — в разработке",
+    "favoritesInDev": "Раздел «Избранное» — в разработке",
+    "folders": "Папки",
+    "noFolders": "Нет папок",
+    "trash": "Корзина",
+    "searchPlaceholder": "Поиск файлов...",
+    "newFolder": "Новая папка",
+    "newTemplate": "Новый шаблон",
+    "uploadFile": "Загрузить файл",
+    "clearTrash": "Очистить корзину",
+    "confirmClearTrash": "Вы уверены, что хотите навсегда удалить все объекты из корзины?",
+    "trashIsEmpty": "Корзина уже пуста"
+  },
+  "ConversionModal": {
+    "errorTitle": "Ошибка конвертации",
+    "successTitle": "Готово!",
+    "defaultTitle": "Конвертация файла",
+    "uploadingStatus": "Загрузка файла... {progress}%",
+    "convertingStatus": "Конвертация в Markdown...",
+    "elapsedTime": "{elapsed} сек",
+    "slowConversionWarning": "Конвертация занимает больше времени, чем обычно. Большие файлы могут обрабатываться до 300 секунд.",
+    "successMessage": "Файл успешно обработан",
+    "closeButton": "Закрыть"
+  },
+  "DocumentEditor": {
+    "documentNotSelected": "Документ не выбран",
+    "uploadDocument": "Загрузить документ (DOCX, PDF, RTF)",
+    "downloadDocx": "Скачать документ (DOCX)",
+    "downloadPdf": "Скачать документ (PDF)",
+    "documentsInPackage": "Документы в комплекте",
+    "documentsCount": "{count} документов",
+    "roleMain": "Основной",
+    "roleAppendix": "Приложение",
+    "rename": "Переименовать",
+    "delete": "Удалить",
+    "confirmDelete": "Удалить «{name}»?",
+    "documentName": "Имя документа",
+    "cancel": "Отмена",
+    "addDocumentToPackage": "Добавить документ в комплект",
+    "undo": "Отменить (Ctrl+Z)",
+    "redo": "Вернуть (Ctrl+Y)",
+    "blockStyles": "Стили блока",
+    "normalText": "Обычный текст",
+    "heading1": "Заголовок 1",
+    "heading2": "Заголовок 2",
+    "heading3": "Заголовок 3",
+    "heading4": "Заголовок 4",
+    "heading5": "Заголовок 5",
+    "heading6": "Заголовок 6",
+    "bold": "Жирный (Ctrl+B)",
+    "italic": "Курсив (Ctrl+I)",
+    "underline": "Подчёркнутый (Ctrl+U)",
+    "highlight": "Выделение",
+    "clearFormatting": "Очистить форматирование",
+    "enterUrl": "Введите URL",
+    "link": "Ссылка",
+    "insertTable": "Вставить таблицу",
+    "pageBreak": "Разрыв страницы",
+    "alignment": "Выравнивание",
+    "alignLeft": "По левому краю",
+    "alignCenter": "По центру",
+    "alignRight": "По правому краю",
+    "alignJustify": "По ширине",
+    "bulletList": "Маркированный список",
+    "insertPoint": "Вставить пункт (того же уровня)",
+    "outdent": "Уменьшить уровень (Shift+Tab)",
+    "indent": "Увеличить уровень (Tab)",
+    "insertCrossRef": "Вставить перекрестную ссылку",
+    "selectTextForComment": "Выделите текст для комментария",
+    "loadingDocument": "Загрузка документа...",
+    "noDocumentsInPackage": "В комплекте нет документов",
+    "addFirstDocumentToStart": "Добавите первый документ, чтобы начать работу",
+    "addDocument": "Добавить документ",
+    "uploadSuccessWithWarnings": "Документ успешно загружен, но возникли предупреждения:\n\n{warnings}"
+  },
+  "editorExtensions": {
+    "pageBreak": "Разрыв страницы",
+    "formulationSlotTitle": "Слот для формулировки: {identifier}"
+  },
+  "LegalPointsExtension": {
+    "clauseRefFallback": "[ссылка]",
+    "clauseRefText": "пункт {number}",
+    "clauseRefHidden": "[пункт скрыт/удален]",
+    "dropdownSearchPlaceholder": "Поиск пункта по номеру или тексту...",
+    "dropdownNoResults": "Ничего не найдено",
+    "dropdownNoPoints": "В документе нет видимых пунктов",
+    "pointPrefix": "п.",
+    "dropdownEmptyPoint": "(пустой пункт)",
+    "dropdownTotalPoints": "Всего пунктов: {count}",
+    "dropdownFoundPoints": "Найдено: {count}"
+  },
+  "SelectionMenu": {
+    "selectProperty": "Выбрать свойство",
+    "selectFormulation": "Выбрать формулировку",
+    "newProperty": "Новое свойство",
+    "newFormulation": "Новая формулировка",
+    "selectType": "Выберите тип",
+    "noAvailableTypes": "Нет доступных типов",
+    "back": "← Назад",
+    "properties": "Свойства",
+    "formulations": "Формулировки",
+    "searchByName": "Поиск по названию...",
+    "nothingFound": "Ничего не найдено",
+    "refineQuery": "Уточните запрос... показано {shown} из {total}",
+    "enterNameTypeAndText": "Введите название, тип и текст формулировки",
+    "formulationType": "Тип формулировки",
+    "selectTypePlaceholder": "Выберите тип...",
+    "formulationName": "Название формулировки",
+    "exampleFormulationName": "Например: Ответственность сторон",
+    "formulationText": "Текст формулировки",
+    "enterFormulationText": "Введите текст формулировки...",
+    "cancel": "Отмена",
+    "create": "Создать",
+    "enterPropertyName": "Введите название свойства",
+    "propertyName": "Название свойства",
+    "examplePropertyName": "Например: Дата договора",
+    "unknown": "Неизвестно",
+    "noType": "Без типа"
+  },
+  "TableDataInjector": {
+    "formulaError": "Ошибка формулы для {identifier}:",
+    "criticalError": "❌ КРИТИЧЕСКАЯ ОШИБКА во время chain.run():"
+  },
+  "TableHoverMenu": {
+    "deleteRow": "Удалить строку",
+    "addRowBelow": "Добавить строку снизу",
+    "removeTemplateStatus": "Убрать статус шаблона",
+    "makeTemplate": "Сделать строку шаблоном",
+    "increaseHeight": "Увеличить высоту",
+    "decreaseHeight": "Уменьшить высоту",
+    "deleteColumn": "Удалить столбец",
+    "addColumnRight": "Добавить столбец справа",
+    "mergeCells": "Объединить ячейки",
+    "splitCells": "Разделить ячейки",
+    "verticalAlign": "Вертикальное выравнивание",
+    "toggleBorder": "Вкл/Выкл бордер",
+    "copyTable": "Копировать таблицу",
+    "deleteTable": "Удалить таблицу",
+    "copyTableError": "Не удалось скопировать таблицу:"
+  },
+  "ModeRail": {
+    "markup": "Разметка",
+    "edit": "Редактирование",
+    "review": "Рецензирование",
+    "comment": "Комментирование",
+    "history": "История версий"
+  },
+  "CommentView": {
+    "title": "Комментарии",
+    "cancel": "Отмена",
+    "fallbackUser": "Пользователь",
+    "avatar": "Аватар",
+    "usersLoading": "Загрузка пользователей…",
+    "attach": {
+      "add": "Добавить к тексту",
+      "cancelTitle": "Отменить выделение"
+    },
+    "newComment": {
+      "title": "Новый комментарий",
+      "placeholder": "Напишите комментарий...",
+      "submit": "Отправить"
+    },
+    "reply": {
+      "placeholder": "Ответить...",
+      "action": "Ответить"
+    },
+    "empty": {
+      "title": "Комментариев пока нет.",
+      "hint": "Нажмите «{action}», чтобы добавить."
+    },
+    "time": {
+      "justNow": "только что",
+      "minutes": "{count} мин назад",
+      "hours": "{count} ч назад",
+      "days": "{count} дн назад"
+    }
+  },
+  "EditView": {
+    "title": "Заполнение данных",
+    "yamlEditTooltip": "Массовое редактирование ответов (YAML)",
+    "yamlEditTitle": "Массовое редактирование ответов (YAML)",
+    "progress": "Прогресс",
+    "progressText": "{filledCount} из {requiredCount} обязательных",
+    "noSection": "Без секции",
+    "yamlPlaceholder": "Вставьте YAML здесь...",
+    "yamlHint": "Измените значение <code>answer</code> и нажмите \"Заполнить анкету\"",
+    "cancel": "Отмена",
+    "fillForm": "Заполнить анкету",
+    "yes": "Да",
+    "editTable": "Редактировать",
+    "columnsCount": "{count, plural, one {# колонка} few {# колонки} other {# колонок}}",
+    "rowsCount": "{count, plural, one {# строка} few {# строки} other {# строк}}",
+    "noColumns": "Нет колонок",
+    "noColumnsHint": "Добавьте свойства в эту секцию, чтобы они стали колонками таблицы",
+    "tableEmpty": "Таблица пуста. Нажмите «Добавить строку»",
+    "deleteRow": "Удалить строку",
+    "autoSaveHint": "Изменения сохраняются при закрытии окна",
+    "addRow": "Добавить строку",
+    "done": "Готово",
+    "saveError": "Ошибка сохранения данных"
+  },
+  "HistoryView": {
+    "title": "История версий",
+    "noVersions": "Нет версий",
+    "unknownAuthor": {
+      "firstName": "Неизвестный",
+      "lastName": "автор",
+      "email": "email не указан"
+    },
+    "current": "Текущая",
+    "makeCurrent": "Сделать текущей"
+  },
+  "MarkupView": {
+    "propertiesTab": "Свойства и условия",
+    "formulationsTab": "Формулировки"
+  },
+  "ReviewView": {
+    "title": "Рецензирование",
+    "editsCount": "{count, plural, =0 {нет правок} one {# правка} few {# правки} other {# правок}}",
+    "noActiveEdits": "Нет активных правок",
+    "unknown": "Неизвестный",
+    "author": "автор",
+    "emailNotSpecified": "email не указан",
+    "accept": "Принять",
+    "reject": "Отклонить"
+  },
+  "FormulationsMarkupTab": {
+    "variantsCount": "{count, plural, one {# вариант} few {# варианта} many {# вариантов} other {# варианта}}",
+    "noBaseFormulation": "Нет базовой формулировки",
+    "noUsedFormulations": "В документе нет используемых формулировок",
+    "avatarAlt": "аватар"
+  },
+  "PropertiesTab": {
+    "condition": "Условие",
+    "text": "Текст",
+    "money": "Сумма",
+    "number": "Число",
+    "date": "Дата",
+    "property": "Свойство",
+    "confirmDeleteSection": "Удалить секцию? Элементы будут перемещены в «Без секции».",
+    "rename": "Переименовать",
+    "tableModeActive": "Режим таблицы (активно)",
+    "tableModeInactive": "Обычный режим (нажмите для включения таблицы)",
+    "delete": "Удалить",
+    "dropHere": "Перетащите свойства или условия сюда",
+    "sectionNamePlaceholder": "Название секции",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "addSection": "Добавить секцию",
+    "unassigned": "Без секции",
+    "empty": "Пусто"
+  },
+  "SettingsPanel": {
+    "propertyTitle": "Настройка свойства",
+    "conditionTitle": "Настройка условия",
+    "formulationTitle": "Настройка формулировки",
+    "formulationGroupTitle": "Настройка формулировки"
+  },
+  "ConditionSettings": {
+    "and": "AND",
+    "or": "OR",
+    "deleteGroupTooltip": "Удалить группу",
+    "selectProperty": "— Свойство —",
+    "selectValue": "— Выберите значение —",
+    "emptyPlaceholder": "пусто",
+    "deleteTooltip": "Удалить",
+    "addRule": "Правило",
+    "addGroup": "Группа",
+    "addRuleToGroup": "Добавить правило в группу",
+    "conditionNameLabel": "Название условия",
+    "conditionNamePlaceholder": "Например: Включать НДС?",
+    "enabledByDefault": "Включено по умолчанию",
+    "applicationLogic": "Логика применения",
+    "loadingLogic": "Загрузка логики...",
+    "failedToLoadLogic": "Не удалось загрузить логику",
+    "warningText": "Убедитесь, что условия не пересекаются или не противоречат друг другу — иначе блок никогда не будет применён.",
+    "cancel": "Отмена",
+    "saving": "Сохранение...",
+    "save": "Сохранить",
+    "createCondition": "Создать условие"
+  },
+  "FormulationSettings": {
+    "selectFormulation": "Выберите формулировку...",
+    "selectType": "Выберите тип",
+    "noTypesAvailable": "Нет доступных типов",
+    "formulations": "Формулировки",
+    "back": "Назад",
+    "search": "Поиск...",
+    "nothingFound": "Ничего не найдено",
+    "groupNotFound": "Группа формулировок не найдена",
+    "variantsCount": "{count, plural, one {# вариант} few {# варианта} other {# вариантов}}",
+    "checkOrder": "Проверка по порядку сверху вниз",
+    "elseIf": "иначе, если",
+    "always": "Always",
+    "alwaysFallback": "— базовый (fallback)",
+    "condition": "Условие",
+    "makeConditional": "Сделать условным",
+    "makeAlways": "Сделать безусловным (Always)",
+    "delete": "Удалить",
+    "selectCondition": "Выберите условие...",
+    "editCondition": "Редактировать условие",
+    "newConditionalVariant": "Новый условный вариант",
+    "newCondition": "Новое условие",
+    "add": "Добавить",
+    "cancel": "Отмена",
+    "addConditionalVariant": "Добавить условный вариант"
+  },
+  "PropertySettings": {
+    "main": "Основное",
+    "name": "Наименование",
+    "identifier": "Идентификатор",
+    "hint": "Подсказка (Hint)",
+    "hintPlaceholder": "Например: Введите ФИО полностью",
+    "dataType": "Тип данных",
+    "types": {
+      "text": "Текст",
+      "number": "Число",
+      "money": "Деньги",
+      "date": "Дата"
+    },
+    "textFormat": "Формат текста",
+    "textInputTypes": {
+      "short": "Короткое",
+      "long": "Длинное",
+      "list": "Список"
+    },
+    "availableValues": "Доступные значения (каждое с новой строки)",
+    "optionsPlaceholder": "Вариант 1\nВариант 2\nВариант 3",
+    "value": "Значение",
+    "valueType": "Тип значения",
+    "valueSources": {
+      "user_input": "Заполняется пользователем",
+      "formula": "Вычисляется по формуле",
+      "database": "Заполняется из БД",
+      "readonly": "Не редактируется"
+    },
+    "formula": "Формула вычисления",
+    "formulaPlaceholder": "Введите формулу...",
+    "defaultValue": "Начальное значение",
+    "defaultValuePlaceholder": "Значение по умолчанию...",
+    "parameters": "Параметры",
+    "isRequired": "Обязательное поле",
+    "hideInForm": "Не показывать в анкете",
+    "conditions": "Условия",
+    "conditionalDisplay": "Условное отображение в анкете",
+    "alwaysDisplay": "Всегда отображать",
+    "conditionDescription": "Свойство будет отображаться в анкете только при выполнении выбранного условия.",
+    "outputFormat": "Формат вывода",
+    "displayTemplate": "Шаблон отображения в документе",
+    "templatePlaceholder": "Например: {value} руб.",
+    "cancel": "Отмена",
+    "saveChanges": "Сохранить изменения",
+    "createProperty": "Создать свойство"
+  },
+  "navbar": {
+    "auth": {
+      "loginError": "Ошибка входа",
+      "registerError": "Ошибка регистрации",
+      "updateProfileError": "Ошибка обновления профиля"
+    },
+    "notifications": {
+      "fetchError": "Не удалось загрузить уведомления",
+      "markReadError": "Не удалось пометить уведомление как прочитанное",
+      "markAllReadError": "Не удалось пометить все уведомления как прочитанные"
+    },
+    "access": {
+      "fetchError": "Ошибка загрузки списка доступов",
+      "grantError": "Ошибка выдачи доступа",
+      "updateError": "Ошибка обновления доступа",
+      "revokeError": "Ошибка отзыва доступа"
+    }
+  },
+  "tasks": {
+    "statuses": {
+      "pending": "Ожидает",
+      "inReview": "На согласовании",
+      "approved": "Согласовано",
+      "needsRevision": "На доработке",
+      "rejected": "Отклонено",
+      "completed": "Выполнено",
+      "canceled": "Отозвано"
+    },
+    "sidebar": {
+      "title": "Задачи",
+      "all": "Все задачи",
+      "my": "Мои задачи",
+      "assignedByMe": "Назначенные мной",
+      "statusTitle": "Статус",
+      "inReview": "На согласовании",
+      "needsRevision": "На доработке",
+      "completed": "Выполнены"
+    },
+    "topbar": {
+      "searchPlaceholder": "Поиск задач...",
+      "newTask": "Новая задача"
+    },
+    "tabs": {
+      "all": "Все",
+      "incoming": "Входящие",
+      "outgoing": "Исходящие",
+      "inReview": "На согласовании",
+      "completed": "Завершённые"
+    },
+    "table": {
+      "task": "Задача",
+      "status": "Статус",
+      "assignee": "Исполнитель",
+      "deadline": "Дедлайн",
+      "updatedAt": "Дата изменения",
+      "loading": "Загрузка задач...",
+      "empty": "Задачи не найдены",
+      "noDescription": "Без описания",
+      "notAssigned": "Не назначен",
+      "subtask": "Подзадача"
+    },
+    "panel": {
+      "actions": {
+        "approve": "Согласовать",
+        "requestRevision": "На доработку",
+        "reject": "Отклонить",
+        "resubmit": "Отправить повторно",
+        "withdraw": "Отозвать"
+      },
+      "tabs": {
+        "details": "Детали",
+        "comments": "Комментарии",
+        "route": "Маршрут",
+        "history": "История"
+      },
+      "details": {
+        "author": "Автор",
+        "assignee": "Исполнитель",
+        "deadline": "Дедлайн",
+        "description": "Описание",
+        "noDescription": "Нет описания",
+        "attachmentsTitle": "Прикреплённые документы",
+        "document": "Документ",
+        "updated": "Обновлён",
+        "noAttachments": "Документы не прикреплены"
+      },
+      "comments": {
+        "titleCount": "Комментарии · {count}",
+        "placeholder": "Написать комментарий...",
+        "send": "Отправить",
+        "reply": "Ответить",
+        "replyPlaceholder": "Написать ответ...",
+        "cancel": "Отмена",
+        "repliesCount": "{count, plural, one {# ответ} few {# ответа} other {# ответов}}"
+      },
+      "route": {
+        "title": "Маршрут согласования",
+        "notStarted": "Не начато",
+        "approved": "Согласовано {date}",
+        "awaitingDecision": "Ожидает решения",
+        "returned": "Возвращено инициатору",
+        "rejected": "Отклонено",
+        "canceled": "Отозвано",
+        "approvedShort": "Согласовано",
+        "awaiting": "Ожидает"
+      },
+      "history": {
+        "title": "История изменений",
+        "action": "Действие",
+        "approved": "Согласовано",
+        "sentForApproval": "Отправлено на согласование",
+        "created": "Задача создана",
+        "rejected": "Отклонено",
+        "needsRevision": "На доработке"
+      }
+    },
+    "errors": {
+      "unauthorized": "Пользователь не авторизован",
+      "loadCommentsFailed": "Не удалось загрузить комментарии для задачи",
+      "createSubtaskFailed": "Ошибка создания подзадачи"
+    }
+  },
+  "workspace": {
+    "fetchStart": "Начало загрузки воркспейсов...",
+    "fetchSuccess": "Успешно получено воркспейсов: {count}",
+    "setCurrentStart": "Текущий не выбран. Устанавливаем воркспейс ID: {id} (сохраненный ID: {savedId})",
+    "noWorkspacesOrAlreadySet": "Воркспейсов нет или текущий уже выбран. Снимаем флаг isInitializing.",
+    "fetchError": "Ошибка при загрузке воркспейсов",
+    "switching": "Переключение на воркспейс ID: {id}",
+    "requestingSub": "Запрос подписки для воркспейса ID: {id}",
+    "subReceived": "Подписка получена. Статус: {status}, Истекает: {expiresAt}",
+    "subError": "Не удалось получить подписку (возможно, триал не активирован). Ошибка",
+    "atomicUpdate": "Атомарное обновление стора. Снимаем флаг isInitializing."
+  },
+  "storage": {
+    "fetchError": "Ошибка чтения данных с сервера",
+    "saveError": "Ошибка записи данных на сервер",
+    "deleteError": "Ошибка удаления данных на сервере",
+    "sizeLimit": "Пропуск сохранения: размер данных превышает сетевой лимит (5 МБ)"
+  },
+  "idb": {
+    "serverError": "indexedDB недоступен на сервере",
+    "readError": "⚠️ Ошибка чтения из IndexedDB:",
+    "skipSaveSize": "⚠️ Пропуск сохранения: размер ({size} МБ) превышает лимит.",
+    "writeError": "⚠️ Ошибка записи в IndexedDB",
+    "exception": "⚠️ Исключение IndexedDB:",
+    "deleteError": "⚠️ Ошибка удаления из IndexedDB:",
+    "backupRestored": "✅ Бэкап успешно восстановлен в IndexedDB!"
+  },
+  "markdown": {
+    "notFound": "Контент для {slug} не найден"
+  },
+  "api": {
+    "errors": {
+      "session_expired": "Сессия истекла. Пожалуйста, войдите в систему снова.",
+      "access_limited_sales": "Доступ ограничен. Пожалуйста, свяжитесь с отделом продаж.",
+      "access_limited": "Доступ ограничен.",
+      "activation_error": "Ошибка активации",
+      "http_error": "HTTP ошибка! статус: {status}"
+    },
+    "warnings": {
+      "jwt_parse_failed": "Не удалось распарсить JWT для получения ID пользователя"
+    }
+  }
+}

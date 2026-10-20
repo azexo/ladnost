@@ -1,0 +1,10 @@
+{
+  "name": "yandex_metrika",
+  "version": "1.0.0",
+  "enabled": true,
+  "frontend": {
+    "components": {
+      "counter-init": "index.tsx"
+    }
+  }
+}

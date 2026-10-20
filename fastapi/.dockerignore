@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 Andrey Soloduhin
+#
+# SPDX-License-Identifier: Apache-2.0
+
+__pycache__
+.cache
+.guncorn
+venv
+env
+.env
+.env.local
+.env.production
+.git
+.gitignore
+*.log
+
+
+extension
+faiss_indexes
+logs
+vsrf_documents
+bypass_for_external.py
+compare_and_rename.py
+convert_cntd_to_md.py
+convert_vsrf_to_md.py
+demo.sql
+fastapi-clm.service.txt
+filter_vs_rf.py
+ladnost.ru-le-ssl.conf.txt
+ladnost.ru.conf.txt
+notify_webinar_start.py
+parser_vsrf.py
+requirements raw.txt
+test_single_embedding.py
+test.py

@@ -1,0 +1,624 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Andrey Soloduhin
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.grab-cursor {
+  cursor: grab;
+}
+
+.grab-cursor:active {
+  cursor: grabbing;
+}
+
+.slide-panel {
+  transition: transform 0.25s cubic-bezier(.4, 0, .2, 1);
+}
+
+.mode-btn {
+  position: relative;
+}
+
+.mode-btn .tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1e293b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+
+.mode-btn:hover .tooltip {
+  opacity: 1;
+}
+
+.nav-link {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748b;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+/* Logic Builder */
+.logic-group {
+  border-left: 3px solid #bfdbfe;
+  background: linear-gradient(to right, #eff6ff 0%, #f8fafc 100%);
+  border-radius: 0 8px 8px 0;
+}
+
+.logic-group-or {
+  border-left: 3px solid #fde68a;
+  background: linear-gradient(to right, #fffbeb 0%, #f8fafc 100%);
+  border-radius: 0 8px 8px 0;
+}
+
+.logic-rule {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.logic-connector {
+  display: inline-flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.logic-connector button {
+  padding: 2px 8px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  transition: all 0.15s;
+  border: none;
+  cursor: pointer;
+  line-height: 1.6;
+}
+
+.logic-connector button.active-and {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.logic-connector button.active-or {
+  background: #fef9c3;
+  color: #b45309;
+}
+
+.logic-connector button:hover:not(.active-and):not(.active-or) {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.group-connector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0 2px 4px;
+}
+
+.connector-line {
+  width: 12px;
+  height: 1px;
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.connector-line-or {
+  background: #fcd34d;
+}
+
+.clause-variant-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.clause-variant-card.always {
+  border-color: #bfdbfe;
+  background: #f0f7ff;
+}
+
+.clause-variant-card.conditional {
+  border-color: #d1fae5;
+  background: #f0fdf4;
+}
+
+.mini-toolbar button {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  color: #64748b;
+  font-size: 11px;
+  transition: background 0.12s;
+}
+
+.mini-toolbar button:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.priority-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.expr-preview {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.depth-1 {
+  margin-left: 0;
+}
+
+.depth-2 {
+  margin-left: 16px;
+}
+
+.depth-3 {
+  margin-left: 32px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.logic-rule-new {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.type-btn.selected {
+  border-color: #3b82f6 !important;
+  background: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+
+/* Базовые стили для контейнера редактора */
+.tiptap {
+  outline: none;
+}
+
+/* Заголовки */
+.tiptap h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+.tiptap h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.tiptap h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.tiptap h4 {
+  font-size: 1.15em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.tiptap h5 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.tiptap h6 {
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+/* Абзацы и Списки */
+.tiptap p {
+  margin-bottom: 0.5em;
+}
+
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap li {
+  margin-bottom: 0.25em;
+}
+
+.tiptap li p {
+  margin-bottom: 0.25em;
+}
+
+/* Цитаты */
+.tiptap blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1em;
+  margin-left: 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Ссылки */
+.tiptap a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  color: #1d4ed8;
+}
+
+/* Горизонтальная линия */
+.tiptap hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}
+
+/* Плейсхолдер (если будете использовать extension-placeholder) */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+
+/* ==========================================
+   СТИЛИ ДЛЯ ТАБЛИЦ TIPTAP
+   ========================================== */
+
+/* Базовые стили таблицы */
+.tiptap table {
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+/* Стили для ячеек и заголовков */
+.tiptap td,
+.tiptap th {
+  border: 1px solid #eee;
+  border-collapse: collapse;
+  min-width: 1em;
+  padding: 6px 8px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  font-size: 0.875rem;
+  /* text-sm */
+  line-height: 1.5;
+}
+
+/* Стили специально для заголовков таблицы (шапки) */
+.tiptap th {
+  background-color: #f1f5f9;
+  /* Цвет slate-100 */
+  font-weight: 600;
+  text-align: left;
+  color: #334155;
+  /* slate-700 */
+}
+
+/* Стиль для выделенных ячеек (когда кликаешь и тянешь для выделения) */
+.tiptap .selectedCell:after {
+  background: rgba(59, 130, 246, 0.15);
+  /* Полупрозрачный синий (blue-500) */
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+/* Ручка для изменения ширины колонок (появляется при наведении на границу) */
+.tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #3b82f6;
+  /* Цвет blue-500 */
+  pointer-events: none;
+}
+
+/* Убираем лишние отступы у параграфов внутри ячеек, чтобы таблица не "плыла" */
+.tiptap td p,
+.tiptap th p {
+  margin: 0;
+}
+
+.tiptap td.bordered,
+.tiptap th.bordered {
+  border: 1px solid #444;
+}
+
+
+/* Визуальное отображение разрыва страницы в редакторе */
+.tiptap .page-break-visual {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+  line-height: 1;
+}
+
+.tiptap .page-break-visual::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed #94a3b8;
+  /* slate-400 */
+  z-index: 1;
+}
+
+.tiptap .page-break-visual span {
+  position: relative;
+  background: white;
+  /* Должно совпадать с фоном canvas */
+  padding: 0 1rem;
+  color: #64748b;
+  /* slate-500 */
+  font-size: 0.75rem;
+  font-family: sans-serif;
+  z-index: 2;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tiptap p:has(.legal-point-inline[data-is-visible="false"]) {
+  display: none !important;
+}
+
+
+.tiptap .anchor-hl {
+  background-color: #fde68a;
+  border-bottom: 2px solid #f59e0b;
+  border-radius: 2px;
+  transition: background-color 0.15s ease;
+}
+
+.tiptap .anchor-hl-active {
+  background-color: #fb923c !important;
+  border-bottom: 2px solid #ea580c;
+  color: #fff;
+  border-radius: 2px;
+}
+
+.tiptap .active-review-highlight {
+  outline: 2px solid #3b82f6;
+  /* blue-500 */
+  outline-offset: 2px;
+  border-radius: 2px;
+  animation: pulse-highlight 1.5s infinite;
+}
+
+@keyframes pulse-highlight {
+  0% {
+    outline-color: rgba(59, 130, 246, 1);
+  }
+
+  50% {
+    outline-color: rgba(59, 130, 246, 0.4);
+  }
+
+  100% {
+    outline-color: rgba(59, 130, 246, 1);
+  }
+}
+
+
+#document-canvas:not(.review-mode):not(.history-mode) [data-track-delete] {
+  display: none !important;
+}
+
+#document-canvas:not(.review-mode):not(.history-mode) [data-track-add] {
+  background-color: transparent !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#document-canvas:not(.comment-mode) [data-anchor-uuid] {
+  background-color: transparent !important;
+  color: inherit !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#document-canvas:not(.comment-mode) .anchor-hl {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+  .tc-add { 
+    background-color: #dcfce7; color: #166534; 
+    text-decoration: underline; text-decoration-color: #22c55e; text-decoration-style: solid; 
+  }
+  .tc-delete { 
+    background-color: #fee2e2; color: #991b1b; 
+    text-decoration: line-through; text-decoration-color: #ef4444; text-decoration-style: solid; 
+  }
+  .tc-delete.tc-add { 
+    background-color: #fee2e2 !important; 
+    color: #991b1b !important; 
+    text-decoration: line-through !important; 
+    text-decoration-color: #ef4444 !important; 
+  }
+
+
+/* Мигание токена/слота в редакторе */
+@keyframes token-flash-anim {
+  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); background-color: rgba(239, 68, 68, 0.2); }
+  50%  { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.1); background-color: rgba(239, 68, 68, 0.05); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); background-color: transparent; }
+}
+
+/* Мигание карточки в боковой панели */
+@keyframes card-flash-anim {
+  0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); border-color: rgb(239, 68, 68); background-color: rgba(239, 68, 68, 0.05); }
+  50%  { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); border-color: rgb(239, 68, 68); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: rgb(226, 232, 240); background-color: transparent; }
+}
+
+.token-highlight-flash {
+  animation: token-flash-anim 1.5s ease-out;
+  border-radius: 4px;
+  z-index: 10;
+  position: relative;
+}
+
+.card-highlight-flash {
+  animation: card-flash-anim 1.5s ease-out;
+}
+
+
+
+/* В режиме разметки (markup) скрываемInjected строки (если они вдруг остались) */
+.mode-markup .injected-data-row {
+  display: none !important;
+}
+
+/* В режиме редактирования (edit) скрываем строку-шаблон */
+.mode-edit tr[data-is-template="true"] {
+  display: none !important;
+}
+
+/* Визуальное отличие строки-шаблона в режиме разметки (опционально) */
+.mode-markup tr[data-is-template="true"] {
+  background-color: #f0f9ff; /* Легкий голубой фон */
+  border: 1px dashed #3b82f6;
+}
+.mode-markup tr[data-is-template="true"] td {
+  color: #2563eb;
+  font-style: italic;
+}
+
+
+.injected-data-row {
+  pointer-events: none;
+  user-select: none;
+  background-color: #f8fafc; /* Легкий фон, чтобы отличать от шаблона */
+}
