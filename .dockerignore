@@ -10,7 +10,8 @@ Dockerfile
 docker-compose.yml
 
 
-спецификации
+specifications
+assets
 app/benchmark
 app/webinar
 app/services
