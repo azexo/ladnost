@@ -2,6 +2,16 @@
 
 **Ladnost Contract Lifecycle Management (CLM)** is a scalable, AI-ready platform for automating the creation, approval, signing, and storage of contracts. The system combines the flexibility of a no-code builder, the capabilities of a full-featured text editor, and an architecture ready for deep integration with AI.
 
+---
+
+<p align="center">
+  <a href="https://ladnost.ru/">Product site</a> ·
+  <a href="#-initial-setup-and-launch-guide-for-ladnost">Quick start</a> ·
+  <a href="mailto:info@ladnost.ru">Enterprise</a>
+</p>
+
+---
+
 <p align="center">
   <img src="./assets/1.png" width="30%" alt="Screenshot 1" />
   <img src="./assets/2.png" width="30%" alt="Screenshot 2" />
