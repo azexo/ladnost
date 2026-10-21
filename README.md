@@ -95,19 +95,8 @@ This guide provides step-by-step instructions for configuring, building, and run
 - **Git** (for cloning the repository).
 - *(Optional)* **Certbot / Let's Encrypt** certificates if you plan to deploy the application in production with HTTPS.
 
-## 📁 2. Directory Structure Preparation
-Before starting the containers, ensure the following directories exist in the root of your project:
-```text
-.
-├── messages/         # i18n translation files (JSON)
-├── content/          # Static content
-├── plugins/          # Backend & Frontend plugins
-├── nginx/            # Must contain `default.conf.template`
-├── fastapi/          # Backend source code
-└── docker-compose.yml
-```
 
-## ⚙️ 3. Environment Variables Configuration
+## ⚙️ 2. Environment Variables Configuration
 You need to create and configure environment files to pass secrets and settings to the containers.
 
 
@@ -180,12 +169,12 @@ NEXT_LOCALE=ru
 NEXT_FORMAT_LOCALE=ru-RU
 ```
 
-## 🛡️ 4. Nginx and SSL Configuration
+## 🛡️ 3. Nginx and SSL Configuration
 - Ensure you have a valid Nginx configuration template at `./nginx/default.conf.template`.
 - **Local Development:** Configure Nginx to serve HTTP on port 80 without SSL.
 - **Production:** The `docker-compose.yml` expects Let's Encrypt certificates on the host at `/etc/letsencrypt`. Ensure you have generated certificates for your `DOMAIN` and that the host path matches the volume mount: `/etc/letsencrypt:/etc/letsencrypt:ro`.
 
-## 🐳 5. Building and Starting the Project
+## 🐳 4. Building and Starting the Project
 Run the following command in the project root to build the images and start all containers in detached mode:
 
 ```bash
@@ -193,19 +182,19 @@ docker-compose up --build -d
 ```
 *Note: The initial build may take several minutes as it installs dependencies for both FastAPI and Next.js, and generates plugin registries.*
 
-## 🌐 6. Accessing the Services
+## 🌐 5. Accessing the Services
 - **Frontend (Next.js via Nginx):** `http://localhost` (or `https://<your_domain>` if SSL is configured).
 - **pgAdmin (Database GUI):** `http://localhost:5050`
   - *Email:* The email specified in `PGADMIN_EMAIL`
   - *Password:* The password specified in `PGADMIN_PASSWORD`
 - **FastAPI Backend:** Exposed internally via Nginx at `/api/v1`. You can access the Swagger UI directly for debugging (if enabled in FastAPI) by checking the container logs or mapping a port temporarily in `docker-compose.yml`.
 
-## 🧩 7. Working with the Plugin System
+## 🧩 6. Working with the Plugin System
 The project utilizes a dynamic plugin architecture for both the backend and frontend.
 - **Backend Plugins:** The FastAPI loader automatically scans the `./plugins` directory on startup. Each plugin must have a `plugin.json` manifest and a Python backend module.
 - **Frontend Plugins:** During the Next.js build, a script scans the `./plugins` directory and generates dynamic App Router routes (`app/(plugins)`) and component registries (`lib/generatedPlugins.ts`).
 - **Disabling Plugins:** To disable a plugin without deleting it, open its `plugin.json` and set `"enabled": false`.
 
-## 🌍 8. Internationalization (i18n)
+## 🌍 7. Internationalization (i18n)
 - **Frontend:** Uses `next-intl`. Add your translation JSON files to the `./messages/` directory (e.g., `ru.json`, `en.json`).
 - **Backend:** Uses a custom `I18n` class that also reads from the `./messages/` directory. Ensure the `LOCALE` environment variable matches your default language file.
