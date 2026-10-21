@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Andrey Soloduhin
 #
-# SPDX-License-Identifier: LicenseRef-Commercial
+# SPDX-License-Identifier: Apache-2.0
 
 import logging
 from fastapi import APIRouter

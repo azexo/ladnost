@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Andrey Soloduhin
 //
-// SPDX-License-Identifier: LicenseRef-Commercial
+// SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
 import Script from 'next/script';
