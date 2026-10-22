@@ -24,7 +24,9 @@ from routers import (
     renderer,
     api_keys,
     integrations,
+    mcp,
 )
+import mcp_tools
 
 logging.basicConfig(
     level=logging.INFO, # Уровень логирования (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -77,6 +79,8 @@ app.include_router(billing.router, prefix="/api/v1/billing", tags=["Billing"])
 app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"])
 
 app.include_router(integrations.router, prefix="/api/v1/integrations", tags=["Integrations"])
+app.include_router(mcp.router, prefix="/api/v1/mcp", tags=["Integrations"])
+
 
 
 

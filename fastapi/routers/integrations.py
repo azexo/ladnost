@@ -17,10 +17,10 @@ from models import (
     QuestionnaireAnswer, User, Folder, DocumentSetAccess
 )
 from utils import get_current_user_or_api_key, check_scope, AuthContext
-# ✅ Подключаем функцию перевода из i18n
+# ✅ Подключаем функцию перевода из i18n 
 from core.i18n import t 
 
-router = APIRouter(prefix="/integrations", tags=["Integrations"])
+router = APIRouter()
 
 # ==========================================
 # PYDANTIC SCHEMAS (DTOs)

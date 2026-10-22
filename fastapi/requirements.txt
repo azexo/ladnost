@@ -22,6 +22,7 @@ numpy==2.2.6
 pandas==2.3.2
 faiss-cpu==1.9.0.post1
 openai==3.26.0
+mcp==2.3.0
 
 # --- Document Parsing & Conversion ---
 beautifulsoup4==4.15.0
@@ -38,6 +39,7 @@ xlrd==2.0.2
 xlsxwriter==3.2.9
 striprtf==0.0.33
 markdownify==1.2.3
+WeasyPrint==70.0
 
 # --- Authentication & Security ---
 passlib==1.7.4
