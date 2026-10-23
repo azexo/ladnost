@@ -376,12 +376,29 @@ export const useFilesStore = create<FilesState>((set, get) => ({
       set({ users });
       await get().fetchRootFolders();
       await get().fetchData();
-
-      // 🆕 Обновляем хлебные крошки с правильным переводом при инициализации
+      
+      // 🆕 Обновляем только корневую хлебную крошку с правильным переводом, 
+      // не сбрасывая всю навигацию, если мы находимся в подпапке
       const t = getT();
-      set({
-        breadcrumbs: [{ id: null, name: t('files.breadcrumbs.myFiles') }]
-      });
+      const { breadcrumbs, view } = get();
+      
+      if (breadcrumbs.length > 0) {
+        // Определяем правильное имя для корневой крошки в зависимости от view
+        const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : 
+                        view === 'trash' ? t('files.breadcrumbs.trash') : 
+                        t('files.breadcrumbs.myFiles');
+                        
+        // Обновляем имя корневой крошки, если оно изменилось (например, при смене языка)
+        if (breadcrumbs[0].name !== rootName) {
+          const updatedBreadcrumbs = [...breadcrumbs];
+          updatedBreadcrumbs[0] = { ...updatedBreadcrumbs[0], name: rootName };
+          set({ breadcrumbs: updatedBreadcrumbs });
+        }
+      } else {
+        // На случай, если breadcrumbs пуст (хотя это не должно происходить)
+        const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : t('files.breadcrumbs.myFiles');
+        set({ breadcrumbs: [{ id: null, name: rootName }] });
+      }
     } catch (error) {
       console.error('Failed to init store:', error);
     }
