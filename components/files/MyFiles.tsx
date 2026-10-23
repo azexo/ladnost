@@ -39,6 +39,8 @@ export default function MyFiles() {
     if (view !== 'files') {
       setView('files');
       fetchData();
+    } else {
+      navigateToFolder(null, ''); 
     }
   };
 
@@ -53,6 +55,8 @@ export default function MyFiles() {
     if (view !== 'shared') {
       setView('shared');
       fetchSharedData();
+    } else {
+      navigateToFolder(null, '');
     }
   };
 
