@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       const $el = $(el);
       const classes = ($el.attr('class') || '').split(' ').filter(c => !c.startsWith('ProseMirror'));
       if (classes.length > 0) {
-        $el.attr('class', classes.join(' '));
+         $el.attr('class', classes.join(' '));
       } else {
         $el.removeAttr('class');
       }
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     // 3. РАЗРЫВЫ СТРАНИЦ
     // ==========================================
     $('hr.page-break, hr[data-type="page-break"]').each((_, el) => {
-      $(el).replaceWith('<div style="page-break-after: always;"></div>');
+      $(el).replaceWith('<div class="page-break"></div>');
     });
 
     // ==========================================
@@ -111,17 +111,36 @@ export async function POST(req: NextRequest) {
     const fullHtml = `
       <!DOCTYPE html>
       <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.5; }
-          table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #ddd; padding: 8px; }
-        </style>
-      </head>
-      <body>
-        ${cleanHtml}
-      </body>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            /* Схлопывание границ таблицы */
+            table {
+              border-collapse: collapse;
+              width: 100%;
+            }
+            table th, table td {
+              padding: 6px 8px;
+            }
+            
+            /* Добавление границы для ячеек с классом bordered */
+            .bordered {
+              border: 1px solid black;
+            }
+            
+            /* Базовые стили для корректного отображения в PDF */
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.4;
+              font-size: 14px;
+              margin: 0;
+              padding: 0;
+            }
+          </style>
+        </head>
+        <body>
+          ${cleanHtml}
+        </body>
       </html>
     `;
 
@@ -130,7 +149,6 @@ export async function POST(req: NextRequest) {
     // ==========================================
 
     // Определяем, находимся ли мы в Docker
-    // В Docker всегда существует файл /.dockerenv или переменная IS_DOCKER
     const isDocker = fs.existsSync('/.dockerenv') || process.env.IS_DOCKER === 'true';
 
     const launchOptions: any = {
@@ -144,7 +162,6 @@ export async function POST(req: NextRequest) {
     };
 
     if (isDocker) {
-      // Если мы в Docker: используем системный Chromium и временную папку для read_only
       launchOptions.executablePath = '/usr/bin/chromium';
       launchOptions.userDataDir = '/tmp/puppeteer-profile';
     } 
