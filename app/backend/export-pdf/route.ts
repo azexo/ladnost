@@ -117,10 +117,18 @@ export async function POST(req: NextRequest) {
             /* Схлопывание границ таблицы */
             table {
               border-collapse: collapse;
+              border-spacing: 0;
               width: 100%;
+              table-layout: auto;
             }
             table th, table td {
-              padding: 6px 8px;
+              padding: 6px 8px !important;
+            }
+            table * {
+              margin-top: 0 !important;
+              margin-bottom: 0 !important;
+              margin-left: 0 !important;
+              margin-right: 0 !important;
             }
             
             /* Добавление границы для ячеек с классом bordered */
