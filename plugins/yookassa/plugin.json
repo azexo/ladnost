@@ -1,0 +1,10 @@
+{
+  "name": "yookassa",
+  "version": "1.0.0",
+  "enabled": true,
+  "backend": {
+    "module": "yookassa.backend.main",
+    "router_attr": "router",
+    "prefix": "/api/v1"
+  }
+}

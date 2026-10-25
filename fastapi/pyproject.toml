@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Andrey Soloduhin
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[tool.deptry]
+known_first_party = ["auth"]
+
+ignore = ["playwright"]

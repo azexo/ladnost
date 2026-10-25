@@ -1,0 +1,68 @@
+server {
+    listen 80;
+    server_name ${DOMAIN} www.${DOMAIN};
+    
+    # Перенаправление всего HTTP трафика на HTTPS
+    return 301 https://${DOMAIN}$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    # SSL сертификаты (пути формируются из переменной SSL_DIR)
+    ssl_certificate ${SSL_DIR}/fullchain.pem;
+    ssl_certificate_key ${SSL_DIR}/privkey.pem;
+
+    # --- ТРЕБОВАНИЯ МИНЦИФРЫ / ФСТЭК К SSL ---
+    ssl_protocols TLSv1.2 TLSv1.3;
+    # Современные безопасные шифры
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # --- ОБЯЗАТЕЛЬНЫЕ ЗАГОЛОВКИ БЕЗОПАСНОСТИ ---
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # 1. Проксирование API на FastAPI
+    location /api/ {
+        proxy_pass http://fastapi:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 2. Проксирование загруженных файлов
+    location /uploads/ {
+        proxy_pass http://fastapi:8000/uploads/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 3. Проксирование всего остального на Next.js
+    location / {
+        proxy_pass http://nextjs:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Поддержка WebSocket для Next.js
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # Логирование
+    access_log /var/log/nginx/clm-access.log;
+    error_log /var/log/nginx/clm-error.log;
+}

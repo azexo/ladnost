@@ -1,0 +1,36 @@
+<VirtualHost *:443>
+    ServerName ladnost.ru
+    ServerAlias www.ladnost.ru
+
+    # 1. ПРОКСИРОВАНИЕ FASTAPI
+    ProxyPass /api/ http://127.0.0.1:8001/api/
+    ProxyPassReverse /api/ http://127.0.0.1:8001/api/
+    
+    # 👉 ДОБАВЛЕНО: Проксирование загруженных файлов на FastAPI
+    ProxyPass /uploads/ http://127.0.0.1:8001/uploads/
+    ProxyPassReverse /uploads/ http://127.0.0.1:8001/uploads/
+
+    # 2. Проксирование на Next.js (порт 3001) - ОБЯЗАТЕЛЬНО ПОСЛЕДНИМ
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:3001/
+    ProxyPassReverse / http://127.0.0.1:3001/
+
+    # Поддержка WebSocket для Next.js
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/uploads/
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule /(.*) ws://127.0.0.1:3001/$1 [P,L]
+    
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/uploads/
+    RewriteCond %{HTTP:Upgrade} !=websocket [NC]
+    RewriteRule /(.*) http://127.0.0.1:3001/$1 [P,L]
+
+    ErrorLog ${APACHE_LOG_DIR}/ladnost-error.log
+    CustomLog ${APACHE_LOG_DIR}/ladnost-access.log combined
+
+    Include /etc/letsencrypt/options-ssl-apache.conf
+    SSLCertificateFile /etc/letsencrypt/live/ladnost.ru/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/ladnost.ru/privkey.pem
+</VirtualHost>

@@ -1,0 +1,270 @@
+{
+  "api_keys": {
+    "workspace_owner_not_found": "У воркспейса не найден владелец (Owner)",
+    "workspace_not_found": "Воркспейс не найден",
+    "key_not_found": "Ключ не найден"
+  },
+  "auth": {
+    "errors": {
+      "email_already_registered": "Пользователь с таким email уже зарегистрирован",
+      "invalid_token_type": "Неверный тип токена",
+      "invalid_token": "Некорректный токен",
+      "token_expired_or_invalid": "Срок действия токена истек или он недействителен",
+      "user_not_found": "Пользователь не найден",
+      "invalid_credentials": "Неверный email или пароль"
+    },
+    "messages": {
+      "account_already_activated": "Аккаунт уже был активирован ранее",
+      "account_activated": "Аккаунт успешно активирован. Теперь вы можете войти в систему.",
+      "account_not_activated_email_sent": "Аккаунт не активирован. На вашу почту отправлена новая ссылка для активации. Пожалуйста, проверьте email.",
+      "if_user_exists_instructions_sent": "Если пользователь с таким email существует, инструкции отправлены.",
+      "password_reset_instructions_sent": "Инструкции по сбросу пароля отправлены на email",
+      "password_changed": "Пароль успешно изменен. Теперь вы можете войти с новым паролем."
+    },
+    "emails": {
+      "registration_confirmation": {
+        "subject": "Подтверждение регистрации",
+        "resend_subject": "Повторное подтверждение регистрации",
+        "greeting": "Здравствуйте, {name}!",
+        "body": "Спасибо за регистрацию. Пожалуйста, подтвердите свой email, перейдя по ссылке ниже (действует {hours} часа):",
+        "resend_body": "Вы попытались войти в систему, но ваш аккаунт еще не активирован."
+      },
+      "password_reset": {
+        "subject": "Восстановление пароля",
+        "greeting": "Здравствуйте!",
+        "body": "Вы запросили восстановление пароля. Перейдите по ссылке ниже, чтобы установить новый пароль (действует {minutes} минут):",
+        "ignore": "Если вы не запрашивали это, просто проигнорируйте письмо."
+      }
+    }
+  },
+  "billing": {
+    "only_owner_can_activate_trial": "Только владелец рабочего пространства может активировать пробный период",
+    "workspace_already_has_active_sub": "У рабочего пространства уже есть активная подписка",
+    "trial_tariff_not_configured": "Тариф для пробного периода не настроен в системе",
+    "subscription_not_found": "Подписка для этого рабочего пространства не найдена",
+    "subscription_expired_or_canceled": "Подписка истекла или отменена. Пожалуйста, свяжитесь с отделом продаж или продлите её.",
+    "only_owner_can_pay": "Только владелец рабочего пространства (OWNER) может оплачивать подписку",
+    "tariff_not_found": "Тариф не найден",
+    "payment_description": "Оплата тарифа {name}",
+    "payment_init_error": "Ошибка инициализации платежной системы",
+    "payment_system_error": "Ошибка платежной системы: {error}",
+    "unknown_error": "Неизвестная ошибка",
+    "payment_not_found": "Платеж не найден"
+  },
+  "comments": {
+    "version_not_found": "Версия документа не найдена",
+    "document_not_found": "Документ не найден",
+    "comment_not_found": "Комментарий не найден"
+  },
+  "document_sets": {
+    "not_found": "Комплект не найден",
+    "original_not_found": "Оригинал не найден",
+    "access_not_found": "Доступ не найден",
+    "clone_suffix": "{name} (Копия)"
+  },
+  "documents": {
+    "errors": {
+      "document_set_not_found": "Комплект документов не найден",
+      "document_not_found": "Документ не найден",
+      "no_current_version": "У документа нет текущей версии",
+      "version_not_found": "Версия не найдена",
+      "comment_not_found": "Комментарий не найден",
+      "no_documents_in_set": "В комплекте нет документов",
+      "no_files_to_download": "В комплекте не найдено файлов для скачивания"
+    },
+    "logs": {
+      "file_delete_failed": "Не удалось удалить файл {file_path}. Ошибка: {error}"
+    }
+  },
+  "folders": {
+    "not_found_or_no_rights": "Папка не найдена или у вас нет прав на это действие",
+    "not_found": "Папка не найдена",
+    "moved_to_trash": "Папка успешно перемещена в корзину",
+    "restored_successfully": "Папка успешно восстановлена",
+    "deleted_permanently": "Папка полностью удалена из системы",
+    "no_doc_sets_in_folder": "В папке нет документов для применения прав доступа",
+    "access_granted": "Права доступа к папке успешно предоставлены",
+    "access_revoked": "Права доступа к папке успешно отозваны"
+  },
+  "formulations": {
+    "errors": {
+      "type_not_found": "Тип не найден",
+      "out_of_bounds": "Невозможно переместить: достигнут предел списка",
+      "type_in_use": "Невозможно удалить тип, так как он используется в формулировках",
+      "set_not_found": "Комплект не найден",
+      "auth_required_for_set": "Необходима авторизация для доступа к этому комплекту",
+      "formulation_not_found": "Формулировка не найдена",
+      "formulation_in_use": "Невозможно удалить формулировку, так как она используется в комплектах документов. Сначала удалите её привязки в анкетах."
+    },
+    "fallbacks": {
+      "no_type": "Без типа",
+      "no_text": "Текст отсутствует...",
+      "author": "Автор",
+      "unknown": "Неизвестно"
+    }
+  },
+  "integrations": {
+    "template_set_not_found": "Комплект-шаблон не найден",
+    "target_folder_not_found_or_no_access": "Целевая папка не найдена, удалена или не принадлежит вам",
+    "document_set_not_found": "Комплект не найден или удален",
+    "no_access_to_fill": "Нет прав на заполнение этого комплекта"
+  },
+  "notifications": {
+    "all_marked_as_read": "Все уведомления отмечены как прочитанные",
+    "marked_as_read": "Уведомление отмечено как прочитанное",
+    "not_found_or_no_access": "Уведомление не найдено или не принадлежит вам"
+  },
+  "questionnaire": {
+    "errors": {
+      "condition_not_found": "Условие не найдено",
+      "variant_not_found": "Вариант не найден",
+      "group_not_found": "Группа не найдена",
+      "rule_not_found": "Правило не найдено",
+      "section_not_found": "Раздел не найден",
+      "property_not_found": "Свойство не найдено"
+    },
+    "messages": {
+      "version_not_found": "[Ошибка: версия не найдена]",
+      "unknown_formulation": "Неизвестно"
+    }
+  },
+  "renderer": {
+    "errors": {
+      "document_version_not_found": "Версия документа не найдена",
+      "document_not_found": "Документ не найден",
+      "current_version_not_found": "Текущая версия не найдена",
+      "main_document_not_found": "Главный документ не найден",
+      "main_document_current_version_not_found": "Текущая версия главного документа не найдена",
+      "id_required": "Необходимо передать ID",
+      "document_empty": "Документ пуст"
+    },
+    "ui": {
+      "clause_text": "пункт {number}",
+      "clause_hidden_or_deleted": "[пункт скрыт/удален]",
+      "clause_ref_fallback": "[ссылка]"
+    }
+  },
+  "tasks": {
+    "errors": {
+      "not_found": "Задача не найдена",
+      "main_not_found": "Главная задача не найдена",
+      "access_denied": "Доступ запрещен",
+      "stage_only": "Это действие доступно только для этапа (подзадачи)",
+      "initiator_resubmit_only": "Только инициатор может отправить повторно",
+      "not_in_revision": "Задача не находится на доработке",
+      "initiator_withdraw_only": "Только инициатор может отозвать задачу",
+      "cannot_withdraw_completed": "Нельзя отозвать завершенную задачу"
+    },
+    "history": {
+      "stage_added": "Добавлен этап {stage_number}",
+      "stage_name": "Этап {stage_number}: Согласование (ID {assignee_id})"
+    },
+    "notifications": {
+      "approved": "согласовал",
+      "rejected": "отклонил",
+      "revision_requested": "вернул на доработку",
+      "withdrawn": "отозвал"
+    }
+  },
+  "template_import": {
+    "errors": {
+      "unknown_enum_value": "Неизвестное значение '{value}' для {enum_name}. Допустимые: {allowed_values}",
+      "yaml_parse_error": "Ошибка парсинга YAML: {error}",
+      "yaml_empty_or_invalid_structure": "YAML пуст или имеет неверную структуру",
+      "metadata_name_required": "Поле template_metadata.name обязательно",
+      "file_invalid_extension": "Файл должен иметь расширение .yaml или .yml",
+      "file_read_error": "Не удалось прочитать файл: {error}",
+      "db_commit_error": "Ошибка сохранения в БД: {error}",
+      "formulation_creation_error": "Ошибка формулировки '{name}': {error}"
+    },
+    "warnings": {
+      "condition_deep_nesting": "Условие '{name}': слишком глубокая вложенность (>10)",
+      "condition_unknown_logical_operator": "Условие '{name}': неизвестный оператор '{operator}', использован AND",
+      "condition_property_not_found": "Условие '{name}': свойство '{property}' не найдено",
+      "condition_unknown_compare_operator": "Условие '{name}': неизвестный оператор '{operator}', использован '='",
+      "property_missing_identifier": "Свойство #{index} пропущено: нет identifier",
+      "property_duplicate": "Свойство '{identifier}' пропущено: дубликат",
+      "property_invalid_data_type": "Свойство '{identifier}': неверный data_type",
+      "condition_duplicate": "Условие '{id}' пропущено: дубликат",
+      "formulation_missing_name": "Формулировка '{id}' пропущена: нет name",
+      "formulation_duplicate": "Формулировка '{id}' пропущена: дубликат",
+      "variant_missing_identifier": "Вариант пропущен: нет identifier",
+      "variant_condition_not_found": "Вариант '{identifier}': условие '{condition_id}' не найдено",
+      "variant_formulation_not_found": "Вариант '{identifier}': формулировка '{formulation_id}' не найдена"
+    }
+  },
+  "trash": {
+    "folder": {
+      "not_found_or_no_rights": "Папка не найдена или у вас нет прав"
+    },
+    "document_set": {
+      "not_found": "Комплект не найден",
+      "no_restore_rights": "Нет прав на восстановление",
+      "not_found_or_no_owner_rights": "Комплект не найден или у вас нет прав владельца"
+    }
+  },
+  "users": {
+    "errors": {
+      "user_not_found": "Пользователь не найден",
+      "contact_send_failed": "Не удалось отправить сообщение. Попробуйте позже."
+    },
+    "defaults": {
+      "invited_first_name": "Приглашенный",
+      "invited_last_name": "Пользователь",
+      "phone_not_specified": "Не указан"
+    },
+    "contact": {
+      "success_message": "Сообщение успешно отправлено. Мы свяжемся с вами в ближайшее время.",
+      "subject": "Новое сообщение с сайта от {name}",
+      "html": "<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\"><h2 style=\"color: #333;\">Новое сообщение с формы обратной связи</h2><p><strong>Имя:</strong> {name}</p><p><strong>Email для связи:</strong> <a href=\"mailto:{email}\">{email}</a></p><p><strong>Телефон:</strong> {phone}</p><hr style=\"border: 1px solid #eee;\"><p><strong>Сообщение:</strong></p><p style=\"background: #f9f9f9; padding: 15px; border-radius: 5px;\">{message}</p></div>"
+    },
+    "invite": {
+      "reminder": {
+        "subject": "Напоминание о приглашении",
+        "html": "<h2>Напоминание о приглашении</h2><p>Здравствуйте!</p><p>Вы были приглашены в систему, но еще не завершили регистрацию.</p><p><a href=\"{link}\">Завершить регистрацию и установить пароль</a></p>"
+      },
+      "new": {
+        "subject": "Приглашение в систему",
+        "html": "<h2>Приглашение в систему</h2><p>Здравствуйте!</p><p>Вы были приглашены присоединиться к нашей платформе.</p><p>Перейдите по ссылке ниже, чтобы задать пароль и активировать аккаунт (ссылка действительна 7 дней):</p><p><a href=\"{link}\">{link}</a></p>"
+      }
+    }
+  },
+  "workspaces": {
+    "not_found": "Рабочее пространство не найдено",
+    "already_member": "Пользователь уже является участником этого рабочего пространства",
+    "member_added": "Участник успешно добавлен с ролью {role}"
+  },
+  "utils": {
+    "errors": {
+      "unauthorized": "Не удалось подтвердить учетные данные",
+      "user_deactivated": "Пользователь деактивирован",
+      "auth_required_for_set": "Необходима авторизация для доступа к этому комплекту",
+      "set_not_found": "Комплект не найден",
+      "access_to_set_forbidden": "Доступ к комплекту запрещен",
+      "document_not_found": "Документ не найден",
+      "access_to_document_forbidden": "Доступ к документу запрещен",
+      "no_workspace_api_rights": "Нет прав на управление API-ключами этого воркспейса",
+      "invalid_token": "Некорректный токен",
+      "invalid_or_expired_token": "Неверный или истекший токен",
+      "user_not_found_or_deactivated": "Пользователь не найден или деактивирован",
+      "no_active_workspace": "У пользователя нет активного рабочего пространства",
+      "invalid_api_key": "Неверный API-ключ",
+      "api_key_expired": "Срок действия API-ключа истёк",
+      "ip_not_allowed": "IP-адрес не разрешён для этого ключа",
+      "auth_required_any": "Необходима авторизация. Передайте Bearer токен или заголовок X-API-Key",
+      "api_key_missing_scope": "API-ключ не имеет права '{scope}'"
+    },
+    "notifications": {
+      "task_assigned_title": "Новая задача: {task_name}",
+      "task_assigned_msg": "{initiator_name} назначил(а) вас исполнителем задачи.",
+      "task_status_changed_title": "Статус задачи изменен: {task_name}",
+      "task_status_changed_msg": "{actor_name} {action} задачу.",
+      "new_comment_title": "Новый комментарий от {author_name}",
+      "new_comment_msg": "Оставлен комментарий к комплекту документов.",
+      "doc_sent_title": "Документ отправлен: {doc_set_name}",
+      "doc_sent_msg": "{sender_name} отправил комплект документов на согласование.",
+      "formulation_updated_title": "Обновлена формулировка: {formulation_name}",
+      "formulation_updated_msg": "{actor_name} добавил(а) новую версию формулировки."
+    }
+  }
+}

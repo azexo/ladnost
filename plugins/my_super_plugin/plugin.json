@@ -1,0 +1,19 @@
+{
+  "name": "my_super_plugin",
+  "version": "1.0.0",
+  "enabled": false,
+  "backend": {
+    "module": "my_super_plugin.backend.main",
+    "router_attr": "router",
+    "prefix": "/api/v1/super"
+  },
+  "frontend": {
+    "pages": {
+      "/super": "pages/index.tsx"
+    },
+    "components": {
+      "cart-promo-widget": "index.tsx"
+    },
+    "logic": "logic.ts"
+  }
+}

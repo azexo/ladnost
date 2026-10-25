@@ -1,0 +1,453 @@
+specification:
+  name: "CLM Formula Service API"
+  version: "1.0"
+  description: "Спецификация форматов вызова функций для парсера формул CLM. Поддерживаются как русские, так и английские имена функций."
+  general_rules:
+    - "Формулы могут начинаться со знака '=' (он будет автоматически удален)."
+    - "Ключевое слово 'null' автоматически заменяется на пустую строку ''."
+    - "Русские булевы значения 'ИСТИНА' и 'ЛОЖЬ' автоматически конвертируются в 'TRUE' и 'FALSE'."
+    - "В дробных числах запятая автоматически заменяется на точку (например, 3,14 -> 3.14)."
+    - "Точка с запятой (;) как разделитель аргументов автоматически заменяется на запятую (,)."
+
+  categories:
+    - name: "1. Работа с ФИО и Текстом"
+      functions:
+        - ru_name: "СКЛОНЯТЬ_ФИО"
+          en_name: "DECLINE_FIO"
+          description: "Склоняет ФИО по падежам с использованием библиотеки petrovich."
+          parameters:
+            - name: "lastName"
+              type: "string"
+              required: true
+              description: "Фамилия."
+            - name: "firstName"
+              type: "string"
+              required: true
+              description: "Имя."
+            - name: "middleName"
+              type: "string"
+              required: false
+              description: "Отчество. Если не указано, определяется по полу и подставляется 'Иванович'/'Ивановна'."
+            - name: "caseName"
+              type: "string"
+              required: true
+              description: "Падеж. Допустимые значения: именительный, родительный, дательный, винительный, творительный, предложный (или сокращения: nom, gen, dat, acc, ins, prep)."
+          returns:
+            type: "string"
+            description: "Склоненное ФИО, разделенное пробелами."
+          example: "=СКЛОНЯТЬ_ФИО(\"Иванов\", \"Иван\", \"Иванович\", \"родительный\") -> \"Иванова Ивана Ивановича\""
+
+        - ru_name: "ПРОПИСН"
+          en_name: "PROPER_CASE"
+          description: "Делает первую букву каждого слова заглавной, остальные строчными (поддерживает кириллицу)."
+          parameters:
+            - name: "text"
+              type: "string"
+              required: true
+              description: "Исходный текст."
+          returns:
+            type: "string"
+            description: "Текст в формате Proper Case."
+
+        - ru_name: "МАСКИРОВАТЬ"
+          en_name: "MASK_DATA"
+          description: "Маскирует часть строки (например, для скрытия данных паспорта или карты)."
+          parameters:
+            - name: "text"
+              type: "string"
+              required: true
+              description: "Исходная строка."
+            - name: "startVisible"
+              type: "number"
+              required: false
+              description: "Количество видимых символов в начале. По умолчанию: 2."
+            - name: "endVisible"
+              type: "number"
+              required: false
+              description: "Количество видимых символов в конце. По умолчанию: 2."
+            - name: "maskChar"
+              type: "string"
+              required: false
+              description: "Символ маскировки. По умолчанию: '*'."
+          returns:
+            type: "string"
+            description: "Замаскированная строка."
+
+        - ru_name: "ИЗВЛЕЧЬ_ПО_ШАБЛОНУ"
+          en_name: "REGEX_EXTRACT"
+          description: "Извлекает подстроку из текста с помощью регулярного выражения."
+          parameters:
+            - name: "text"
+              type: "string"
+              required: true
+              description: "Исходный текст."
+            - name: "pattern"
+              type: "string"
+              required: true
+              description: "Регулярное выражение."
+            - name: "groupIndex"
+              type: "number"
+              required: false
+              description: "Индекс захватывающей группы. По умолчанию: 0 (весь матч)."
+          returns:
+            type: "string"
+            description: "Найденная подстрока или пустая строка."
+
+        - ru_name: "ПЕЧСИМВ"
+          en_name: "CLEAN"
+          description: "Удаляет непечатаемые символы из текста."
+          parameters:
+            - name: "text"
+              type: "string"
+              required: true
+              description: "Исходный текст."
+          returns:
+            type: "string"
+            description: "Очищенный текст."
+
+    - name: "2. Даты и Сроки (CLM Core)"
+      functions:
+        - ru_name: "ФОРМАТ_ДАТЫ"
+          en_name: "FORMAT_DATE"
+          description: "Форматирует дату в указанную строку формата (использует date-fns)."
+          parameters:
+            - name: "dateInput"
+              type: "date/string/number"
+              required: true
+              description: "Дата (объект Date, строка 'YYYY-MM-DD' или Excel-число)."
+            - name: "formatStr"
+              type: "string"
+              required: true
+              description: "Строка формата (например, 'dd.MM.yyyy', 'd MMMM yyyy')."
+          returns:
+            type: "string"
+            description: "Отформатированная дата."
+
+        - ru_name: "ДАТА_ПРОПИСЬЮ"
+          en_name: "DATE_IN_WORDS"
+          description: "Преобразует дату в строку прописью на русском языке."
+          parameters:
+            - name: "dateInput"
+              type: "date/string/number"
+              required: true
+              description: "Дата для преобразования."
+          returns:
+            type: "string"
+            description: "Дата прописью (например, 'первого января две тысячи двадцать третьего года')."
+
+        - ru_name: "ДОБАВИТЬ_ДНИ"
+          en_name: "ADD_DAYS"
+          description: "Добавляет указанное количество дней к дате."
+          parameters:
+            - name: "dateInput"
+              type: "date/string/number"
+              required: true
+              description: "Исходная дата."
+            - name: "days"
+              type: "number"
+              required: true
+              description: "Количество дней для добавления (может быть отрицательным)."
+          returns:
+            type: "string"
+            description: "Новая дата в формате 'YYYY-MM-DD'."
+
+        - ru_name: "ДОБАВИТЬ_МЕСЯЦЫ"
+          en_name: "ADD_MONTHS"
+          description: "Добавляет указанное количество месяцев к дате."
+          parameters:
+            - name: "dateInput"
+              type: "date/string/number"
+              required: true
+              description: "Исходная дата."
+            - name: "months"
+              type: "number"
+              required: true
+              description: "Количество месяцев."
+          returns:
+            type: "string"
+            description: "Новая дата в формате 'YYYY-MM-DD'."
+
+        - ru_name: "РАЗНДАТ"
+          en_name: "DATE_DIFF"
+          description: "Вычисляет разницу между двумя датами."
+          parameters:
+            - name: "startDateInput"
+              type: "date/string/number"
+              required: true
+              description: "Дата начала."
+            - name: "endDateInput"
+              type: "date/string/number"
+              required: true
+              description: "Дата окончания."
+            - name: "unit"
+              type: "string"
+              required: false
+              description: "Единица измерения: 'days'/'дни'/'д', 'months'/'месяцы'/'м', 'years'/'годы'/'г'. По умолчанию: 'days'."
+          returns:
+            type: "number"
+            description: "Абсолютное значение разницы (всегда положительное)."
+
+        - ru_name: "РАБ_ДНИ"
+          en_name: "WORK_DAYS"
+          description: "Считает количество рабочих дней между двумя датами (исключая السبت и воскресенье)."
+          parameters:
+            - name: "startDateInput"
+              type: "date/string/number"
+              required: true
+              description: "Дата начала."
+            - name: "endDateInput"
+              type: "date/string/number"
+              required: true
+              description: "Дата окончания."
+          returns:
+            type: "number"
+            description: "Количество рабочих дней."
+
+        - ru_name: "СЛЕД_РАБ_ДЕНЬ"
+          en_name: "NEXT_WORKDAY"
+          description: "Находит следующий рабочий день после указанной даты."
+          parameters:
+            - name: "dateInput"
+              type: "date/string/number"
+              required: true
+              description: "Исходная дата."
+          returns:
+            type: "string"
+            description: "Дата следующего рабочего дня в формате 'YYYY-MM-DD'."
+
+        - ru_name: "ПРЕД_РАБ_ДЕНЬ"
+          en_name: "PREV_WORKDAY"
+          description: "Находит предыдущий рабочий день перед указанной датой."
+          parameters:
+            - name: "dateInput"
+              type: "date/string/number"
+              required: true
+              description: "Исходная дата."
+          returns:
+            type: "string"
+            description: "Дата предыдущего рабочего дня в формате 'YYYY-MM-DD'."
+
+    - name: "3. Финансы, Бухгалтерия и Ответственность"
+      functions:
+        - ru_name: "ФОРМАТ_ВАЛЮТЫ"
+          en_name: "FORMAT_CURRENCY"
+          description: "Форматирует число как валюту с учетом локали ru-RU."
+          parameters:
+            - name: "amount"
+              type: "number"
+              required: true
+              description: "Числовая сумма."
+            - name: "currency"
+              type: "string"
+              required: false
+              description: "Код валюты (ISO 4217). По умолчанию: 'RUB'."
+          returns:
+            type: "string"
+            description: "Отформатированная строка (например, '1 234,56 ₽')."
+
+        - ru_name: "ВЫДЕЛИТЬ_НДС"
+          en_name: "EXTRACT_VAT"
+          description: "Выделяет сумму НДС из суммы, уже включающей НДС."
+          parameters:
+            - name: "amount"
+              type: "number"
+              required: true
+              description: "Сумма с НДС (брутто)."
+            - name: "rate"
+              type: "number"
+              required: true
+              description: "Ставка НДС в процентах (например, 20)."
+          returns:
+            type: "number"
+            description: "Сумма выделенного НДС."
+
+        - ru_name: "НАЧИСЛИТЬ_НДС"
+          en_name: "ADD_VAT"
+          description: "Рассчитывает сумму НДС для суммы без НДС."
+          parameters:
+            - name: "amount"
+              type: "number"
+              required: true
+              description: "Сумма без НДС (нетто)."
+            - name: "rate"
+              type: "number"
+              required: true
+              description: "Ставка НДС в процентах (например, 20)."
+          returns:
+            type: "number"
+            description: "Сумма начисленного НДС."
+
+        - ru_name: "СУММА_С_НДС"
+          en_name: "TOTAL_WITH_VAT"
+          description: "Рассчитывает общую сумму с учетом НДС."
+          parameters:
+            - name: "amount"
+              type: "number"
+              required: true
+              description: "Сумма без НДС (нетто)."
+            - name: "rate"
+              type: "number"
+              required: true
+              description: "Ставка НДС в процентах (например, 20)."
+          returns:
+            type: "number"
+            description: "Итоговая сумма с НДС (брутто)."
+
+        - ru_name: "РАССЧИТАТЬ_ПЕНЮ"
+          en_name: "CALCULATE_PENALTY"
+          description: "Рассчитывает пеню за просрочку платежа."
+          parameters:
+            - name: "amount"
+              type: "number"
+              required: true
+              description: "Сумма долга."
+            - name: "days"
+              type: "number"
+              required: true
+              description: "Количество дней просрочки."
+            - name: "ratePerDay"
+              type: "number"
+              required: true
+              description: "Ставка пени в процентах за день (например, 0.1 для 0.1%)."
+          returns:
+            type: "number"
+            description: "Рассчитанная сумма пени."
+
+        - ru_name: "СУММА_ПРОПИСЬЮ"
+          en_name: "SUM_IN_WORDS"
+          description: "Преобразует число в строку прописью с указанием валюты."
+          parameters:
+            - name: "amount"
+              type: "number"
+              required: true
+              description: "Числовая сумма."
+            - name: "currency"
+              type: "string"
+              required: false
+              description: "Валюта ('rub', 'usd', 'eur'). По умолчанию: 'rub'."
+          returns:
+            type: "string"
+            description: "Сумма прописью (например, 'одна тысяча рублей 00 копеек')."
+
+    - name: "4. Логика и Проверка Данных"
+      functions:
+        - ru_name: "ПУСТО"
+          en_name: "IS_EMPTY"
+          description: "Проверяет, является ли значение пустым, null или строкой 'null'."
+          parameters:
+            - name: "value"
+              type: "any"
+              required: true
+              description: "Проверяемое значение."
+          returns:
+            type: "boolean"
+            description: "TRUE если значение пустое, иначе FALSE."
+
+        - ru_name: "ЕСЛИ_ПУСТО"
+          en_name: "COALESCE"
+          description: "Возвращает первое непустое значение из списка аргументов (аналог COALESCE в SQL)."
+          parameters:
+            - name: "values"
+              type: "any[]"
+              required: true
+              description: "Список значений для проверки."
+          returns:
+            type: "any"
+            description: "Первое найденное непустое значение или пустая строка."
+
+    - name: "5. Базовые стандартные функции (Excel-like)"
+      description: "Стандартные математические, текстовые и логические функции, поддерживаемые hot-formula-parser. Доступны как на русском, так и на английском."
+      functions:
+        - ru_name: "СУММ"
+          en_name: "SUM"
+          description: "Суммирует числа."
+        - ru_name: "ЕСЛИ"
+          en_name: "IF"
+          description: "Логическая проверка условия."
+        - ru_name: "ЕСЛИОШИБКА"
+          en_name: "IFERROR"
+          description: "Возвращает альтернативное значение, если формула вызывает ошибку."
+        - ru_name: "ДЛСТР"
+          en_name: "LEN"
+          description: "Возвращает длину строки."
+        - ru_name: "ПСТР"
+          en_name: "MID"
+          description: "Извлекает подстроку из середины строки."
+        - ru_name: "ЛЕВСИМВ"
+          en_name: "LEFT"
+          description: "Извлекает символы слева."
+        - ru_name: "ПРАВСИМВ"
+          en_name: "RIGHT"
+          description: "Извлекает символы справа."
+        - ru_name: "НАЙТИ"
+          en_name: "FIND"
+          description: "Поиск подстроки (с учетом регистра)."
+        - ru_name: "ПОИСК"
+          en_name: "SEARCH"
+          description: "Поиск подстроки (без учета регистра)."
+        - ru_name: "СЖПРОБЕЛЫ"
+          en_name: "TRIM"
+          description: "Удаляет лишние пробелы."
+        - ru_name: "ПОДСТАВИТЬ"
+          en_name: "SUBSTITUTE"
+          description: "Заменяет текст в строке."
+        - ru_name: "СЦЕПИТЬ"
+          en_name: "CONCATENATE"
+          description: "Объединяет несколько строк."
+        - ru_name: "ОБЪЕДИНИТЬ"
+          en_name: "TEXTJOIN"
+          description: "Объединяет текст с разделителем."
+        - ru_name: "ТЕКСТ"
+          en_name: "TEXT"
+          description: "Форматирует число в текст."
+        - ru_name: "ЗНАЧЕН"
+          en_name: "VALUE"
+          description: "Преобразует текстовую строку с числом в число."
+        - ru_name: "ДАТА"
+          en_name: "DATE"
+          description: "Возвращает дату по году, месяцу и дню."
+        - ru_name: "ГОД"
+          en_name: "YEAR"
+          description: "Извлекает год из даты."
+        - ru_name: "МЕСЯЦ"
+          en_name: "MONTH"
+          description: "Извлекает месяц из даты."
+        - ru_name: "ДЕНЬ"
+          en_name: "DAY"
+          description: "Извлекает день из даты."
+        - ru_name: "СЕГОДНЯ"
+          en_name: "TODAY"
+          description: "Возвращает текущую дату."
+        - ru_name: "ТДАТА"
+          en_name: "NOW"
+          description: "Возвращает текущие дату и время."
+        - ru_name: "МАКС"
+          en_name: "MAX"
+          description: "Возвращает максимальное значение."
+        - ru_name: "МИН"
+          en_name: "MIN"
+          description: "Возвращает минимальное значение."
+        - ru_name: "СРЗНАЧ"
+          en_name: "AVERAGE"
+          description: "Возвращает среднее арифметическое."
+        - ru_name: "ОКРУГЛ"
+          en_name: "ROUND"
+          description: "Округляет число до указанного количества разрядов."
+        - ru_name: "ОКРУГЛВВЕРХ"
+          en_name: "ROUNDUP"
+          description: "Округляет число в большую сторону."
+        - ru_name: "ОКРУГЛВНИЗ"
+          en_name: "ROUNDDOWN"
+          description: "Округляет число в меньшую сторону."
+        - ru_name: "ЦЕЛОЕ"
+          en_name: "INT"
+          description: "Округляет число до ближайшего меньшего целого."
+        - ru_name: "И"
+          en_name: "AND"
+          description: "Логическое И."
+        - ru_name: "ИЛИ"
+          en_name: "OR"
+          description: "Логическое ИЛИ."
+        - ru_name: "НЕ"
+          en_name: "NOT"
+          description: "Логическое отрицание."
