@@ -25,6 +25,7 @@ from routers import (
     api_keys,
     integrations,
     mcp,
+    obligations,
 )
 import mcp_tools
 
@@ -77,6 +78,7 @@ app.include_router(api_keys.router, prefix="/api/v1/workspaces", tags=["API Keys
 app.include_router(workspaces.router, prefix="/api/v1/workspaces", tags=["Workspaces"])
 app.include_router(billing.router, prefix="/api/v1/billing", tags=["Billing"])
 app.include_router(webhooks.router, prefix="/api/v1/webhooks", tags=["Webhooks"])
+app.include_router(obligations.router, prefix="/api/v1", tags=["Obligations (AI)"])
 
 app.include_router(integrations.router, prefix="/api/v1/integrations", tags=["Integrations"])
 app.include_router(mcp.router, prefix="/api/v1/mcp", tags=["Integrations"])

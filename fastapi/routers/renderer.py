@@ -421,6 +421,81 @@ def recalculate_legal_numbers(node: Dict[str, Any], counters: List[int], number_
             recalculate_legal_numbers(child, counters, number_map)
 
 # ==========================================
+# 3.6 ПОСТРОЕНИЕ КАРТЫ UUID -> НОМЕР ПУНКТА
+# ==========================================
+def build_legal_point_map(content_json: Optional[Dict[str, Any]]) -> Dict[str, str]:
+    """
+    Строит карту соответствия UUID блоков номерам пунктов (legalPoint), которые внутри них находятся.
+    Возвращает словарь {uuid_блока: "номер_пункта"}.
+    
+    Источник истины: LegalPointsExtension.tsx
+    legalPoint - это инлайн-нода (inline: true, atom: true), которая находится внутри блока (paragraph).
+    "Принадлежащий пункту текст" - это текст блока, содержащего legalPoint.
+    """
+    if not content_json or not isinstance(content_json, dict):
+        return {}
+    
+    legal_numbers = {}  # uuid legalPoint -> номер
+    parent_map = {}     # blockUuid блока -> номер legalPoint внутри него
+    
+    # 1. Пересчитываем номера пунктов (аналог LegalNumberingPlugin)
+    counters = [0] * 20
+    
+    def calc_numbers(node):
+        if not isinstance(node, dict):
+            return
+        node_type = node.get("type")
+        attrs = node.get("attrs", {})
+        
+        if node_type == "legalPoint":
+            is_visible = attrs.get("isVisible", True)
+            level = attrs.get("level", 1) - 1
+            if is_visible and 0 <= level < len(counters):
+                counters[level] += 1
+                for i in range(level + 1, len(counters)):
+                    counters[i] = 0
+                num_str = ".".join(str(c) for c in counters[:level + 1])
+                
+                lp_uuid = attrs.get("uuid") 
+                if lp_uuid:
+                    legal_numbers[lp_uuid] = num_str
+                    
+        if "content" in node and isinstance(node["content"], list):
+            for child in node["content"]:
+                calc_numbers(child)
+    
+    calc_numbers(content_json)
+    
+    # 2. Сопоставляем блоки с legalPoint внутри них
+    # Согласно recalculatePointsVisibility на фронте, пункту принадлежит блок, 
+    # в котором находится legalPoint (ближайший блок-предок).
+    block_types = {"paragraph", "heading", "listItem", "blockquote", "tableCell", "tableHeader"}
+    
+    def map_blocks(node, current_block_uuid=None):
+        if not isinstance(node, dict):
+            return
+        node_type = node.get("type")
+        attrs = node.get("attrs", {})
+        
+        # Если это блок, запоминаем его UUID как текущий
+        if node_type in block_types:
+            current_block_uuid = attrs.get("blockUuid")
+            
+        # Если это legalPoint, мапим UUID текущего блока на номер пункта
+        if node_type == "legalPoint":
+            lp_uuid = attrs.get("uuid")
+            if lp_uuid and lp_uuid in legal_numbers and current_block_uuid:
+                parent_map[current_block_uuid] = legal_numbers[lp_uuid]
+                
+        # Рекурсивно обходим дочерние элементы
+        if "content" in node and isinstance(node["content"], list):
+            for child in node["content"]:
+                map_blocks(child, current_block_uuid)
+    
+    map_blocks(content_json)
+    return parent_map
+
+# ==========================================
 # 4. ГЕНЕРАЦИЯ HTML ИЗ JSON
 # ==========================================
 def json_to_html(node: Dict[str, Any]) -> str:

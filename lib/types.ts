@@ -60,7 +60,16 @@ export interface DocumentSet {
     created_at: string; 
     updated_at: string; 
 }
-export interface Document { id: number; document_set_id: number; name: string; document_role: DocumentRole; sort_order: number; created_at: string; updated_at: string; }
+export interface Document { 
+    id: number; 
+    document_set_id: number; 
+    name: string; 
+    document_role: DocumentRole; 
+    sort_order: number; 
+    current_version_number?: number; // ✅ ДОБАВЛЕНО: Номер текущей версии
+    created_at: string; 
+    updated_at: string; 
+}
 export interface DocumentVersion { id: number; document_id: number; version_number: number; content_html?: string; content_json: any; plain_text_cache?: string; file_path?: string; file_size?: number; author_id: number; change_reason?: string; is_current: boolean; created_at: string; }
 export interface DocumentBlock { id: number; document_version_id: number; block_uuid: string; block_type: BlockType; block_path: string; parent_block_uuid?: string; sort_order: number; }
 export interface DocumentAnchor { id: number; document_version_id: number; block_uuid: string; anchor_uuid: string; anchor_type: AnchorType; text_content: string; char_offset: number; char_length: number; }
@@ -85,7 +94,8 @@ export interface ApprovalStage { id: number; task_id: number; stage_number: numb
 export interface TaskAttachment { id: number; task_id: number; document_version_id: number; attached_by: number; created_at: string; }
 export interface TaskHistory { id: number; task_id: number; root_task_id: number; user_id: number; action: HistoryAction; comment?: string; created_at: string; }
 export interface ReviewEdit { id: number; document_version_id: number; task_id?: number; edit_type: EditType; old_text?: string; new_text?: string; block_uuid: string; anchor_from_uuid?: string; anchor_to_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; is_orphan: boolean; orphan_reason?: OrphanReason; author_id: number; resolution_status: ResolutionStatus; resolved_by?: number; resolved_at?: string; created_at: string; }
-export interface Comment { id: number; document_version_id: number; task_id?: number; parent_comment_id?: number | null; block_uuid: string; anchor_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; is_orphan: boolean; orphan_resolved_at?: string; text_content: string; author_id: number; is_resolved: boolean; resolved_by?: number; resolved_at?: string; created_at: string; updated_at: string; }
+export interface Comment { id: number; document_version_id: number; task_id?: number; parent_comment_id?: number | null; block_uuid: string; anchor_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; is_orphan: boolean; orphan_resolved_at?: string; text_content: string; author_id: number; is_resolved: boolean; resolved_by?: number; resolved_at?: string; created_at: string; updated_at: string; legal_point: string;}
+
 export interface DocumentSetAccess { id: number; document_set_id: number; user_id: number; access_type: AccessType; expires_at?: string; granted_by: number; created_at: string; }
 export interface Notification { id: number; user_id: number; type: NotificationType; title: string; message?: string; related_entity_type?: RelatedEntityType; related_entity_id?: number; is_read: boolean; created_at: string; }
 
@@ -368,4 +378,17 @@ export interface ContactFormPayload {
     email: string;
     phone?: string;
     message: string;
+}
+
+export interface SyncedReviewEdit {
+    edit_uuid: string;
+    edit_uuids: string[];
+    batch_id: string;
+    edit_type: string; // 'ADD' | 'DELETE' | 'REPLACEMENT'
+    old_text: string;
+    new_text: string;
+    author_id: number | null;
+    resolution_status: string; // 'PENDING' | 'ACCEPTED' | 'REJECTED'
+    legal_point: string;
+    created_at: string | null;
 }

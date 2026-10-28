@@ -6,7 +6,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Tuple, Optional, List, Any, Dict
 from datetime import datetime, timedelta
 import os
@@ -23,6 +23,7 @@ from models import (
 )
 from utils import get_current_active_user
 from utils import verify_document_set_access, verify_document_access
+from .renderer import build_legal_point_map
 
 # Импортируем функцию перевода из вашего модуля i18n
 from core.i18n import t
@@ -32,6 +33,40 @@ router = APIRouter()
 # ==========================================
 # Pydantic Schemas
 # ==========================================
+
+class CommentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    document_version_id: int
+    task_id: Optional[int] = None
+    parent_comment_id: Optional[int] = None
+    block_uuid: str
+    anchor_uuid: Optional[str] = None
+    char_offset_in_block: Optional[int] = None
+    char_length_in_block: Optional[int] = None
+    is_orphan: bool
+    orphan_resolved_at: Optional[datetime] = None
+    text_content: str
+    author_id: int
+    is_resolved: bool
+    resolved_by: Optional[int] = None
+    resolved_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    legal_point: Optional[str] = None
+
+
+class DocumentWithVersionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    document_set_id: int
+    name: str
+    document_role: DocumentRole
+    sort_order: int
+    current_version_number: Optional[int] = None # ✅ Номер текущей версии
+    created_at: datetime
+    updated_at: datetime
+
 class DocumentPayload(BaseModel):
     name: str
     document_role: Optional[DocumentRole] = DocumentRole.MAIN
@@ -74,13 +109,36 @@ class ResolveCommentPayload(BaseModel):
 # Endpoints
 # ==========================================
 
-@router.get("/sets/{set_id}/documents", summary="Получить документы комплекта")
+@router.get("/sets/{set_id}/documents", response_model=List[DocumentWithVersionOut], summary="Получить документы комплекта")
 def list_by_set(
     set_id: int,
     access_data: Tuple[DocumentSet, Optional[User]] = Depends(verify_document_set_access),
     db: Session = Depends(get_db)
 ):
+    # 1. Получаем все документы комплекта
     docs = db.query(Document).filter(Document.document_set_id == set_id).order_by(Document.sort_order).all()
+    
+    if not docs:
+        return []
+        
+    doc_ids = [d.id for d in docs]
+    
+    # 2. ОДНИМ запросом получаем номера текущих версий для всех документов
+    current_versions = db.query(
+        DocumentVersion.document_id, 
+        DocumentVersion.version_number
+    ).filter(
+        DocumentVersion.document_id.in_(doc_ids),
+        DocumentVersion.is_current == True
+    ).all()
+    
+    # Создаем словарь для быстрого маппинга: {document_id: version_number}
+    ver_map = {v[0]: v[1] for v in current_versions}
+    
+    # 3. Добавляем временное поле к ORM-объектам, чтобы Pydantic мог его прочитать
+    for doc in docs:
+        doc.current_version_number = ver_map.get(doc.id)
+        
     return docs
 
 @router.post("/sets/{set_id}/documents", summary="Создать документ в комплекте")
@@ -351,21 +409,53 @@ async def upload_source_file(
     
     return {"status": "success", "file_path": file_path, "file_size": file_size}
 
-@router.get("/{document_id}/comments", summary="Получить комментарии текущей версии")
+@router.get("/{document_id}/comments", response_model=List[CommentOut], summary="Получить комментарии текущей версии")
 def get_comments(
     document_id: int,
     access_data: Tuple[Document, DocumentSet, Optional[User]] = Depends(verify_document_access),
     db: Session = Depends(get_db)
 ):
+    # 1. Получаем текущую версию документа
     current_ver = db.query(DocumentVersion).filter(
         DocumentVersion.document_id == document_id,
         DocumentVersion.is_current == True
     ).first()
-    
-    if not current_ver:
+    if not current_ver or not current_ver.content_json:
         return []
-        
-    return db.query(Comment).filter(Comment.document_version_id == current_ver.id).all()
+
+    # 2. Строим карту block_uuid -> legal_point (как в get_review_edits)
+    legal_point_map = build_legal_point_map(current_ver.content_json)
+
+    # 3. Получаем все комментарии текущей версии
+    comments = db.query(Comment).filter(
+        Comment.document_version_id == current_ver.id
+    ).all()
+
+    # 4. Обогащаем каждый комментарий legal_point из его блока
+    result = []
+    for c in comments:
+        result.append(CommentOut(
+            id=c.id,
+            document_version_id=c.document_version_id,
+            task_id=c.task_id,
+            parent_comment_id=c.parent_comment_id,
+            block_uuid=c.block_uuid,
+            anchor_uuid=c.anchor_uuid,
+            char_offset_in_block=c.char_offset_in_block,
+            char_length_in_block=c.char_length_in_block,
+            is_orphan=c.is_orphan,
+            orphan_resolved_at=c.orphan_resolved_at,
+            text_content=c.text_content,
+            author_id=c.author_id,
+            is_resolved=c.is_resolved,
+            resolved_by=c.resolved_by,
+            resolved_at=c.resolved_at,
+            created_at=c.created_at,
+            updated_at=c.updated_at,
+            legal_point=legal_point_map.get(c.block_uuid) if c.block_uuid else None,
+        ))
+
+    return result
 
 @router.post("/{document_id}/comments", summary="Добавить комментарий")
 def add_comment(
@@ -401,7 +491,6 @@ def add_comment(
     db.refresh(new_comment)
     return new_comment
 
-# 🛠️ ИСПРАВЛЕНО: Используем ResolveCommentPayload для приема JSON Body
 @router.put("/comments/{comment_id}/resolve", summary="Отметить комментарий как решенный")
 def resolve_comment(
     comment_id: int,
@@ -496,3 +585,105 @@ def download_set_archive(
         media_type="application/x-zip-compressed",
         headers={"Content-Disposition": f"attachment; filename={doc_set.name}.zip"}
     )
+
+@router.get("/{document_id}/review-edits", summary="Получить правки (Review Edits) текущей версии из JSON")
+def get_review_edits(
+    document_id: int,
+    access_data: Tuple[Document, DocumentSet, Optional[User]] = Depends(verify_document_access),
+    db: Session = Depends(get_db)
+):
+    # 1. Получаем текущую версию документа
+    current_ver = db.query(DocumentVersion).filter(
+        DocumentVersion.document_id == document_id,
+        DocumentVersion.is_current == True
+    ).first()
+    
+    if not current_ver or not current_ver.content_json:
+        return []
+
+    legal_point_map = build_legal_point_map(current_ver.content_json)
+        
+    edits_map = {}
+    
+    # 2. Рекурсивная функция для обхода Tiptap JSON 
+    # Добавляем аргумент current_block_uuid, чтобы передавать ID блока вниз по дереву
+    def traverse_node(node: Dict[str, Any], current_block_uuid: Optional[str] = None):
+        if not isinstance(node, dict):
+            return
+        
+        node_attrs = node.get("attrs", {})
+        block_uuid = node_attrs.get("blockUuid") or current_block_uuid
+        
+        marks = node.get("marks", [])
+        node_text = node.get("text", "")
+        
+        for mark in marks:
+            mark_type = mark.get("type")
+            if mark_type in ("trackAdd", "trackDelete"):
+                attrs = mark.get("attrs", {})
+                edit_uuid = attrs.get("editUuid")
+                batch_id = attrs.get("batchId") or edit_uuid 
+                author_id = attrs.get("authorId")
+                
+                if not edit_uuid:
+                    continue
+                    
+                if batch_id not in edits_map:
+                    edits_map[batch_id] = {
+                        "old_text": "",
+                        "new_text": "",
+                        "author_id": author_id,
+                        "edit_uuids": [],
+                        "block_uuid": block_uuid  # ✅ СОХРАНЯЕМ block_uuid в группу
+                    }
+                
+                edit_data = edits_map[batch_id]
+                
+                if edit_uuid not in edit_data["edit_uuids"]:
+                    edit_data["edit_uuids"].append(edit_uuid)
+                
+                if author_id and not edit_data["author_id"]:
+                    edit_data["author_id"] = author_id
+                    
+                if mark_type == "trackAdd":
+                    edit_data["new_text"] += node_text
+                elif mark_type == "trackDelete":
+                    edit_data["old_text"] += node_text
+                    
+        # Рекурсивный обход дочерних элементов
+        content = node.get("content", [])
+        if isinstance(content, list):
+            for child in content:
+                # ✅ Передаем вычисленный block_uuid в дочерние узлы
+                traverse_node(child, block_uuid) 
+                
+    # Запускаем обход
+    traverse_node(current_ver.content_json)
+    
+    # 3. Формируем итоговый список
+    result = []
+    for batch_id, data in edits_map.items():
+        edit_type = "REPLACEMENT"
+        if data["new_text"] and not data["old_text"]:
+            edit_type = "ADD"
+        elif data["old_text"] and not data["new_text"]:
+            edit_type = "DELETE"
+
+        # ✅ Используем .get() для безопасности, если вдруг блок не имел id
+        block_uuid = data.get("block_uuid")
+        legal_point = legal_point_map.get(block_uuid) if block_uuid else None
+            
+        result.append({
+            "edit_uuid": data["edit_uuids"][0] if data["edit_uuids"] else f"batch_{batch_id}",
+            "edit_uuids": data["edit_uuids"],
+            "batch_id": batch_id,
+            "edit_type": edit_type,
+            "old_text": data["old_text"],
+            "new_text": data["new_text"],
+            "author_id": data["author_id"],
+            "resolution_status": "PENDING",
+            "legal_point": legal_point,
+            "created_at": current_ver.created_at.isoformat() if current_ver.created_at else None
+        })
+        
+    return result

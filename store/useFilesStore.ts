@@ -66,7 +66,7 @@ interface FilesState {
   clearSelection: () => void;
   batchAction: (action: 'trash' | 'move' | 'favorite', targetFolderId?: number | null, customItems?: SelectedItem[]) => Promise<void>;
   getUserById: (id: number) => User | undefined;
-  uploadAndCreateNonStandardSet: (file: File, modalRef?: ConversionModalRefLike) => Promise<void>;
+  uploadAndCreateNonStandardSet: (file: File, modalRef?: ConversionModalRefLike) => Promise<number | null>;
   
   contextMenu: ContextMenuState | null;
   renameModal: RenameModalState | null;
@@ -167,98 +167,110 @@ export const useFilesStore = create<FilesState>((set, get) => ({
     }
   },
 
-  uploadAndCreateNonStandardSet: async (file: File, modalRef?: ConversionModalRefLike) => {
+  uploadAndCreateNonStandardSet: async (file: File, modalRef?: ConversionModalRefLike): Promise<number | null> => {
     const fileName = file.name.replace(/\.[^/.]+$/, '');
     set({ isLoading: true });
-    
     modalRef?.current?.start(fileName);
-    
+
     const formData = new FormData();
     formData.append('file', file);
-    
-    const xhr = new XMLHttpRequest();
-    
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentComplete = Math.round((event.loaded / event.total) * 100);
-        modalRef?.current?.updateProgress(percentComplete);
-      }
-    };
-    
-    const timeoutId = setTimeout(() => {
-      xhr.abort();
-    }, 300_000);
-    
-    xhr.onload = async () => {
-      clearTimeout(timeoutId);
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          if (!data.markdown) {
-            throw new Error(getT()('files.errors.noMarkdown'));
-          }
-          
-          const { json: contentJson, html: contentHtml } = parseMarkdownToTiptap(data.markdown);
-          
-          const newSet = await documentSetsApi.create({
-            name: fileName,
-            folder_id: get().currentFolderId ?? undefined,
-            mode: 'non_standard' as any
-          });
-          
-          const newDoc = await documentsApi.create(newSet.id, { 
-            name: fileName, 
-            document_role: 'main' as any 
-          });
-          
-          await documentsApi.updateContent(newDoc.id, contentJson, contentHtml);
-          await documentsApi.uploadSourceFile(newDoc.id, file);
-          
-          await get().fetchData();
-          
-          if (data.warnings && data.warnings.length > 0) {
-            console.warn('[UPLOAD WARNINGS]', data.warnings);
-            modalRef?.current?.finish(getT()('files.notifications.uploadedWithWarnings', { warnings: data.warnings.join('\n') }));
-          } else {
-            modalRef?.current?.finish();
-          }
-          
-          get().showNotification(getT()('files.notifications.setCreated', { name: fileName }));
-        } catch (error: any) {
-          console.error('Ошибка при обработке результата:', error);
-          modalRef?.current?.finish(error.message || getT()('files.errors.conversionError'));
-          get().showNotification(error.message || getT()('files.notifications.fileUploadError'));
+
+    // 🔑 Оборачиваем XHR в Promise
+    return new Promise<number | null>((resolve) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          modalRef?.current?.updateProgress(percentComplete);
         }
-      } else {
-        let msg = getT()('files.errors.serverError', { status: xhr.status });
-        try {
-          const errData = JSON.parse(xhr.responseText);
-          if (errData.error) msg = errData.error;
-        } catch (e) {}
+      };
+
+      const timeoutId = setTimeout(() => {
+        xhr.abort();
+      }, 300_000);
+
+      xhr.onload = async () => {
+        clearTimeout(timeoutId);
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (!data.markdown) {
+              throw new Error(getT()('files.errors.noMarkdown'));
+            }
+
+            const { json: contentJson, html: contentHtml } = parseMarkdownToTiptap(data.markdown);
+
+            const newSet = await documentSetsApi.create({
+              name: fileName,
+              folder_id: get().currentFolderId ?? undefined,
+              mode: 'non_standard' as any,
+            });
+
+            const newDoc = await documentsApi.create(newSet.id, {
+              name: fileName,
+              document_role: 'main' as any,
+            });
+
+            await documentsApi.updateContent(newDoc.id, contentJson, contentHtml);
+            await documentsApi.uploadSourceFile(newDoc.id, file);
+            await get().fetchData();
+
+            if (data.warnings && data.warnings.length > 0) {
+              console.warn('[UPLOAD WARNINGS]', data.warnings);
+              modalRef?.current?.finish(
+                getT()('files.notifications.uploadedWithWarnings', { warnings: data.warnings.join('\n') })
+              );
+            } else {
+              modalRef?.current?.finish();
+            }
+
+            get().showNotification(getT()('files.notifications.setCreated', { name: fileName }));
+
+            // 🔑 Возвращаем ID созданного набора
+            resolve(newSet.id);
+          } catch (error: any) {
+            console.error('Ошибка при обработке результата:', error);
+            modalRef?.current?.finish(error.message || getT()('files.errors.conversionError'));
+            get().showNotification(error.message || getT()('files.notifications.fileUploadError'));
+            resolve(null);
+          }
+        } else {
+          let msg = getT()('files.errors.serverError', { status: xhr.status });
+          try {
+            const errData = JSON.parse(xhr.responseText);
+            if (errData.error) msg = errData.error;
+          } catch (e) {}
+          modalRef?.current?.finish(msg);
+          get().showNotification(msg);
+          resolve(null);
+        }
+
+        set({ isLoading: false });
+      };
+
+      xhr.onerror = () => {
+        clearTimeout(timeoutId);
+        const msg = getT()('files.errors.networkError');
         modalRef?.current?.finish(msg);
         get().showNotification(msg);
-      }
-      set({ isLoading: false });
-    };
-    
-    xhr.onerror = () => {
-      clearTimeout(timeoutId);
-      const msg = getT()('files.errors.networkError');
-      modalRef?.current?.finish(msg);
-      get().showNotification(msg);
-      set({ isLoading: false });
-    };
-    
-    xhr.onabort = () => {
-      clearTimeout(timeoutId);
-      const msg = getT()('files.errors.timeoutError');
-      modalRef?.current?.finish(msg);
-      get().showNotification(msg);
-      set({ isLoading: false });
-    };
-    
-    xhr.open('POST', '/backend/to-md', true);
-    xhr.send(formData);
+        set({ isLoading: false });
+        resolve(null);
+      };
+
+      xhr.onabort = () => {
+        clearTimeout(timeoutId);
+        const msg = getT()('files.errors.timeoutError');
+        modalRef?.current?.finish(msg);
+        get().showNotification(msg);
+        set({ isLoading: false });
+        resolve(null);
+      };
+
+      xhr.open('POST', '/backend/to-md', true);
+      xhr.send(formData);
+    });
   },
 
   setView: (view) => {

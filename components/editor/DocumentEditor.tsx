@@ -128,7 +128,9 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
     const [renameValue, setRenameValue] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [newDocName, setNewDocName] = useState('');
-    
+    const [isDownloadingDocx, setIsDownloadingDocx] = useState(false);
+    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
     const docSetMode = useStore((s: any) => s.documentPackage.documentSetMode);
     const showFormatting = (mode === 'markup' || mode === 'edit') && docSetMode !== 'standard' && docSetMode !== 'file';
     const currentUserAccess = useStore((s: any) => s.documentPackage.currentUserAccess); 
@@ -293,7 +295,9 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
     };
 
     const handleDownloadDocx = async () => {
-      if (!editor) return;
+      if (!editor || isDownloadingDocx) return;
+      setIsDownloadingDocx(true); 
+
       const state = useStore.getState();
       state.data.syncFormulationSlots();
       extractUsedIdentifiers(editor);
@@ -313,11 +317,14 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
         a.href = url; a.download = `${fileName}.docx`;
         document.body.appendChild(a); a.click(); a.remove();
         window.URL.revokeObjectURL(url);
-      } catch (error) { console.error('Ошибка при конвертации в DOCX:', error); }
+      } catch (error) { console.error('Ошибка при конвертации в DOCX:', error); } finally {
+        setIsDownloadingDocx(false);
+      }
     };
 
     const handleDownloadPdf = async () => {
-      if (!editor) return;
+      if (!editor || isDownloadingPdf) return;
+      setIsDownloadingPdf(true);
       const state = useStore.getState();
       state.data.syncFormulationSlots();
       extractUsedIdentifiers(editor);
@@ -337,7 +344,9 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
         a.href = url; a.download = `${fileName}.pdf`;
         document.body.appendChild(a); a.click(); a.remove();
         window.URL.revokeObjectURL(url);
-      } catch (error) { console.error('Ошибка при конвертации в PDF:', error); }
+      } catch (error) { console.error('Ошибка при конвертации в PDF:', error); } finally {
+        setIsDownloadingPdf(false);
+      }
     };
 
     const editor = useEditor({
@@ -802,11 +811,30 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
                 </button>
               )}
               <input type="file" ref={fileInputRef} accept=".docx,.pdf,.rtf" className="hidden" onChange={handleUploadDocument} />
-              <button title={t('downloadDocx')} onClick={handleDownloadDocx} className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-green-50 hover:text-green-600 transition-colors">
-                <i className="fa-solid fa-file-word text-[11px]"></i>
+              <button 
+                title={t('downloadDocx')} 
+                onClick={handleDownloadDocx} 
+                disabled={isDownloadingDocx}
+                className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+                  isDownloadingDocx 
+                    ? 'text-slate-400 cursor-not-allowed' 
+                    : 'text-slate-500 hover:bg-green-50 hover:text-green-600'
+                }`}
+              >
+                <i className={`fa-solid ${isDownloadingDocx ? 'fa-spinner fa-spin' : 'fa-file-word'} text-[11px]`}></i>
               </button>
-              <button title={t('downloadPdf')} onClick={handleDownloadPdf} className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:bg-green-50 hover:text-green-600 transition-colors">
-                <i className="fa-solid fa-file-pdf text-[11px]"></i>
+
+              <button 
+                title={t('downloadPdf')} 
+                onClick={handleDownloadPdf} 
+                disabled={isDownloadingPdf}
+                className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+                  isDownloadingPdf 
+                    ? 'text-slate-400 cursor-not-allowed' 
+                    : 'text-slate-500 hover:bg-green-50 hover:text-green-600'
+                }`}
+              >
+                <i className={`fa-solid ${isDownloadingPdf ? 'fa-spinner fa-spin' : 'fa-file-pdf'} text-[11px]`}></i>
               </button>
             </div>
             {docPackageOpen && (

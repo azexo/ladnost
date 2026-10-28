@@ -648,10 +648,16 @@ export const useStore = create<any>((set, get) => {
         set((s: any) => ({ reviews: { ...s.reviews, items: newItems } }));
       },
 
-      fetchReviews: async (versionId: number) => {
-        // В реальном приложении тут будет API. 
-        // Пока что просто помечаем как загруженные, т.к. синхронизация идет из редактора
-        set((s: any) => ({ reviews: { ...s.reviews, isLoading: false } }));
+      fetchReviews: async (documentId: number) => {
+          set((s: any) => ({ reviews: { ...s.reviews, isLoading: true } }));
+          try {
+              // Предполагается, что у вас есть documentsApi
+              const items = await documentsApi.getReviewEdits(documentId); 
+              set((s: any) => ({ reviews: { ...s.reviews, items, isLoading: false } }));
+          } catch (e) {
+              console.error('Failed to fetch reviews', e);
+              set((s: any) => ({ reviews: { ...s.reviews, isLoading: false } }));
+          }
       },
 
       setActiveEdit: (uuid: string | null) => {

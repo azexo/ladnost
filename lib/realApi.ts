@@ -28,6 +28,7 @@ import {
     ApiKeyCreatePayload, ApiKeyResponse, ApiKeyCreatedResponse, ApiKeyRevokePayload,
     TemplateImportResponse,
     ContactFormPayload,
+    SyncedReviewEdit,
     tokenUtils
 } from './types';
 import { useNavbarStore } from '@/store/useNavbarStore';
@@ -331,6 +332,11 @@ export const documentSetsApi = {
 };
 
 export const documentsApi = {
+    getReviewEdits: async (docId: number): Promise<SyncedReviewEdit[]> => {
+        return request<SyncedReviewEdit[]>(`/documents/${docId}/review-edits`, { 
+            method: 'GET' 
+        });
+    },
     makeVersionCurrent: async (docId: number, versionId: number): Promise<DocumentVersion> => {
         return request<DocumentVersion>(`/documents/${docId}/versions/${versionId}/make-current`, { method: 'PUT' });
     },
@@ -921,4 +927,34 @@ export const contactApi = {
             body: JSON.stringify(data),
         });
     },
+};
+
+// ==========================================
+// ОБЯЗАТЕЛЬСТВА (AI-АНАЛИЗ ДОКУМЕНТОВ)
+// ==========================================
+export const obligationsApi = {
+  /**
+   * Получить список обязательств, извлеченных AI из документов комплекта
+   * Используется во вкладке "Обязательства (AI)" в Cockpit
+   */
+  listBySet: async (setId: number): Promise<any[]> => {
+    return request<any[]>(`/document-sets/${setId}/obligations`, { method: 'GET' });
+  },
+  
+  /**
+   * Запустить или перезапустить процесс извлечения обязательств (AI)
+   */
+  extract: async (setId: number): Promise<{ status: string }> => {
+    return request<{ status: string }>(`/document-sets/${setId}/obligations/extract`, { method: 'POST' });
+  },
+
+  /**
+   * Обновить обязательство (например, пометить как исполненное/неактивное)
+   */
+  update: async (id: number, data: { is_active?: boolean; risk_level?: string }): Promise<any> => {
+    return request<any>(`/obligations/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
 };

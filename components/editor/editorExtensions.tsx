@@ -82,8 +82,13 @@ const escapeHtml = (str: string | null | undefined): string => {
 // ==========================================
 // 1. РАСШИРЕНИЕ: Атрибуты блоков (UUID и Тип)
 // ==========================================
+
+const blockUuidKey = new PluginKey('blockUuid');
+
 export const BlockAttributes = Extension.create({
   name: 'blockAttributes',
+  
+  // 1. Определяем атрибуты блоков
   addGlobalAttributes() {
     return [
       {
@@ -107,6 +112,36 @@ export const BlockAttributes = Extension.create({
           },
         },
       },
+    ];
+  },
+
+  // 2. Автоматически присваиваем UUID новым блокам
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: blockUuidKey,
+        appendTransaction(transactions, oldState, newState) {
+          const hasDocChanges = transactions.some(tr => tr.docChanged);
+          if (!hasDocChanges) return null;
+
+          let tr = newState.tr;
+          let modified = false;
+
+          newState.doc.descendants((node, pos) => {
+            if (['paragraph', 'heading', 'listItem', 'blockquote'].includes(node.type.name)) {
+              if (!node.attrs.blockUuid) {
+                tr.setNodeMarkup(pos, undefined, {
+                  ...node.attrs,
+                  blockUuid: `block_${Math.random().toString(36).substring(2, 11)}`
+                });
+                modified = true;
+              }
+            }
+          });
+
+          return modified ? tr : null;
+        },
+      }),
     ];
   },
 });
