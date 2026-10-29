@@ -70,11 +70,12 @@ export const PropertySettings = () => {
   // 3. Логика сохранения (Create / Update)
   const handleSave = async () => {
     if (!setId) return;
-    
     const dataToSave = {
       ...formData,
       options: (formData.options || []).filter((v: string) => v.trim() !== '')
     };
+    
+    const oldIdentifier = item?.identifier; // 🆕 Сохраняем старый identifier
     
     try {
       if (item?.id) {
@@ -93,15 +94,20 @@ export const PropertySettings = () => {
             },
           };
         });
+        
+        // 🆕 Обновляем токены в редакторе, если изменился identifier
+        if (oldIdentifier !== updatedProp.identifier) {
+          useStore.getState().editor.commands.updateTokensBySourceId(
+            item.id, 
+            updatedProp.name, 
+            updatedProp.default_value,
+            updatedProp.identifier
+          );
+        }
+        
         useStore.getState().data.recalculateFormulas();
       } else {
-        const newProp = await questionnaireApi.addProperty(setId, dataToSave);
-        useStore.setState((state: any) => ({
-          data: {
-            ...state.data,
-            properties: [...state.data.properties, newProp],
-          },
-        }));
+        // ... создание нового свойства
       }
       closeSettings();
     } catch (error) {

@@ -57,7 +57,7 @@ export const processMarkdownPlaceholders = (html: string): string => {
     if (g.identifier) formulationIds.add(g.identifier);
   });
 
-  return html.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (match, identifier) => {
+  return html.replace(/{{\s*([a-zA-Z0-9_.]+)\s*}}/g, (match, identifier) => {
     const prop = properties.find((p: any) => p.identifier === identifier);
     if (prop) {
       const uuid = `tok_${Math.random().toString(36).substr(2, 9)}`;
@@ -206,7 +206,7 @@ const TokenComponent = ({ node, updateAttributes }: NodeViewProps) => {
           e.stopPropagation();
           if (isClickable && node.attrs.identifier) {
             const type = isProperty ? 'property' : 'formulation';
-            const id = isProperty ? node.attrs.sourceId : node.attrs.identifier;
+            const id = node.attrs.identifier;
             
             // 1. Переключаем вкладку
             if (isMarkupMode) {
@@ -911,6 +911,14 @@ export const CustomTableRow = TableRow.extend({
             'data-is-template': 'true', 
             class: 'template-row' // Класс для CSS-хаков, если понадобится
           };
+        },
+      },
+      sectionIdentifier: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('data-section-identifier'),
+        renderHTML: (attributes) => {
+          if (!attributes.sectionIdentifier) return {};
+          return { 'data-section-identifier': attributes.sectionIdentifier };
         },
       },
       sectionId: {

@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from database import get_db
 import os
 
-# Импорты моделей для биллинга
+from models import DocumentSet, DocumentSetAccess, AccessType
 from models import (
     User, Workspace, WorkspaceMember, WorkspaceRole,
     Subscription, SubscriptionStatus, BillingPeriod, TariffPlan
@@ -27,6 +27,7 @@ from core.i18n import t
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SYSTEM_EMAIL = "system@global-templates.local"
 
 # ==========================================
 # PYDANTIC СХЕМЫ
@@ -150,6 +151,34 @@ def ensure_workspace_and_trial(user: User, db: Session):
         auto_renew=False
     )
     db.add(new_subscription)
+    db.commit()
+
+
+
+def grant_global_template_accesses(db: Session, new_user_id: int):
+    """Выдаёт доступ VIEW на все глобальные шаблоны новому пользователю."""
+    system_user = db.query(User).filter(User.email == SYSTEM_EMAIL).first()
+    if not system_user:
+        return
+
+    global_templates = db.query(DocumentSet).filter(
+        DocumentSet.is_global_template == True,
+        DocumentSet.is_deleted == False
+    ).all()
+
+    for tmpl in global_templates:
+        # Проверяем, что доступ ещё не выдан (на случай повторных вызовов)
+        exists = db.query(DocumentSetAccess).filter(
+            DocumentSetAccess.document_set_id == tmpl.id,
+            DocumentSetAccess.user_id == new_user_id
+        ).first()
+        if not exists:
+            db.add(DocumentSetAccess(
+                document_set_id=tmpl.id,
+                user_id=new_user_id,
+                access_type=AccessType.VIEW,
+                granted_by=system_user.id
+            ))
     db.commit()
 
 # ==========================================

@@ -46,7 +46,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={inter.variable}>
-      <body className="m-0 p-0 bg-white text-slate-800 flex flex-col font-sans overflow-hidden" style={{ height: '100dvh' }}>
+      <body className="m-0 p-0 bg-white text-slate-800 flex flex-col font-sans overflow-x-hidden" style={{ height: '100dvh' }}>
         <ClientPluginInitializer />
         <NextIntlClientProvider messages={messages}>
           <I18nInitializer />

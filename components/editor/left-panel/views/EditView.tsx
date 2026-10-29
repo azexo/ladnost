@@ -426,7 +426,7 @@ export const EditView = () => {
         {!isCollapsed && (
           <div className="p-3 space-y-4 border-t border-slate-100">
             {props.map((prop: any) => (
-              <div key={prop.id} data-prop-id={prop.id} className="scroll-mt-20">
+              <div key={prop.id} data-prop-id={prop.id} data-identifier={prop.identifier} className="scroll-mt-20">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   {prop.name} {prop.is_required && <span className="text-red-500">*</span>}
                 </label>
@@ -550,7 +550,21 @@ export const EditView = () => {
 
   useEffect(() => {
     if (highlightTarget && highlightTarget.type === 'property') {
-      const el = document.querySelector(`[data-prop-id="${highlightTarget.id}"]`);
+
+      // 🆕 Приоритет 1: ищем по identifier (стабильный, не меняется при клонировании)
+      let el: Element | null = null;
+      const targetId = highlightTarget.id;
+      
+      if (typeof targetId === 'string') {
+        // Если прилетел identifier (строка) — ищем по data-identifier
+        el = document.querySelector(`[data-identifier="${targetId}"]`);
+      }
+      
+      // 🆕 Fallback: если не нашли по identifier или прилетел числовой id
+      if (!el) {
+        el = document.querySelector(`[data-prop-id="${targetId}"]`);
+      }
+
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         el.classList.add('card-highlight-flash');

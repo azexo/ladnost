@@ -895,6 +895,7 @@
     "deleteRow": "Удалить строку",
     "addRowBelow": "Добавить строку снизу",
     "removeTemplateStatus": "Убрать статус шаблона",
+    "noSectionForTemplate": "Не удалось определить секцию. Добавьте в строку токен свойства из нужной секции.",
     "makeTemplate": "Сделать строку шаблоном",
     "increaseHeight": "Увеличить высоту",
     "decreaseHeight": "Уменьшить высоту",

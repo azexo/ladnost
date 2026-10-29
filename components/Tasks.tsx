@@ -10,6 +10,7 @@ import { useTasksStore, getTaskStatusLabels } from '@/store/useTasksStore';
 import { TaskStatus, StageStatus, HistoryAction, Task, User } from '@/lib/types';
 import { tasksApi } from '@/lib/realApi';
 import { useNavbarStore } from '@/store/useNavbarStore';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 // Вспомогательные функции для стилизации статусов
 const getStatusBadgeClasses = (status: string) => {
@@ -38,6 +39,8 @@ const getStatusIcon = (status: string) => {
 
 export default function Tasks() {
     const t = useTranslations('tasks');
+    const router = useRouter();
+    const searchParams = useSearchParams();
     
     const {
         tasks, usersMap, selectedTaskId, taskDetails, activeTab, statusFilter,
@@ -57,6 +60,31 @@ export default function Tasks() {
     useEffect(() => {
         initialize();
     }, [initialize]);
+
+    // ====== 1) URL → store: открываем задачу из URL при загрузке ======
+    useEffect(() => {
+        const taskIdFromUrl = searchParams.get('taskId');
+        if (taskIdFromUrl) {
+            const id = Number(taskIdFromUrl);
+            if (!Number.isNaN(id) && id !== selectedTaskId) {
+                selectTask(id);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // только при монтировании
+
+    // ====== 2) store → URL: при изменении selectedTaskId пишем в URL ======
+    useEffect(() => {
+        const current = new URLSearchParams(Array.from(searchParams.entries()));
+        if (selectedTaskId) {
+            current.set('taskId', String(selectedTaskId));
+        } else {
+            current.delete('taskId');
+        }
+        const query = current.toString();
+        const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+        router.replace(newUrl, { scroll: false });
+    }, [selectedTaskId, router, searchParams]);
 
     const mySubtask = taskDetails?.subtasks.find(
         sub => sub.assignee_id === currentUserId && sub.status === TaskStatus.IN_REVIEW

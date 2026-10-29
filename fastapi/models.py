@@ -145,6 +145,10 @@ class DocumentSet(Base):
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     is_anonymous_access: Mapped[bool] = mapped_column(Boolean, default=False, comment="Анонимный доступ к комплекту")
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    is_global_template: Mapped[bool] = mapped_column(
+        Boolean, default=False, index=True,
+        comment="Глобальный шаблон, доступен всем"
+    )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -77,7 +77,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header id="header" className="h-12 border-b border-slate-200 flex items-center justify-between px-4 shrink-0 bg-white z-50 gap-4">
+      <header id="header" className="h-12 border-b border-slate-200 flex items-center justify-between px-4 shrink-0 bg-white z-30 gap-4">
         <div className="flex items-center gap-1 min-w-0">
           <div className="flex items-center gap-2 mr-3 shrink-0">
             <div className="w-7 h-7 bg-primary-600 rounded flex items-center justify-center text-white font-bold text-sm">

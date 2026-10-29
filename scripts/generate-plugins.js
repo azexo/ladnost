@@ -85,46 +85,63 @@ if (fs.existsSync(pluginsDir)) {
                 logicRegistrations.push(`  if (typeof (${importName} as any).init === 'function') (${importName} as any).init();`);
             }
             
-            // ==========================================
-            // 3. ОБРАБОТКА СТРАНИЦ / МАРШРУТОВ (APP ROUTER)
-            // ==========================================
-            if (frontendConfig.pages) {
-                Object.entries(frontendConfig.pages).forEach(([routePath, pageConfig]) => {
-                    // Поддержка обратной совместимости: если передана строка, это путь к странице
-                    let pageFile, layoutFile;
-                    if (typeof pageConfig === 'string') {
-                        pageFile = pageConfig;
-                    } else if (typeof pageConfig === 'object' && pageConfig !== null && pageConfig.page) {
-                        pageFile = pageConfig.page;
-                        layoutFile = pageConfig.layout;
-                    } else {
-                        console.warn(`[Plugin Generator] ⚠️ Неверный формат конфигурации для маршрута ${routePath} в плагине ${plugin}`);
-                        return;
-                    }
+// ==========================================
+// 3. ОБРАБОТКА СТРАНИЦ / МАРШРУТОВ (APP ROUTER)
+// ==========================================
+if (frontendConfig.pages) {
+    Object.entries(frontendConfig.pages).forEach(([routePath, pageConfig]) => {
+        // Поддержка обратной совместимости: если передана строка, это путь к странице
+        let pageFile, layoutFile, serverPageFile;
+        if (typeof pageConfig === 'string') {
+            pageFile = pageConfig;
+        } else if (typeof pageConfig === 'object' && pageConfig !== null && (pageConfig.page || pageConfig.server_page)) {
+            pageFile = pageConfig.page;
+            layoutFile = pageConfig.layout;
+            serverPageFile = pageConfig.server_page;
+        } else {
+            console.warn(`[Plugin Generator] ⚠️ Неверный формат конфигурации для маршрута ${routePath} в плагине ${plugin}`);
+            return;
+        }
 
-                    // routePath: "/super/[id]" -> normalizedRoute: "super/[id]"
-                    const normalizedRoute = routePath.replace(/^\//, ''); 
-                    const routeDir = path.join(appOutputDir, normalizedRoute);
-                    
-                    // Создаем вложенную структуру папок
-                    fs.mkdirSync(routeDir, { recursive: true });
-                    
-                    const cleanPageFile = pageFile.replace(/\.(tsx?|jsx?)$/, '').replace(/^\.\//, '');
-                    
-                    // Вычисляем абсолютные пути для корректного расчета относительного пути
-                    const pageFilePath = path.join(routeDir, 'page.tsx');
-                    const targetComponentAbsPath = path.join(__dirname, `../plugins/${plugin}/frontend/${cleanPageFile}`);
-                    
-                    // Считаем относительный путь от page.tsx до компонента плагина
-                    let relativeComponentPath = path.relative(path.dirname(pageFilePath), targetComponentAbsPath).replace(/\\/g, '/');
-                    if (!relativeComponentPath.startsWith('.')) {
-                        relativeComponentPath = './' + relativeComponentPath;
-                    }
-                    
+        // routePath: "/super/[id]" -> normalizedRoute: "super/[id]"
+        const normalizedRoute = routePath.replace(/^\//, ''); 
+        const routeDir = path.join(appOutputDir, normalizedRoute);
+        
+        // Создаем вложенную структуру папок
+        fs.mkdirSync(routeDir, { recursive: true });
 
-                    // Генерация page.tsx
-                    const pageContent = `
+        // Определяем, какой файл использовать как основу для page.tsx
+        // Если есть server_page - берем его, иначе обычный page
+        const basePageFile = serverPageFile || pageFile;
+        const cleanBasePageFile = basePageFile.replace(/\.(tsx?|jsx?)$/, '').replace(/^\.\//, '');
+        
+        // Вычисляем абсолютные пути для корректного расчета относительного пути
+        const pageFilePath = path.join(routeDir, 'page.tsx');
+        const targetComponentAbsPath = path.join(__dirname, `../plugins/${plugin}/frontend/${cleanBasePageFile}`);
+        
+        // Считаем относительный путь от page.tsx до компонента плагина
+        let relativeComponentPath = path.relative(path.dirname(pageFilePath), targetComponentAbsPath).replace(/\\/g, '/');
+        if (!relativeComponentPath.startsWith('.')) {
+            relativeComponentPath = './' + relativeComponentPath;
+        }
+
+        let pageContent;
+
+        if (serverPageFile) {
+            // ✅ Если указан serverPage, генерируем Server Component (без dynamic, чтобы работал async/await)
+            pageContent = `
+import PageComponent from '${relativeComponentPath}';
+
+export default function Page() {
+  return <PageComponent />;
+}
+`;
+            console.log(`[Plugin Generator] 📄 Server Route generated: /${normalizedRoute} (plugin: ${plugin})`);
+        } else {
+            // ✅ Обычная клиентская страница через dynamic
+            pageContent = `
 import dynamic from 'next/dynamic';
+
 const PageComponent = dynamic(() => import('${relativeComponentPath}'), {
   loading: () => (
     <div className="flex h-screen w-full items-center justify-center">
@@ -133,41 +150,42 @@ const PageComponent = dynamic(() => import('${relativeComponentPath}'), {
   ),
   ssr: true,
 });
+
 export default function Page() {
   return <PageComponent />;
 }
 `;
+            console.log(`[Plugin Generator] 📄 Route generated: /${normalizedRoute} (plugin: ${plugin})`);
+        }
 
-                    fs.writeFileSync(pageFilePath, pageContent);
-                    console.log(`[Plugin Generator] 📄 Route generated: /${normalizedRoute} (plugin: ${plugin})`);
+        fs.writeFileSync(pageFilePath, pageContent);
 
-                    // ==========================================
-                    // 3.1 ГЕНЕРАЦИЯ LAYOUT (ЕСЛИ УКАЗАН)
-                    // ==========================================
-                    if (layoutFile) {
-                        const cleanLayoutFile = layoutFile.replace(/\.(tsx?|jsx?)$/, '').replace(/^\.\//, '');
-                        const targetLayoutAbsPath = path.join(__dirname, `../plugins/${plugin}/frontend/${cleanLayoutFile}`);
-                        const layoutFilePath = path.join(routeDir, 'layout.tsx');
-                        
-                        let relativeLayoutPath = path.relative(path.dirname(layoutFilePath), targetLayoutAbsPath).replace(/\\/g, '/');
-                        if (!relativeLayoutPath.startsWith('.')) {
-                            relativeLayoutPath = './' + relativeLayoutPath;
-                        }
-
-                        // ✅ СТАЛО (Статический импорт сохраняет Server/Client контекст)
-                        const layoutContent = `
+        // ==========================================
+        // 3.1 ГЕНЕРАЦИЯ LAYOUT (ЕСЛИ УКАЗАН)
+        // ==========================================
+        if (layoutFile) {
+            const cleanLayoutFile = layoutFile.replace(/\.(tsx?|jsx?)$/, '').replace(/^\.\//, '');
+            const targetLayoutAbsPath = path.join(__dirname, `../plugins/${plugin}/frontend/${cleanLayoutFile}`);
+            const layoutFilePath = path.join(routeDir, 'layout.tsx');
+            let relativeLayoutPath = path.relative(path.dirname(layoutFilePath), targetLayoutAbsPath).replace(/\\/g, '/');
+            if (!relativeLayoutPath.startsWith('.')) {
+                relativeLayoutPath = './' + relativeLayoutPath;
+            }
+            
+            // ✅ СТАЛО (Статический импорт сохраняет Server/Client контекст)
+            const layoutContent = `
 import LayoutComponent from '${relativeLayoutPath}';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    return <LayoutComponent>{children}</LayoutComponent>;
+  return <LayoutComponent>{children}</LayoutComponent>;
 }
 `;
-                        fs.writeFileSync(layoutFilePath, layoutContent);
-                        console.log(`[Plugin Generator] 📄 Layout generated: /${normalizedRoute}/layout.tsx (plugin: ${plugin})`);
-                    }
+            fs.writeFileSync(layoutFilePath, layoutContent);
+            console.log(`[Plugin Generator] 📄 Layout generated: /${normalizedRoute}/layout.tsx (plugin: ${plugin})`);
+        }
+    });
+}
 
-                });
-            }
         } catch (e) {
             console.error(`[Plugin Generator] ❌ Error processing plugin ${plugin}:`, e);
         }

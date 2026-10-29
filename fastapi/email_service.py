@@ -14,7 +14,6 @@ from models import EmailLog, EmailStatus
 
 from config import get_settings
 
-# Получаем экземпляр настроек (кэшируется через lru_cache)
 settings = get_settings()
 
 def _strip_html(html: str) -> str:

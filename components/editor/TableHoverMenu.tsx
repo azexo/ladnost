@@ -454,38 +454,53 @@ const TableHoverMenu = ({ editor }: TableHoverMenuProps) => {
               if (!hoveredRow) return;
               const rowInfo = getRowNodePos(hoveredRow);
               if (!rowInfo) return;
-
               const isCurrentlyTemplate = rowInfo.node.attrs.isTemplate;
 
-              // 🆕 ИСПОЛЬЗУЕМ ПРЯМУЮ ТРАНЗАКЦИЮ ВМЕСТО chain(), чтобы избежать проблем с выделением
               if (isCurrentlyTemplate) {
-                // Снимаем статус шаблона
+                // 🆕 СНИМАЕМ статус шаблона — очищаем оба атрибута (для совместимости)
                 const { tr } = editor.state;
                 tr.setNodeMarkup(rowInfo.pos, null, {
                   ...rowInfo.node.attrs,
                   isTemplate: false,
-                  sectionId: null
+                  sectionId: null,           // legacy
+                  sectionIdentifier: null,   // 🆕 новый идентификатор
                 });
                 editor.view.dispatch(tr);
               } else {
-                // Устанавливаем статус шаблона и ищем sectionId
-                let detectedSectionId: number | null = null;
+                // 🆕 УСТАНАВЛИВАЕМ статус шаблона — ищем ИМЯ секции через токены в строке
+                let detectedSectionIdentifier: string | null = null;
+
                 rowInfo.node.descendants((child: any) => {
-                  if (child.type.name === 'token' && child.attrs.sourceId) {
+                  if (detectedSectionIdentifier) return; // уже нашли — выходим
+                  if (child.type.name === 'token' && child.attrs?.sourceId) {
                     const prop = useStore.getState().data.properties.find(
                       (p: any) => p.id === Number(child.attrs.sourceId)
                     );
                     if (prop?.section_id) {
-                      detectedSectionId = prop.section_id;
+                      const section = useStore.getState().data.sections.find(
+                        (s: any) => s.id === prop.section_id
+                      );
+                      if (section?.name) {
+                        detectedSectionIdentifier = section.name; // 🆕 используем имя как идентификатор
+                      }
                     }
                   }
                 });
+
+                if (!detectedSectionIdentifier) {
+                  // 🆕 Защита: нельзя сделать строку шаблонной, если в ней нет токенов свойств
+                  // (или токены не привязаны ни к одной секции)
+                  console.warn('[TableHoverMenu] Невозможно определить секцию для шаблонной строки. Добавьте в строку хотя бы один токен свойства.');
+                  alert(t('noSectionForTemplate'));
+                  return;
+                }
 
                 const { tr } = editor.state;
                 tr.setNodeMarkup(rowInfo.pos, null, {
                   ...rowInfo.node.attrs,
                   isTemplate: true,
-                  sectionId: detectedSectionId
+                  sectionId: null,                  // 🆕 обнуляем legacy-атрибут
+                  sectionIdentifier: detectedSectionIdentifier, // 🆕 строковый идентификатор (имя секции)
                 });
                 editor.view.dispatch(tr);
               }

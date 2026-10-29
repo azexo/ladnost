@@ -293,7 +293,7 @@ def clone_document_set(
     sec_map, cond_map, prop_map, group_map = {}, {}, {}, {}
     sections = db.query(QuestionnaireSection).filter(QuestionnaireSection.document_set_id == set_id).all()
     for sec in sections:
-        new_sec = QuestionnaireSection(document_set_id=clone.id, name=sec.name, sort_order=sec.sort_order)
+        new_sec = QuestionnaireSection(document_set_id=clone.id, name=sec.name, sort_order=sec.sort_order, is_table=sec.is_table)
         db.add(new_sec)
         db.flush()
         sec_map[sec.id] = new_sec.id

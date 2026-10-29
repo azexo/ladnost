@@ -4,15 +4,23 @@
 
 'use client';
 import './tasks.css';
-import { useEffect } from 'react';
+import { Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Tasks from '@/components/Tasks';
 
 export default function TasksPage() {
-  return (
-    <>
-      <Navbar />
-      <Tasks />
-    </>
-  );
+    return (
+        <>
+            <Navbar />
+            <Suspense
+                fallback={
+                    <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                }
+            >
+                <Tasks />
+            </Suspense>
+        </>
+    );
 }

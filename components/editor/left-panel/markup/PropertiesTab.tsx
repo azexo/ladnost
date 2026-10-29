@@ -57,6 +57,8 @@ const SortableItem = ({ item, openSettingsPanel }: any) => {
   return (
     <div
       id={`prop-card-${item.id}`}
+      data-identifier={item.identifier}
+      data-prop-id={item.id} 
       ref={setNodeRef}
       style={style}
       className={`bg-white border border-slate-200 ${isCondition ? 'border-l-4 border-l-orange-400' : ''} rounded-lg p-2.5 flex items-center gap-2.5 hover:border-primary-300 hover:shadow-sm cursor-pointer property-item w-full`}
@@ -300,7 +302,38 @@ export const PropertiesTab = ({ openSettingsPanel }: PropertiesTabProps) => {
   const highlightTarget = useStore((s: any) => s.ui.highlightTarget);
 
   useEffect(() => {
-    if (highlightTarget && highlightTarget.type === 'property') {
+    if (!highlightTarget) return;
+
+    if (highlightTarget.type === 'property') {
+      const targetId = highlightTarget.id;
+      let cardEl: HTMLElement | null = null;
+
+      // 🆕 Приоритет 1: ищем по data-identifier (стабильный, не меняется при клонировании)
+      if (typeof targetId === 'string') {
+        cardEl = document.querySelector(
+          `[data-identifier="${targetId}"]`
+        ) as HTMLElement;
+      }
+
+      // 🆕 Fallback: если не нашли или прилетел числовой id — ищем по id карточки
+      if (!cardEl) {
+        cardEl = document.getElementById(`prop-card-${targetId}`);
+      }
+
+      // 🆕 Дополнительный fallback: поиск по data-prop-id (если id — числовой)
+      if (!cardEl && typeof targetId === 'number') {
+        cardEl = document.querySelector(
+          `[data-prop-id="${targetId}"]`
+        ) as HTMLElement;
+      }
+
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cardEl.classList.add('card-highlight-flash');
+        setTimeout(() => cardEl.classList.remove('card-highlight-flash'), 1500);
+      }
+    } else if (highlightTarget.type === 'formulation') {
+      // Формулировки уже работают по identifier — оставляем как есть
       const cardEl = document.getElementById(`prop-card-${highlightTarget.id}`);
       if (cardEl) {
         cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -53,7 +53,7 @@ const processMarkdownPlaceholders = (html: string): string => {
   state.data.setFormulations?.forEach((g: any) => {
     if (g.identifier) formulationIds.add(g.identifier);
   });
-  return html.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (match, identifier) => {
+  return html.replace(/{{\s*([a-zA-Z0-9_.]+)\s*}}/g, (match, identifier) => {
     const prop = properties.find((p: any) => p.identifier === identifier);
     if (prop) {
       const uuid = `tok_${Math.random().toString(36).substr(2, 9)}`;
@@ -71,7 +71,7 @@ const processMarkdownPlaceholders = (html: string): string => {
 // ==========================================
 export interface DocumentEditorHandle {
   insertToken: (type: 'property' | 'formulation', sourceId: number | string, label: string, value: string, identifier?: string) => void;
-  updateTokensBySourceId: (sourceId: number | string, newLabel: string, newValue?: string) => void;
+  updateTokensBySourceId: (sourceId: number | string, newLabel: string, newValue?: string, newIdentifier?: string) => void;
   removeTokensBySourceId: (sourceId: number | string) => void;
   markSelectionAsAnchor: (anchorType?: string) => void;
   getHTML: () => string;
@@ -647,7 +647,7 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
           editor.chain().focus().insertContent({ type: 'formulationSlot', attrs: { identifier } }).run();
         }
       },
-      updateTokensBySourceId: (sourceId, newLabel, newValue) => {
+      updateTokensBySourceId: (sourceId, newLabel, newValue, newIdentifier?) => {
         if (!editor || editor.isDestroyed) return;
         try {
           const { state, dispatch } = editor.view;
@@ -655,7 +655,12 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
           let hasChanges = false;
           state.doc.descendants((node, pos) => {
             if (node.type.name === 'token' && node.attrs.sourceId == sourceId) {
-              const newAttrs = { ...node.attrs, label: newLabel, ...(newValue !== undefined ? { value: newValue } : {}) };
+              const newAttrs = { 
+                ...node.attrs, 
+                label: newLabel, 
+                ...(newValue !== undefined ? { value: newValue } : {}),
+                ...(newIdentifier !== undefined ? { identifier: newIdentifier } : {}) // 🆕
+              };
               tr.setNodeMarkup(pos, undefined, newAttrs);
               hasChanges = true;
             }

@@ -502,9 +502,10 @@ export const useStore = create<any>((set, get) => {
       setActiveTab: (tab: string) => set((state: any) => ({ ui: { ...state.ui, activeTab: tab } })),
       setSelectingAnchor: (value: boolean) => set((s: any) => ({ ui: { ...s.ui, isSelectingAnchor: value } })),
 
-      highlightTarget: null as { type: 'property' | 'formulation'; id: string | number } | null,
-      setHighlightTarget: (target: any) => set((s: any) => ({ ui: { ...s.ui, highlightTarget: target } })),
-
+      highlightTarget: null as { type: 'property' | 'formulation'; id: string } | null,
+      setHighlightTarget: (target: { type: 'property' | 'formulation'; id: string | number } | null) => {
+        set((s: any) => ({ ui: { ...s.ui, highlightTarget: target } }));
+      },
     },
 
     users: {
@@ -742,7 +743,7 @@ export const useStore = create<any>((set, get) => {
       commands: {
         removeAnchorByUuid: (uuid: string) => get().editor.ref?.current?.removeAnchorByUuid?.(uuid), // <-- ДОБАВИТЬ ЭТО
         insertToken: (type: string, sourceId: number | string, label: string, value: string, identifier?: string) => get().editor.ref?.current?.insertToken(type, sourceId, label, value, identifier),
-        updateTokensBySourceId: (sourceId: number | string, newLabel: string, newValue?: string) => get().editor.ref?.current?.updateTokensBySourceId(sourceId, newLabel, newValue),
+        updateTokensBySourceId: (sourceId: number | string, newLabel: string, newValue?: string, newIdentifier?: string) => get().editor.ref?.current?.updateTokensBySourceId(sourceId, newLabel, newValue, newIdentifier),
         removeTokensBySourceId: (sourceId: number | string) => get().editor.ref?.current?.removeTokensBySourceId(sourceId),
         toggleReviewMode: () => get().editor.ref?.current?.toggleReviewMode() || false,
         markAnchor: (type?: string) => get().editor.ref?.current?.markSelectionAsAnchor(type),
@@ -903,6 +904,40 @@ export const useStore = create<any>((set, get) => {
                   console.error('Ошибка сохранения порядка секций на бэкенд:', e);
               }
           }
+      },
+      getTableDataBySectionIdentifier: (sectionIdentifier: string) => {
+          const state = get();
+          // 1. Находим секцию по имени (идентификатору)
+          const section = state.data.sections.find((s: any) => s.name === sectionIdentifier);
+          if (!section) {
+              console.warn(`[getTableDataBySectionIdentifier] Секция с именем "${sectionIdentifier}" не найдена`);
+              return { columns: [], rows: [] };
+          }
+          
+          // 2. Получаем все свойства (колонки) этой секции
+          const columns = state.data.properties.filter((p: any) => p.section_id === section.id);
+          
+          // 3. Собираем индексы строк из табличных ответов
+          const rowIndexes = new Set<number>();
+          columns.forEach((col: any) => {
+              const tableData = state.data.currentTableAnswers[col.id] || {};
+              Object.keys(tableData).forEach((rowIdx) => {
+                  if (tableData[rowIdx] !== null && tableData[rowIdx] !== undefined) {
+                      rowIndexes.add(Number(rowIdx));
+                  }
+              });
+          });
+          
+          // 4. Формируем массив строк
+          const rows = Array.from(rowIndexes).sort((a, b) => a - b).map((rowIdx) => {
+              const cells: Record<number, any> = {};
+              columns.forEach((col: any) => {
+                  cells[col.id] = state.data.currentTableAnswers[col.id]?.[rowIdx] ?? '';
+              });
+              return { rowIndex: rowIdx, cells };
+          });
+          
+          return { columns, rows };
       },
       getTableDataBySectionId: (sectionId: number) => {
           const state = get();
@@ -1756,14 +1791,26 @@ export const useStore = create<any>((set, get) => {
 });
 
 useStore.subscribe((state, prevState) => {
-  const editorRef = state.editor.ref?.current;
-  if (!editorRef?.updateTokensBySourceId) return;
-  if (state.data.myFormulations !== prevState.data.myFormulations) {
-    state.data.myFormulations.forEach((newForm: any) => {
-      const oldForm = prevState.data.myFormulations.find((f: any) => f.id === newForm.id);
-      if (oldForm && (oldForm.name !== newForm.name || oldForm.text_content !== newForm.text_content)) {
-          editorRef.updateTokensBySourceId(newForm.id, newForm.name, newForm.text_content);
-      }
-    });
-  }
+    const editorRef = state.editor.ref?.current;
+    if (!editorRef?.updateTokensBySourceId) return;
+    
+    if (state.data.myFormulations !== prevState.data.myFormulations) {
+        state.data.myFormulations.forEach((newForm: any) => {
+            const oldForm = prevState.data.myFormulations.find((f: any) => f.id === newForm.id);
+            if (oldForm) {
+                const identifierChanged = oldForm.identifier !== newForm.identifier;
+                const nameChanged = oldForm.name !== newForm.name;
+                const contentChanged = oldForm.text_content !== newForm.text_content;
+                
+                if (nameChanged || contentChanged || identifierChanged) {
+                    editorRef.updateTokensBySourceId(
+                        newForm.id, 
+                        newForm.name, 
+                        newForm.text_content,
+                        identifierChanged ? newForm.identifier : undefined  // 🆕
+                    );
+                }
+            }
+        });
+    }
 });
