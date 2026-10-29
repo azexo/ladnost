@@ -162,6 +162,7 @@ FROM_EMAIL=noreply@example.com
 ADMIN_EMAIL=admin@example.com
 FRONTEND_BASE_URL=http://localhost
 LOCALE=ru
+NEXTJS_BACKEND_URL=http://localhost:3000
 ```
 
 ### C. Frontend Environment (`./.env.docker`)
