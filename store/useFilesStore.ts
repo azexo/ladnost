@@ -8,6 +8,7 @@ import { foldersApi, documentSetsApi, documentsApi, usersApi, trashApi } from '@
 import { Folder, DocumentSet, User } from '@/lib/types';
 import { parseMarkdownToTiptap } from '@/lib/templateImport';
 import { getT } from '@/store/i18nStore';
+import { useNavbarStore } from '@/store/useNavbarStore';
 
 export interface SelectedItem {
   id: number;
@@ -310,8 +311,8 @@ export const useFilesStore = create<FilesState>((set, get) => ({
         if (currentFolderId === null) return f.parent_id === undefined || f.parent_id === null;
         return f.parent_id === currentFolderId;
       });
-      
-      const allSets = await documentSetsApi.listShared();
+      const userId = useNavbarStore.getState().user?.id;
+      const allSets = await documentSetsApi.listShared(userId);
       const documentSets = allSets.filter(s => {
         if (currentFolderId === null) return s.folder_id === undefined || s.folder_id === null;
         return s.folder_id === currentFolderId;

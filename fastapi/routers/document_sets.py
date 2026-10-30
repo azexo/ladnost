@@ -282,11 +282,20 @@ def clone_document_set(
         )
         db.add(new_doc)
         db.flush()
-        for ver in doc.versions:
+
+        current_ver = next((v for v in doc.versions if v.is_current), None)
+        if current_ver:
             new_ver = DocumentVersion(
-                document_id=new_doc.id, version_number=ver.version_number, content_json=ver.content_json, 
-                content_html=ver.content_html, plain_text_cache=ver.plain_text_cache, file_path=ver.file_path, 
-                file_size=ver.file_size, is_current=ver.is_current, author_id=current_user.id, change_reason=ver.change_reason
+                document_id=new_doc.id, 
+                version_number=1,
+                content_json=current_ver.content_json, 
+                content_html=current_ver.content_html, 
+                plain_text_cache=current_ver.plain_text_cache, 
+                file_path=current_ver.file_path, 
+                file_size=current_ver.file_size, 
+                is_current=True, 
+                author_id=current_user.id, 
+                change_reason="Клонирование комплекта"
             )
             db.add(new_ver)
 

@@ -10,10 +10,11 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useNavbarStore } from '@/store/useNavbarStore';
-import { authApi } from '@/lib/realApi';
+import { authApi, CHECK_TOKEN_KEY } from '@/lib/realApi';
 import ContactFormModal from '@/components/ContactFormModal';
 import { PluginSlot } from '@/components/PluginSlot';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { tokenUtils } from '@/lib/types';
 
 interface AuthPageClientProps {
   articleContent: string;
@@ -29,8 +30,8 @@ export default function AuthPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { user, login, register, isAuthLoading, authError } = useNavbarStore();
-  
+  const { user, login, register, isAuthLoading, authError, initializeAuth } = useNavbarStore();
+
   const t = useTranslations('Auth');
 
   const mode = searchParams.get('mode');
@@ -42,8 +43,14 @@ export default function AuthPageClient({
 
   // Редирект после успешной авторизации
   useEffect(() => {
-    if (user && (pathname === '/' || pathname === '/login' || pathname === '/auth')) {
-      router.replace('/workspace');
+    if (user && pathname === '/') {
+      const pendingRedirect = sessionStorage.getItem('redirectAfterAuth');
+      if (pendingRedirect) {
+        sessionStorage.removeItem('redirectAfterAuth');
+        router.replace(pendingRedirect);
+      } else {
+        router.replace('/workspace');
+      }
     }
   }, [user, router, pathname]);
 
@@ -60,7 +67,7 @@ export default function AuthPageClient({
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginErrors, setLoginErrors] = useState({ email: false, password: false });
-  
+
   const [regFirstName, setRegFirstName] = useState('');
   const [regLastName, setRegLastName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -123,6 +130,19 @@ export default function AuthPageClient({
       const response = await authApi.activate(tkn);
       setActivateStatus('success');
       setActivateMessage(response.message || t('activate.successDefault'));
+
+      // 🔑 Если бэкенд вернул access_token — автоматически логиним пользователя
+      if (response.access_token) {
+        tokenUtils.setToken(response.access_token);
+        try {
+          await initializeAuth(); // загрузит user и notifications
+        } catch (e) {
+          console.warn('Не удалось автоматически войти после активации', e);
+        }
+        return;
+      }
+
+      // Fallback: если токен не пришёл — отправляем на логин
       setTimeout(() => {
         setActiveTab('login');
         router.replace('/');
@@ -198,6 +218,54 @@ export default function AuthPageClient({
     }
   };
 
+  const handleCheckActivation = async () => {
+    switchTab('activate');
+    setActivateStatus('loading');
+    setActivateMessage(t('activate.loadingText'));
+
+    // Получаем check_token из sessionStorage
+    const checkToken = typeof window !== 'undefined'
+      ? sessionStorage.getItem(CHECK_TOKEN_KEY)
+      : null;
+
+    if (!checkToken) {
+      setActivateStatus('error');
+      setActivateMessage(t('activate.noCheckToken'));
+      return;
+    }
+
+    try {
+      const response = await authApi.checkActivation(checkToken);
+
+      if (!response.is_active) {
+        setActivateStatus('error');
+        setActivateMessage(t('activate.notYetActivated'));
+        return;
+      }
+
+      // 🔑 Аккаунт активирован — выполняем автоматический вход
+      setActivateStatus('success');
+      setActivateMessage(response.message || t('activate.successDefault'));
+
+      if (response.access_token) {
+        tokenUtils.setToken(response.access_token);
+
+        try {
+          await initializeAuth(); // Загрузит user и notifications
+        } catch (e) {
+          console.warn('Не удалось автоматически войти', e);
+        }
+
+        // Удаляем check_token (он больше не нужен)
+        sessionStorage.removeItem('ladnost.activation_check');
+      }
+
+    } catch (err: any) {
+      setActivateStatus('error');
+      setActivateMessage(err.message || t('activate.errorDefault'));
+    }
+  };
+
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail) {
@@ -263,7 +331,7 @@ export default function AuthPageClient({
             <div className="absolute -bottom-16 right-8 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(191,219,254,0.12), transparent 70%)' }}></div>
             <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '44px 44px' }}></div>
           </div>
-          
+
           <div className="relative z-10 flex flex-col min-h-full px-6 py-10 lg:px-10 xl:px-14">
             {/* Шапка с логотипом и навигацией */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-y-4">
@@ -280,13 +348,13 @@ export default function AuthPageClient({
                 <a href="/partner" className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-transparent border border-white hover:bg-white/10 rounded-xl transition-all">
                   {t('header.becomePartner')}
                 </a>
-                <button 
+                <button
                   onClick={() => {
                     if (typeof window !== 'undefined' && (window as any).ym) {
                       (window as any).ym(111041629, 'reachGoal', 'open_consultation');
                     }
                     setIsContactOpen(true);
-                  }} 
+                  }}
                   className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-900 bg-white hover:bg-blue-50 rounded-xl transition-all shadow-sm"
                 >
                   <i className="fa-solid fa-headset text-xs"></i> {t('header.consultation')}
@@ -302,9 +370,9 @@ export default function AuthPageClient({
                 </span>
               </div>
               <div className="pb-10">
-                <MarkdownRenderer 
-                  content={articleContent} 
-                  className="prose-invert max-w-none text-blue-100 text-white prose-headings:text-white prose-strong:text-white prose-blockquote:border-blue-300 prose-blockquote:text-blue-200" 
+                <MarkdownRenderer
+                  content={articleContent}
+                  className="prose-invert max-w-none text-blue-100 text-white prose-headings:text-white prose-strong:text-white prose-blockquote:border-blue-300 prose-blockquote:text-blue-200"
                 />
               </div>
             </div>
@@ -325,18 +393,18 @@ export default function AuthPageClient({
           <div className="w-full max-w-sm fade-in">
             <div className="mb-7" id="auth-heading">
               <h2 className="text-2xl font-extrabold text-slate-900 mb-1.5" id="auth-title">
-                {activeTab === 'register' ? t('auth.title.register') : 
-                 activeTab === 'forgot' ? t('auth.title.forgot') : 
-                 activeTab === 'reset' ? t('auth.title.reset') :
-                 activeTab === 'activate' ? t('auth.title.activate') :
-                 t('auth.title.login')}
+                {activeTab === 'register' ? t('auth.title.register') :
+                  activeTab === 'forgot' ? t('auth.title.forgot') :
+                    activeTab === 'reset' ? t('auth.title.reset') :
+                      activeTab === 'activate' ? t('auth.title.activate') :
+                        t('auth.title.login')}
               </h2>
               <p className="text-sm text-slate-500" id="auth-subtitle">
-                {activeTab === 'register' ? t('auth.subtitle.register') : 
-                 activeTab === 'forgot' ? t('auth.subtitle.forgot') : 
-                 activeTab === 'reset' ? t('auth.subtitle.reset') :
-                 activeTab === 'activate' ? t('auth.subtitle.activate') :
-                 t('auth.subtitle.login')}
+                {activeTab === 'register' ? t('auth.subtitle.register') :
+                  activeTab === 'forgot' ? t('auth.subtitle.forgot') :
+                    activeTab === 'reset' ? t('auth.subtitle.reset') :
+                      activeTab === 'activate' ? t('auth.subtitle.activate') :
+                        t('auth.subtitle.login')}
               </p>
             </div>
 
@@ -419,15 +487,15 @@ export default function AuthPageClient({
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('register.workEmail')} <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <i className="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                      <input 
-                        id="reg-email" 
-                        type="email" 
-                        className="form-input pl-9" 
-                        placeholder={t('register.placeholders.email')} 
-                        autoComplete="email" 
-                        value={regEmail} 
-                        onChange={(e) => setRegEmail(e.target.value)} 
-                        readOnly={mode === 'invite'} 
+                      <input
+                        id="reg-email"
+                        type="email"
+                        className="form-input pl-9"
+                        placeholder={t('register.placeholders.email')}
+                        autoComplete="email"
+                        value={regEmail}
+                        onChange={(e) => setRegEmail(e.target.value)}
+                        readOnly={mode === 'invite'}
                       />
                     </div>
                     <p id="reg-email-error" className={`text-[11px] text-red-500 mt-1 ${regErrors.email ? '' : 'hidden'}`}>
@@ -636,6 +704,19 @@ export default function AuthPageClient({
               <button onClick={() => switchTab('login')} className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md">
                 {t('success.back')}
               </button>
+
+              <button
+                onClick={handleCheckActivation}
+                className="w-full py-2.5 bg-white hover:bg-slate-50 text-primary-600 border border-primary-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <i className="fa-solid fa-rotate text-xs"></i>
+                {t('success.checkActivation')}
+              </button>
+
+              <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
+                {t('success.checkActivationDesc')}
+              </p>
+
             </div>
           </div>
 
@@ -654,7 +735,7 @@ export default function AuthPageClient({
               <h3 className="text-lg font-bold text-slate-900">
                 {modalContent === 'terms' ? t('modal.termsTitle') : t('modal.privacyTitle')}
               </h3>
-              <button 
+              <button
                 onClick={() => setModalContent(null)}
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors"
               >
@@ -663,19 +744,19 @@ export default function AuthPageClient({
             </div>
             {/* Контент модального окна */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
-              <MarkdownRenderer 
-                content={modalContent === 'terms' ? termsContent : privacyContent} 
+              <MarkdownRenderer
+                content={modalContent === 'terms' ? termsContent : privacyContent}
                 className="prose prose-sm max-w-none text-slate-600 
                           prose-h2:text-xl prose-h2:font-bold prose-h2:text-slate-900 prose-h2:mb-4 prose-h2:mt-6
                           prose-h3:text-lg prose-h3:font-semibold prose-h3:text-slate-800 prose-h3:mb-2 prose-h3:mt-4
                           prose-headings:text-slate-800 
                           prose-strong:text-slate-800 
-                          prose-a:text-primary-600 hover:prose-a:underline" 
+                          prose-a:text-primary-600 hover:prose-a:underline"
               />
             </div>
             {/* Футер модального окна */}
             <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
-              <button 
+              <button
                 onClick={() => setModalContent(null)}
                 className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md"
               >

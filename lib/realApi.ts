@@ -39,6 +39,7 @@ import { getT } from '@/store/i18nStore';
 // 1. НАСТРОЙКИ И HTTP КЛИЕНТ
 // ==========================================
 const BASE_URL = '/api/v1'; // Укажите актуальный URL вашего бэкенда
+export const CHECK_TOKEN_KEY = 'ladnost.activation_check';
 
 // Вспомогательная функция для формирования Query-параметров
 const buildQueryString = (params?: Record<string, any>): string => {
@@ -64,6 +65,10 @@ export async function request<T>(
 ): Promise<T> {
     const { skipLogout, ...restOptions } = options;
     const token = tokenUtils.getToken();
+
+    const globalSkipLogout = useNavbarStore.getState().skipGlobalLogout;
+    const shouldSkipLogout = skipLogout || globalSkipLogout;
+
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
@@ -80,7 +85,7 @@ export async function request<T>(
         // 🔹 Используем перевод
         const errorMessage = errorData.detail || getT()('api.errors.session_expired');
 
-        if (!skipLogout) {
+        if (!shouldSkipLogout) {
             tokenUtils.removeToken();
             useNavbarStore.getState().logout();
         }
@@ -119,27 +124,27 @@ export async function request<T>(
 }
 
 // ==========================================
-// 2. УТИЛИТЫ (Для совместимости с фронтом)
-// ==========================================
-const getCurrentUserId = (): number => {
-    const token = tokenUtils.getToken();
-    if (token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return parseInt(payload.sub, 10);
-        } catch (e) {
-            // 🔹 Используем перевод для console.warn
-            console.warn(getT()('api.warnings.jwt_parse_failed'));
-        }
-    }
-    return 1; // fallback
-};
-
-// ==========================================
 // 3. РЕАЛИЗАЦИЯ API (ЭНДПОИНТЫ)
 // ==========================================
 export const authApi = {
-    activate: async (token: string) => {
+    generateOtt: async (): Promise<{ ott: string }> => {
+        return request<{ ott: string }>('/auth/generate-ott', { method: 'POST' });
+    },
+    exchangeOtt: async (ott: string): Promise<{ access_token: string; token_type: string }> => {
+        const res = await request<{ access_token: string; token_type: string }>('/auth/exchange-ott', {
+            method: 'POST',
+            body: JSON.stringify({ ott }),
+            skipLogout: true, // Чтобы при ошибке обмена не срабатывал глобальный logout
+        });
+        tokenUtils.setToken(res.access_token);
+        return res;
+    },
+    activate: async (token: string): Promise<{
+        status: string;
+        message: string;
+        access_token?: string;
+        token_type?: string;
+    }> => {
         const response = await fetch('/api/v1/auth/activate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -147,7 +152,6 @@ export const authApi = {
         });
         if (!response.ok) {
             const error = await response.json();
-            // 🔹 Используем перевод
             throw new Error(error.detail || getT()('api.errors.activation_error'));
         }
         return response.json();
@@ -169,12 +173,35 @@ export const authApi = {
         tokenUtils.setToken(res.access_token);
         return res;
     },
-    register: async (data: RegisterPayload): Promise<User> => {
-        return request<User>('/auth/register', {
+    register: async (data: RegisterPayload): Promise<any> => {
+        const res = await request<any>('/auth/register', {
             method: 'POST',
             body: JSON.stringify(data),
             skipLogout: true,
         });
+        if (res?.check_token && typeof window !== 'undefined') {
+            sessionStorage.setItem(CHECK_TOKEN_KEY, res.check_token);
+        }
+        return res;
+    },
+    checkActivation: async (checkToken: string): Promise<{
+        is_active: boolean;
+        access_token?: string;
+        token_type?: string;
+        message?: string;
+    }> => {
+        const response = await fetch('/auth/activation-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ check_token: checkToken }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.detail || getT()('api.errors.activation_error'));
+        }
+
+        return response.json();
     },
     getMe: async (): Promise<User> => {
         return request<User>('/auth/me', { method: 'GET' });
@@ -271,10 +298,11 @@ export const documentSetsApi = {
         const query = newName ? `?new_name=${encodeURIComponent(newName)}` : '';
         return request<DocumentSet>(`/document-sets/${setId}/clone${query}`, { method: 'POST' });
     },
-    listShared: async (): Promise<DocumentSet[]> => {
+    listShared: async (currentUserId?: number): Promise<DocumentSet[]> => {
         const all = await request<DocumentSet[]>('/document-sets/', { method: 'GET' });
-        const currentUserId = getCurrentUserId();
-        return all.filter(ds => ds.owner_id !== currentUserId && !ds.is_deleted);
+        return all.filter(ds =>
+            !ds.is_deleted && (currentUserId == null || ds.owner_id !== currentUserId)
+        );
     },
     list: async (params?: { folder_id?: number; status?: string }): Promise<DocumentSet[]> => {
         const query = buildQueryString(params);
@@ -333,8 +361,8 @@ export const documentSetsApi = {
 
 export const documentsApi = {
     getReviewEdits: async (docId: number): Promise<SyncedReviewEdit[]> => {
-        return request<SyncedReviewEdit[]>(`/documents/${docId}/review-edits`, { 
-            method: 'GET' 
+        return request<SyncedReviewEdit[]>(`/documents/${docId}/review-edits`, {
+            method: 'GET'
         });
     },
     makeVersionCurrent: async (docId: number, versionId: number): Promise<DocumentVersion> => {
@@ -792,11 +820,10 @@ export const templateImportApi = {
             }),
         });
     },
-    importFromFile: async (file: File, userId: number = 1): Promise<TemplateImportResponse> => {
+    importFromFile: async (file: File): Promise<TemplateImportResponse> => {
         const token = tokenUtils.getToken();
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('user_id', String(userId));
 
         const response = await fetch(`${BASE_URL}/template_import/import-file`, {
             method: 'POST',
@@ -933,28 +960,28 @@ export const contactApi = {
 // ОБЯЗАТЕЛЬСТВА (AI-АНАЛИЗ ДОКУМЕНТОВ)
 // ==========================================
 export const obligationsApi = {
-  /**
-   * Получить список обязательств, извлеченных AI из документов комплекта
-   * Используется во вкладке "Обязательства (AI)" в Cockpit
-   */
-  listBySet: async (setId: number): Promise<any[]> => {
-    return request<any[]>(`/document-sets/${setId}/obligations`, { method: 'GET' });
-  },
-  
-  /**
-   * Запустить или перезапустить процесс извлечения обязательств (AI)
-   */
-  extract: async (setId: number): Promise<{ status: string }> => {
-    return request<{ status: string }>(`/document-sets/${setId}/obligations/extract`, { method: 'POST' });
-  },
+    /**
+     * Получить список обязательств, извлеченных AI из документов комплекта
+     * Используется во вкладке "Обязательства (AI)" в Cockpit
+     */
+    listBySet: async (setId: number): Promise<any[]> => {
+        return request<any[]>(`/document-sets/${setId}/obligations`, { method: 'GET' });
+    },
 
-  /**
-   * Обновить обязательство (например, пометить как исполненное/неактивное)
-   */
-  update: async (id: number, data: { is_active?: boolean; risk_level?: string }): Promise<any> => {
-    return request<any>(`/obligations/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    });
-  }
+    /**
+     * Запустить или перезапустить процесс извлечения обязательств (AI)
+     */
+    extract: async (setId: number): Promise<{ status: string }> => {
+        return request<{ status: string }>(`/document-sets/${setId}/obligations/extract`, { method: 'POST' });
+    },
+
+    /**
+     * Обновить обязательство (например, пометить как исполненное/неактивное)
+     */
+    update: async (id: number, data: { is_active?: boolean; risk_level?: string }): Promise<any> => {
+        return request<any>(`/obligations/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    }
 };

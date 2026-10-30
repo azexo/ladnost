@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Andrey Soloduhin
-//
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 // components/AuthInitializer.tsx
 'use client';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react'; // 🆕 Добавили useState и useRef
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useNavbarStore } from '@/store/useNavbarStore';
 import { pluginManager } from '@/lib/pluginManager';
+import { tokenUtils } from '@/lib/types'; // 🆕 Убедитесь, что импортирован
+import { authApi } from '@/lib/realApi'; // 🆕 Импортируем authApi
 
 const DEFAULT_ALLOWED_PATHS = ['/', '/viewer', '/trial-expired'];
 const DEFAULT_BYPASS_PATHS: string[] = [];
@@ -17,70 +18,85 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('AuthInitializer');
-  
+
   const initializeAuth = useNavbarStore((state) => state.initializeAuth);
   const isAuthLoading = useNavbarStore((state) => state.isAuthLoading);
   const isAuthInitialized = useNavbarStore((state) => state.isAuthInitialized);
   const user = useNavbarStore((state) => state.user);
+  const setSkipGlobalLogout = useNavbarStore((state) => state.setSkipGlobalLogout);
 
-  // 🆕 1. Получаем список путей, которые полностью пропускают авторизацию через хук плагина
-  const bypassAuthPaths = pluginManager.applyFilters(
-    'auth.bypassPaths',
-    [...DEFAULT_BYPASS_PATHS]
-  );
 
-  // 🆕 2. Проверяем, находится ли текущий путь в списке игнорируемых
+  // 🆕 Состояния для контроля процесса обмена OTT
+  const [isProcessingOtt, setIsProcessingOtt] = useState(false);
+  const ottProcessedRef = useRef(false); // Защита от двойного вызова (Strict Mode / быстрые клики)
+
+  const bypassAuthPaths = pluginManager.applyFilters('auth.bypassPaths', [...DEFAULT_BYPASS_PATHS]);
   const isBypassPath = useMemo(() => {
     return bypassAuthPaths.some(
       (path) => pathname === path || pathname.startsWith(`${path}/`)
     );
   }, [bypassAuthPaths, pathname]);
 
-  // 3. Запускаем инициализацию только один раз
+  // 🆕 Единый эффект для обработки OTT и инициализации
+  const initProcessedRef = useRef(false);
+
   useEffect(() => {
-    if (!isAuthInitialized) {
-      initializeAuth();
-    }
+    const handleOttAndInit = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const ott = params.get('ott');
+
+      setSkipGlobalLogout(true);
+      try {
+        if (ott && !tokenUtils.getToken() && !ottProcessedRef.current) {
+          ottProcessedRef.current = true;
+          setIsProcessingOtt(true);
+          try {
+            await authApi.exchangeOtt(ott);
+            params.delete('ott');
+            const cleanUrl = params.toString()
+              ? `${window.location.pathname}?${params.toString()}`
+              : window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
+          } catch (e) {
+            console.error('Ошибка обмена OTT:', e);
+          } finally {
+            setIsProcessingOtt(false);
+          }
+        }
+        if (!isAuthInitialized && !initProcessedRef.current) {
+          initProcessedRef.current = true;
+          await initializeAuth();
+        }
+      } finally {
+        setSkipGlobalLogout(false);
+      }
+    };
+    handleOttAndInit();
   }, [initializeAuth, isAuthInitialized]);
 
-  // 4. Проверяем авторизацию ТОЛЬКО после того, как инициализация началась
+  // 🆕 ГАРД: Не редиректить, пока идет обработка OTT!
   useEffect(() => {
-    // 🆕 Заменяем хардкод if (pathname.startsWith('/partner'))
-    if (isBypassPath) {
-      return;
-    }
+    if (isBypassPath) return;
+    if (!isAuthInitialized) return;
+    if (isProcessingOtt) return; // 🔥 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: ждем завершения обмена токена
 
-    if (!isAuthInitialized) {
-      return;
-    }
-
-    const allowedPaths = pluginManager.applyFilters(
-      'auth.allowedPaths',
-      [...DEFAULT_ALLOWED_PATHS]
-    );
-    
+    const allowedPaths = pluginManager.applyFilters('auth.allowedPaths', [...DEFAULT_ALLOWED_PATHS]);
     const isAllowedPath = allowedPaths.some(
       (path) => pathname === path || pathname.startsWith(`${path}/`)
     );
-
-    if (isAllowedPath) {
-      return;
-    }
+    if (isAllowedPath) return;
 
     if (!isAuthLoading && !user) {
+      const nextPath = encodeURIComponent(pathname);
       console.log(`[AuthInitializer] ${t('userNotFoundRedirect')}`);
-      router.push('/');
-      return;
+      router.push(`/?next=${nextPath}`);
     }
-  }, [user, isAuthLoading, isAuthInitialized, router, pathname, t, isBypassPath]);
+  }, [user, isAuthLoading, isAuthInitialized, isProcessingOtt, router, pathname, t, isBypassPath]);
 
-  // 🆕 5. Пропускаем спиннер для bypass путей (замена второго хардкода /partner)
-  if (isBypassPath) {
-    return <>{children}</>;
-  }
+  if (isBypassPath) return <>{children}</>;
 
-  // 6. Показываем спиннер, пока не инициализировано
-  if (!isAuthInitialized) {
+  // Показываем загрузку, если идет инициализация ИЛИ обработка OTT
+  if (!isAuthInitialized || isProcessingOtt) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

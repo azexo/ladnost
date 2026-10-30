@@ -615,7 +615,7 @@ async def import_template(
 @router.post("/import-file", response_model=TemplateImportResponse)
 async def import_template_from_file(
     file: UploadFile = File(..., description="YAML-файл шаблона"),
-    current_user: User = Depends(get_current_user), # Исправлено для корректной передачи пользователя
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     user_id = current_user.id

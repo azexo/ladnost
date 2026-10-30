@@ -856,3 +856,15 @@ class ContractObligation(Base):
     document_set: Mapped["DocumentSet"] = relationship(foreign_keys=[document_set_id])
     document_version: Mapped["DocumentVersion"] = relationship(foreign_keys=[document_version_id])
 
+
+class OneTimeToken(Base):
+    __tablename__ = "one_time_tokens"
+    
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    token: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    is_used: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    
+    # Relationships (опционально, для удобства)
+    user: Mapped["User"] = relationship()

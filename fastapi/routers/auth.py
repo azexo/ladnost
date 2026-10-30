@@ -12,11 +12,11 @@ from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 from database import get_db
 import os
-
+import secrets
 from models import DocumentSet, DocumentSetAccess, AccessType
 from models import (
     User, Workspace, WorkspaceMember, WorkspaceRole,
-    Subscription, SubscriptionStatus, BillingPeriod, TariffPlan
+    Subscription, SubscriptionStatus, BillingPeriod, TariffPlan, OneTimeToken
 )
 from utils import get_current_user, settings
 from email_service import send_email
@@ -57,6 +57,16 @@ class UserResponse(BaseModel):
     is_active: bool
     model_config = ConfigDict(from_attributes=True)
 
+class RegisterResponse(BaseModel):
+    id: int
+    email: str
+    first_name: str
+    last_name: str
+    middle_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    is_active: bool
+    check_token: str
+
 class ForgotPasswordRequest(BaseModel):
     email: str
 
@@ -66,6 +76,12 @@ class ResetPasswordRequest(BaseModel):
 
 class ActivateAccountRequest(BaseModel):
     token: str
+
+class CheckActivationRequest(BaseModel):
+    check_token: str
+
+class ExchangeOTTRequest(BaseModel):
+    ott: str = Field(..., description="Одноразовый токен для обмена")
 
 # ==========================================
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -154,7 +170,6 @@ def ensure_workspace_and_trial(user: User, db: Session):
     db.commit()
 
 
-
 def grant_global_template_accesses(db: Session, new_user_id: int):
     """Выдаёт доступ VIEW на все глобальные шаблоны новому пользователю."""
     system_user = db.query(User).filter(User.email == SYSTEM_EMAIL).first()
@@ -184,7 +199,7 @@ def grant_global_template_accesses(db: Session, new_user_id: int):
 # ==========================================
 # ENDPOINTS
 # ==========================================
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_in: UserRegister, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_in.email).first()
     if existing_user:
@@ -197,6 +212,7 @@ async def register(user_in: UserRegister, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(existing_user)
             ensure_workspace_and_trial(existing_user, db)
+            grant_global_template_accesses(db, existing_user.id)
             return existing_user
         
         raise HTTPException(
@@ -221,6 +237,12 @@ async def register(user_in: UserRegister, db: Session = Depends(get_db)):
         token_type="activate", 
         expires_delta=timedelta(hours=24)
     )
+    check_token = create_auth_token(
+        data={"sub": db_user.email},
+        token_type="activation_check",
+        expires_delta=timedelta(hours=24)
+    )
+
     frontend_url = os.getenv("FRONTEND_BASE_URL", "https://ladnost.ru")
     activate_link = f"{frontend_url}/?mode=activate&token={activate_token}"
     
@@ -231,7 +253,17 @@ async def register(user_in: UserRegister, db: Session = Depends(get_db)):
     <p><a href="{activate_link}">{activate_link}</a></p>
     """
     send_email(db_user.email, t("auth.emails.registration_confirmation.subject"), html_content)
-    return db_user
+
+    return {
+        "id": db_user.id,
+        "email": db_user.email,
+        "first_name": db_user.first_name,
+        "last_name": db_user.last_name,
+        "middle_name": db_user.middle_name,
+        "avatar_url": db_user.avatar_url,
+        "is_active": db_user.is_active,
+        "check_token": check_token
+    }
 
 @router.post("/activate")
 async def activate_account(request: ActivateAccountRequest, db: Session = Depends(get_db)):
@@ -249,14 +281,35 @@ async def activate_account(request: ActivateAccountRequest, db: Session = Depend
     if not user:
         raise HTTPException(status_code=404, detail=t("auth.errors.user_not_found"))
 
+    # Если аккаунт уже активирован — всё равно выдаём токен, чтобы пользователь мог войти
     if user.is_active:
-        return {"status": "success", "message": t("auth.messages.account_already_activated")}
+        access_token_expires = timedelta(minutes=getattr(settings, 'ACCESS_TOKEN_EXPIRE_MINUTES', 30))
+        access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
+        return {
+            "status": "success",
+            "message": t("auth.messages.account_already_activated"),
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
 
     user.is_active = True
     db.commit()
-    
     ensure_workspace_and_trial(user, db)
-    return {"status": "success", "message": t("auth.messages.account_activated")}
+    grant_global_template_accesses(db, user.id)
+
+    # 🔑 ГЕНЕРИРУЕМ access_token для автоматического входа
+    access_token_expires = timedelta(minutes=getattr(settings, 'ACCESS_TOKEN_EXPIRE_MINUTES', 30))
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=access_token_expires
+    )
+
+    return {
+        "status": "success",
+        "message": t("auth.messages.account_activated"),
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 @router.post("/login", response_model=Token)
 async def login(form_data: UserLogin, db: Session = Depends(get_db)):
@@ -340,3 +393,128 @@ async def reset_password(request: ResetPasswordRequest, db: Session = Depends(ge
     user.password_hash = get_password_hash(request.new_password)
     db.commit()
     return {"status": "success", "message": t("auth.messages.password_changed")}
+
+
+@router.post("/activation-status")
+async def check_activation_status(
+    request: CheckActivationRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Проверяет статус активации аккаунта по check_token.
+    Если аккаунт активирован — выдаёт access_token для автоматического входа.
+    НЕ активирует аккаунт (в отличие от /activate).
+    """
+    try:
+        payload = jwt.decode(
+            request.check_token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
+        
+        # Проверяем тип токена
+        if payload.get("type") != "activation_check":
+            raise HTTPException(
+                status_code=400,
+                detail=t("auth.errors.invalid_token_type")
+            )
+        
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(
+                status_code=400,
+                detail=t("auth.errors.invalid_token")
+            )
+            
+    except PyJWTError:
+        raise HTTPException(
+            status_code=400,
+            detail=t("auth.errors.token_expired_or_invalid")
+        )
+    
+    # Ищем пользователя
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=t("auth.errors.user_not_found")
+        )
+    
+    # Проверяем статус активации
+    if not user.is_active:
+        return {
+            "is_active": False,
+            "message": t("auth.messages.account_not_activated")
+        }
+    
+    # 🔑 Аккаунт активирован — выдаём access_token
+    access_token_expires = timedelta(
+        minutes=getattr(settings, 'ACCESS_TOKEN_EXPIRE_MINUTES', 30)
+    )
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "is_active": True,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": t("auth.messages.account_activated")
+    }
+
+
+@router.post("/generate-ott")
+async def generate_ott(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Генерирует одноразовый токен для перехода в новую вкладку."""
+    ott = secrets.token_urlsafe(32)
+    
+    # Сохраняем токен в БД (живет 60 секунд)
+    new_token = OneTimeToken(
+        token=ott,
+        user_id=current_user.id,
+        expires_at=datetime.utcnow() + timedelta(seconds=60),
+        is_used=False
+    )
+    db.add(new_token)
+    db.commit()
+    
+    return {"ott": ott}
+
+
+@router.post("/exchange-ott")
+async def exchange_ott(
+    request: ExchangeOTTRequest,
+    db: Session = Depends(get_db)
+):
+    """Обменивает одноразовый токен на полноценный JWT."""
+    # 1. Ищем токен в БД
+    ott_record = db.query(OneTimeToken).filter(OneTimeToken.token == request.ott).first()
+    
+    if not ott_record:
+        raise HTTPException(status_code=400, detail=t("auth.errors.token_expired_or_invalid"))
+    
+    # 2. Проверяем, не был ли он уже использован
+    if ott_record.is_used:
+        raise HTTPException(status_code=400, detail=t("auth.errors.token_expired_or_invalid"))
+        
+    # 3. Проверяем срок жизни
+    if ott_record.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail=t("auth.errors.token_expired_or_invalid"))
+        
+    # 4. Помечаем токен как использованный (гарантия одноразовости)
+    ott_record.is_used = True
+    db.commit()
+    
+    # 5. Получаем пользователя и генерируем JWT
+    user = db.query(User).filter(User.id == ott_record.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail=t("auth.errors.user_not_found"))
+        
+    access_token_expires = timedelta(minutes=getattr(settings, 'ACCESS_TOKEN_EXPIRE_MINUTES', 30))
+    access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
+    
+    return {"access_token": access_token, "token_type": "bearer"}

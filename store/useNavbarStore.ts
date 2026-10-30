@@ -17,11 +17,12 @@ interface NavbarState {
   isAuthLoading: boolean;
   isAuthInitialized: boolean;
   authError: string | null;
-  
+  skipGlobalLogout: boolean;
+
   // --- Состояние Уведомлений ---
   notifications: Notification[];
   unreadCount: number;
-  
+
   // --- Состояние Доступа (Access) ---
   accessList: DocumentSetAccess[];
   isAccessLoading: boolean;
@@ -32,12 +33,13 @@ interface NavbarState {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterPayload) => Promise<boolean>;
   logout: () => void;
-  
+  setSkipGlobalLogout: (skip: boolean) => void;
+
   // --- Действия: Уведомления ---
   fetchNotifications: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
   markAllAsRead: () => Promise<void>;
-  
+
   // --- Действия: Доступ ---
   fetchAccess: (setId: number) => Promise<void>;
   grantAccess: (setId: number, data: AccessPayload) => Promise<void>;
@@ -57,6 +59,7 @@ export const useNavbarStore = create<NavbarState>((set, get) => ({
   accessList: [],
   isAccessLoading: false,
   accessError: null,
+  skipGlobalLogout: false,
 
   // === АУТЕНТИФИКАЦИЯ ===
   initializeAuth: async () => {
@@ -73,6 +76,10 @@ export const useNavbarStore = create<NavbarState>((set, get) => ({
     } else {
       set({ isAuthLoading: false, isAuthInitialized: true });
     }
+  },
+
+  setSkipGlobalLogout: (skip: boolean) => {
+    set({ skipGlobalLogout: skip });
   },
 
   login: async (email: string, password: string) => {

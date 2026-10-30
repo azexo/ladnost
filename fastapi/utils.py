@@ -380,15 +380,37 @@ def notify_formulation_updated(db: Session, formulation_id: int, formulation_nam
 # =====================================================================
 # 7. АВТОРИЗАЦИЯ ПО API-КЛЮЧУ
 # =====================================================================
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
+
 class AuthContext:
-    def __init__(self, user: User, workspace_id: int, auth_type: str, scopes: list = None):
+    """
+    Универсальный контекст аутентификации.
+    Возвращается как при JWT/API-Key, так и из плагинов (Б24, Telegram, LDAP и т.д.)
+    """
+    def __init__(self, user: User, workspace_id: int, auth_type: str, scopes: list = None, **extra):
         self.user = user
         self.workspace_id = workspace_id
-        self.auth_type = auth_type
+        self.auth_type = auth_type          # "jwt" | "api_key" | "bitrix24" | "telegram" | ...
         self.scopes = scopes or []
+        self.extra = extra or {}            # Плагины могут класть сюда свои метаданные
+
+    def __getattr__(self, name):
+        if name in self.extra:
+            return self.extra[name]
+        raise AttributeError(f"У AuthContext нет атрибута '{name}'")
+
+
+def _resolve_workspace_for_user(db: Session, user: User) -> Optional[int]:
+    """Определяет workspace пользователя (участие или владение)."""
+    ws_member = db.query(WorkspaceMember).filter(WorkspaceMember.user_id == user.id).first()
+    if ws_member:
+        return ws_member.workspace_id
+    ws_owner = db.query(Workspace).filter(Workspace.owner_id == user.id).first()
+    return ws_owner.id if ws_owner else None
+
 
 def get_current_user_or_api_key(
     request: Request,
@@ -396,6 +418,17 @@ def get_current_user_or_api_key(
     api_key: Optional[str] = Security(api_key_header),
     db: Session = Depends(get_db)
 ) -> AuthContext:
+    """
+    Универсальная зависимость аутентификации.
+    Порядок проверки:
+      1. JWT токен (Bearer)
+      2. API-ключ (X-API-Key)
+      3. 🔥 Плагины через фильтр 'resolve_auth_context'
+    """
+
+    # ==========================================
+    # 1. ПРОВЕРКА JWT ТОКЕНА
+    # ==========================================
     if token:
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -410,21 +443,21 @@ def get_current_user_or_api_key(
         if not user or not user.is_active:
             raise HTTPException(status_code=401, detail=t("utils.errors.user_not_found_or_deactivated"))
 
-        ws_member = db.query(WorkspaceMember).filter(WorkspaceMember.user_id == user.id).first()
-        workspace_id = ws_member.workspace_id if ws_member else None
-        if not workspace_id:
-            ws_owner = db.query(Workspace).filter(Workspace.owner_id == user.id).first()
-            workspace_id = ws_owner.id if ws_owner else None
+        workspace_id = _resolve_workspace_for_user(db, user)
         if not workspace_id:
             raise HTTPException(status_code=403, detail=t("utils.errors.no_active_workspace"))
 
         return AuthContext(user=user, workspace_id=workspace_id, auth_type="jwt")
 
+    # ==========================================
+    # 2. ПРОВЕРКА API-КЛЮЧА
+    # ==========================================
     if api_key:
         prefix = api_key[:9] + "..."
         candidates = db.query(ApiKey).filter(
             ApiKey.key_prefix == prefix, ApiKey.is_active == True
         ).all()
+
         if not candidates:
             raise HTTPException(status_code=401, detail=t("utils.errors.invalid_api_key"))
 
@@ -433,6 +466,7 @@ def get_current_user_or_api_key(
             if pwd_context.verify(api_key, candidate.key_hash):
                 matched_key = candidate
                 break
+
         if not matched_key:
             raise HTTPException(status_code=401, detail=t("utils.errors.invalid_api_key"))
 
@@ -446,6 +480,7 @@ def get_current_user_or_api_key(
 
         matched_key.last_used_at = datetime.utcnow()
         db.commit()
+
         return AuthContext(
             user=matched_key.creator,
             workspace_id=matched_key.workspace_id,
@@ -453,14 +488,61 @@ def get_current_user_or_api_key(
             scopes=matched_key.scopes or []
         )
 
+    # ==========================================
+    # 3. 🔥 ТОЧКА ВХОДА ДЛЯ ПЛАГИНОВ АВТОРИЗАЦИИ
+    # ==========================================
+    # Собираем контекст и передаём в фильтр.
+    # Любой плагин (Б24, Telegram, LDAP, SSO, AD) может перехватить запрос,
+    # проверить свои заголовки/куки и вернуть готовый AuthContext.
+    plugin_ctx = {
+        "request": request,
+        "db": db,
+        "token": token,
+        "api_key": api_key,
+        "resolved": False,           # Флаг: нашёл ли плагин пользователя
+        "auth_context": None,        # Сюда плагин кладёт AuthContext
+        "auth_source": None,         # "bitrix24", "telegram", "ldap" и т.д.
+    }
+
+    plugin_ctx = hooks.apply_filters_sync("resolve_auth_context", plugin_ctx)
+
+    if plugin_ctx.get("resolved") and plugin_ctx.get("auth_context"):
+        auth_ctx: AuthContext = plugin_ctx["auth_context"]
+
+        # 🔒 Валидация: плагин обязан вернуть валидный AuthContext
+        if not isinstance(auth_ctx, AuthContext):
+            raise HTTPException(
+                status_code=500,
+                detail=t("utils.errors.plugin_returned_invalid_context"),
+            )
+        if not auth_ctx.user or not auth_ctx.user.is_active:
+            # Плагин вернул неактивного пользователя — игнорируем и идём дальше
+            pass
+        else:
+            # Убеждаемся, что у пользователя есть workspace
+            if not auth_ctx.workspace_id:
+                auth_ctx.workspace_id = _resolve_workspace_for_user(db, auth_ctx.user)
+            if not auth_ctx.workspace_id:
+                raise HTTPException(status_code=403, detail=t("utils.errors.no_active_workspace"))
+
+            # 🔥 Даём другим плагинам шанс ОБОГАТИТЬ контекст (scopes, роли, метаданные)
+            auth_ctx = hooks.apply_filters_sync("enrich_auth_context", auth_ctx)
+            return auth_ctx
+
+    # ==========================================
+    # 4. НИ ОДИН СПОСОБ НЕ СРАБОТАЛ — 401
+    # ==========================================
     raise HTTPException(
         status_code=401,
         detail=t("utils.errors.auth_required_any"),
-        headers={"WWW-Authenticate": "Bearer"}
+        headers={"WWW-Authenticate": "Bearer"},
     )
 
+
 def check_scope(required_scope: str, ctx: AuthContext):
-    if ctx.auth_type == "api_key" and required_scope not in ctx.scopes:
+    """Проверка наличия scope (для API-ключей и плагинов, которые их выдают)."""
+    if ctx.auth_type in ("api_key", "bitrix24", "telegram", "ldap", "sso") \
+            and required_scope not in ctx.scopes:
         raise HTTPException(
             status_code=403,
             detail=t("utils.errors.api_key_missing_scope", scope=required_scope)
