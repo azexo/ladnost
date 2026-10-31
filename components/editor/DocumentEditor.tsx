@@ -135,6 +135,7 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
     const showFormatting = (mode === 'markup' || mode === 'edit') && docSetMode !== 'standard' && docSetMode !== 'file';
     const currentUserAccess = useStore((s: any) => s.documentPackage.currentUserAccess); 
     const canModifyPackage = currentUserAccess === 'owner' || currentUserAccess === 'full'; 
+    const accessError = useStore((s: any) => s.documentPackage.accessError);
     const isContentLoading = useStore((s: any) => s.documentPackage.isContentLoading);
     
     const conversionModalRef = useRef<ConversionModalHandle>(null);
@@ -793,6 +794,24 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
       if (editor?.isActive('codeBlock')) return 'code';
       return 'p';
     };
+
+    if (accessError) {
+      return (
+        <section id="right-panel" className="flex-1 flex flex-col bg-slate-100 min-w-0 items-center justify-center p-8">
+          <div className="bg-white p-10 rounded-2xl shadow-lg border border-slate-200 text-center max-w-md w-full">
+            <div className="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-full flex items-center justify-center">
+              <i className="fa-solid fa-lock text-4xl text-red-400"></i>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-3">
+              {t('accessDeniedTitle')}
+            </h2>
+            <p className="text-slate-600 mb-8 leading-relaxed">
+              {accessError}
+            </p>
+          </div>
+        </section>
+      );
+    }
 
     return (
       <section id="right-panel" className="flex-1 flex flex-col bg-slate-100 min-w-0">

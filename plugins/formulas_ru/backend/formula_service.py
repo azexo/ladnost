@@ -573,9 +573,38 @@ class CLMFormulaService:
     def evaluate(self, formula: str, context: Dict[str, Any] = None) -> Any:
         if context is None: context = {}
         normalized = self._preprocess_formula(formula)
-        for key, value in context.items(): 
+        
+        # 🆕 ИСПРАВЛЕНИЕ: Python eval() не умеет обращаться к ключам словаря через точку 
+        # (например, deal.BEGINDATE вызовет AttributeError, так как deal - это dict).
+        # Мы заменяем точки на подчеркивания в ключах контекста и в самой формуле.
+        safe_context = {}
+        
+        # Находим все ключи с точками и сортируем по убыванию длины.
+        # Это критически важно: сначала заменяем более длинные ключи 
+        # (например, company_requisite.0.RQ_BASE_DOC), чтобы они не конфликтовали 
+        # с более короткими (company_requisite.0).
+        keys_to_replace = sorted([k for k in context.keys() if '.' in k], key=len, reverse=True)
+        
+        for key in keys_to_replace:
+            safe_key = key.replace('.', '_') # deal.BEGINDATE -> deal_BEGINDATE
+            safe_context[safe_key] = context[key]
+            
+            # Заменяем в формуле, экранируя точку для регулярки и используя границы слова \b
+            escaped_key = re.escape(key) 
+            pattern = r'\b' + escaped_key + r'\b'
+            normalized = re.sub(pattern, safe_key, normalized)
+            
+        # Добавляем остальные ключи (без точек)
+        for key, value in context.items():
+            if '.' not in key:
+                safe_context[key] = value
+
+        # Устанавливаем "плоские" переменные в парсер
+        for key, value in safe_context.items(): 
             self.parser.set_variable(key, value)
+            
         result = self.parser.parse(normalized)
+        
         if result["error"]:
             if normalized.startswith('IFERROR(') and normalized.endswith(')'):
                 depth = 0; last_comma_idx = -1
@@ -587,6 +616,7 @@ class CLMFormulaService:
                     fallback_str = normalized[last_comma_idx + 1:-1].strip()
                     fallback_result = self.parser.parse(fallback_str)
                     if not fallback_result["error"]: return fallback_result["result"]
+                    
         return result["result"]
 
 # Singleton instance

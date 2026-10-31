@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Andrey Soloduhin
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
-
 // lib/templateImport.ts
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
@@ -33,6 +32,7 @@ type LogFunction = (message: string) => void;
 // ============================================================================
 // УТИЛИТЫ
 // ============================================================================
+
 /**
  * Корректное экранирование HTML-сущностей (включая кавычки).
  */
@@ -43,12 +43,13 @@ const escapeHtml = (str: string | null | undefined): string => {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/'/g, '&#39;');
 };
 
 // ============================================================================
 // ВАЛИДАЦИЯ РАСПАРСЕННОГО ШАБЛОНА
 // ============================================================================
+
 function validateParsedTemplate(
     json: any,
     originalMd: string,
@@ -60,13 +61,13 @@ function validateParsedTemplate(
     const t = getT(); // Получаем функцию перевода
 
     onLog(t('templateImport.validation.startAnalysis'));
-    
+
     let tokenCount = 0;
     let slotCount = 0;
     let tableCount = 0;
     let dynamicTableCount = 0;
     let templateRowCount = 0;
-    
+
     const foundTokens = new Set<string>();
     const foundSlots = new Set<string>();
     const errors: string[] = [];
@@ -132,9 +133,10 @@ function validateParsedTemplate(
             node.content.forEach(walk);
         }
     };
+
     walk(json);
 
-    const mdPlaceholders = originalMd.match(/\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g) || [];
+    const mdPlaceholders = originalMd.match(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g) || [];
     const mdPlaceholderCount = mdPlaceholders.length;
     const totalParsedEntities = tokenCount + slotCount;
 
@@ -151,14 +153,14 @@ function validateParsedTemplate(
     const unusedVariants = variants.filter(v => !foundSlots.has(v.identifier));
 
     if (unusedProperties.length > 0) {
-        warnings.push(t('templateImport.validation.unusedProperties', { 
-            list: unusedProperties.map(p => p.identifier).join(', ') 
+        warnings.push(t('templateImport.validation.unusedProperties', {
+            list: unusedProperties.map(p => p.identifier).join(', ')
         }));
     }
 
     if (unusedVariants.length > 0) {
-        warnings.push(t('templateImport.validation.unusedVariants', { 
-            list: unusedVariants.map(v => v.identifier).join(', ') 
+        warnings.push(t('templateImport.validation.unusedVariants', {
+            list: unusedVariants.map(v => v.identifier).join(', ')
         }));
     }
 
@@ -186,108 +188,186 @@ function validateParsedTemplate(
     onLog(t('templateImport.validation.analysisComplete'));
 }
 
+/**
+ * Удаляет общий ведущий отступ (Common Indent).
+ * Это спасает от ситуации, когда весь текст сдвинут вправо на N пробелов,
+ * из-за чего Markdown-парсер превращает абзацы в блоки кода (<pre><code>).
+ */
+const normalizeMarkdownIndents = (markdown: string): string => {
+    const lines = markdown.split('\n');
+    let minIndent = Infinity;
+
+    // Находим минимальный отступ среди непустых строк
+    for (const line of lines) {
+        if (line.trim().length > 0) {
+            const match = line.match(/^[ \t]*/);
+            if (match && match[0].length < minIndent) {
+                minIndent = match[0].length;
+            }
+        }
+    }
+
+    // Если отступа нет или он минимален, возвращаем как есть
+    if (minIndent === Infinity || minIndent === 0) return markdown;
+
+    // Убираем найденный общий отступ у всех строк
+    return lines.map(line => {
+        if (line.trim().length === 0) return ''; // Пустые строки оставляем пустыми
+        return line.substring(minIndent);
+    }).join('\n');
+};
+
+/**
+ * Убирает лишние пустые строки (схлопывает 3+ переноса в 2).
+ */
+const removeExtraBlankLines = (markdown: string): string => {
+    return markdown.replace(/\n{3,}/g, '\n\n').trim();
+};
+
 // ============================================================================
-// ПОДГОТОВКА MARKDOWN: ЗАМЕНА ПЛЕЙСХОЛДЕРОВ НА HTML-ТЕГИ
+// ЗАМЕНА ПЛЕЙСХОЛДЕРОВ НА НАТИВНЫЕ НОДЫ В JSON
 // ============================================================================
-function prepareMarkdownForTiptap(
-    markdown: string,
+
+function replacePlaceholdersWithNativeNodes(
+    json: any,
     properties: PropertyOut[],
     variants: VariantOut[],
     sections: SectionOut[],
     onLog: LogFunction
-): string {
-    if (!markdown) return ''; // Исправлена опечатка r eturn
-    
-    const t = getT(); // Получаем функцию перевода
-
-    type BlockType = 'table' | 'list' | 'quote' | 'heading' | 'code' | 'hr' | 'paragraph';
-    const getBlockType = (line: string, inCodeBlock: boolean): { type: BlockType, inCodeBlock: boolean } => {
-        const trimmed = line.trim();
-        if (inCodeBlock) {
-            if (trimmed.startsWith('```')) return { type: 'code', inCodeBlock: false };
-            return { type: 'code', inCodeBlock: true };
-        }
-        if (trimmed.startsWith('```')) return { type: 'code', inCodeBlock: true };
-        if (/^\|/.test(trimmed)) return { type: 'table', inCodeBlock: false }; 
-        if (/^([-*+]|\d+\.)\s/.test(trimmed)) return { type: 'list', inCodeBlock: false }; 
-        if (/^>/.test(trimmed)) return { type: 'quote', inCodeBlock: false }; 
-        if (/^#{1,6}\s/.test(trimmed)) return { type: 'heading', inCodeBlock: false }; 
-        if (/^(---|\*\*\*|___)$/.test(trimmed)) return { type: 'hr', inCodeBlock: false }; 
-        return { type: 'paragraph', inCodeBlock: false }; 
-    };
-
-    let inCodeBlock = false;
-    const normalizedMd = markdown.split('\n').reduce((acc, line, index, arr) => {
-        const currentBlock = getBlockType(line, inCodeBlock);
-        inCodeBlock = currentBlock.inCodeBlock;
-        acc.push(line);
-        if (index < arr.length - 1) {
-            const nextLine = arr[index + 1];
-            const nextBlock = getBlockType(nextLine, inCodeBlock);
-            if (line.trim() !== '' && nextLine.trim() !== '') {
-                const isSameContinuousBlock = 
-                    currentBlock.type === nextBlock.type && 
-                    ['table', 'list', 'quote', 'code'].includes(currentBlock.type);
-                if (!isSameContinuousBlock) {
-                    acc.push(''); 
-                }
-            }
-        }
-        return acc;
-    }, [] as string[]).join('\n');
+): void {
+    if (!json) return;
+    const t = getT();
 
     const sectionNameToId: Record<string, number> = {};
-    const sectionNameToIsTable: Record<string, boolean> = {};
-    for (const sec of sections) {
-        sectionNameToId[sec.name] = sec.id;
-        sectionNameToIsTable[sec.name] = sec.is_table;
-    }
+    for (const sec of sections) sectionNameToId[sec.name] = sec.id;
 
+    const placeholderRegex = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
     let matchCount = 0;
-    const processedMd = normalizedMd.replace(
-        /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g,
-        (match, identifier: string) => {
-            matchCount++;
-            const property = properties.find(p => p.identifier === identifier);
-            if (property) {
-                const sectionId = property.section
-                    ? (sectionNameToId[property.section] ?? '')
-                    : '';
-                const isTableCol = property.is_table ? 'true' : 'false';
-                const uuid = `tok_${Math.random().toString(36).substr(2, 9)}`;
-                
-                const tableSuffix = property.is_table ? t('templateImport.prepare.isTableColumn') : '';
-                onLog(
-                    t('templateImport.prepare.insertProperty', { 
-                        count: matchCount, 
-                        identifier, 
-                        tableSuffix 
-                    })
-                );
 
-                const safeValue = property.default_value ? escapeHtml(property.default_value) : '\u200B';
-                const htmlTag = `<span data-token-uuid="${escapeHtml(uuid)}" data-token-source-id="${property.id}" data-token-identifier="${escapeHtml(identifier)}" data-token-type="property" data-token-label="${escapeHtml(property.name)}" data-token-value="${safeValue}" data-token-display="compact">\u200B</span>`;
-                return htmlTag;
+    // Рекурсивная обработка. Возвращает либо одну ноду, либо массив нод
+    // (когда текстовая нода разбивается на части).
+    const processNode = (node: any): any | any[] => {
+        if (!node) return node;
+
+        // === Базовый случай: текстовая нода ===
+        if (node.type === 'text' && typeof node.text === 'string') {
+            const text = node.text;
+            placeholderRegex.lastIndex = 0;
+            if (!placeholderRegex.test(text)) return node;
+            placeholderRegex.lastIndex = 0;
+
+            const parts: any[] = [];
+            let lastIndex = 0;
+            let match: RegExpExecArray | null;
+
+            while ((match = placeholderRegex.exec(text)) !== null) {
+                const identifier = match[1];
+                const fullMatch = match[0];
+                const startIndex = match.index;
+
+                // 1) Текст ДО плейсхолдера (наследует marks исходной ноды)
+                if (startIndex > lastIndex) {
+                    const textBefore = text.substring(lastIndex, startIndex);
+                    parts.push({
+                        type: 'text',
+                        text: textBefore,
+                        ...(node.marks ? { marks: [...node.marks] } : {}),
+                    });
+                }
+
+                // 2) Сам плейсхолдер → токен или слот
+                const property = properties.find(p => p.identifier === identifier);
+                if (property) {
+                    matchCount++;
+                    const uuid = `tok_${Math.random().toString(36).substr(2, 9)}`;
+                    const tableSuffix = property.is_table
+                        ? t('templateImport.prepare.isTableColumn')
+                        : '';
+                    onLog(
+                        t('templateImport.prepare.insertProperty', {
+                            count: matchCount,
+                            identifier,
+                            tableSuffix,
+                        })
+                    );
+
+                    parts.push({
+                        type: 'token',
+                        attrs: {
+                            uuid,
+                            sourceId: property.id,
+                            identifier,
+                            type: 'property',
+                            label: property.name,
+                            value: property.default_value || '',
+                            displayMode: 'compact',
+                        },
+                    });
+                } else {
+                    const variant = variants.find(v => v.identifier === identifier);
+                    if (variant) {
+                        matchCount++;
+                        onLog(
+                            t('templateImport.prepare.insertVariant', {
+                                count: matchCount,
+                                identifier,
+                            })
+                        );
+                        parts.push({
+                            type: 'formulationSlot',
+                            attrs: { identifier },
+                        });
+                    } else {
+                        matchCount++;
+                        onLog(
+                            t('templateImport.prepare.entityNotFound', {
+                                count: matchCount,
+                                identifier,
+                            })
+                        );
+                        // Неизвестный плейсхолдер — оставляем как обычный текст
+                        parts.push({
+                            type: 'text',
+                            text: fullMatch,
+                            ...(node.marks ? { marks: [...node.marks] } : {}),
+                        });
+                    }
+                }
+
+                lastIndex = startIndex + fullMatch.length;
             }
 
-            const variant = variants.find(v => v.identifier === identifier);
-            if (variant) {
-                onLog(
-                    t('templateImport.prepare.insertVariant', { count: matchCount, identifier })
-                );
-                const slotTag = `<span data-slot-identifier="${escapeHtml(identifier)}">\u200B</span>`;
-                return slotTag;
+            // 3) Текст ПОСЛЕ последнего плейсхолдера
+            if (lastIndex < text.length) {
+                parts.push({
+                    type: 'text',
+                    text: text.substring(lastIndex),
+                    ...(node.marks ? { marks: [...node.marks] } : {}),
+                });
             }
 
-            onLog(
-                t('templateImport.prepare.entityNotFound', { count: matchCount, identifier })
-            );
-            return match;
+            return parts;
         }
-    );
 
+        // === Рекурсия по содержимому ===
+        if (node.content && Array.isArray(node.content)) {
+            const newContent: any[] = [];
+            for (const child of node.content) {
+                const processed = processNode(child);
+                if (Array.isArray(processed)) {
+                    newContent.push(...processed);
+                } else if (processed) {
+                    newContent.push(processed);
+                }
+            }
+            node.content = newContent;
+        }
+
+        return node;
+    };
+
+    processNode(json);
     onLog(t('templateImport.prepare.totalProcessed', { count: matchCount }));
-    return processedMd;
 }
 
 // ============================================================================
@@ -300,7 +380,7 @@ function markDynamicTables(
     onLog: LogFunction
 ): void {
     if (!json) return;
-    const t = getT(); // Получаем функцию перевода
+    const t = getT();
 
     const sectionNameToId: Record<string, number> = {};
     for (const sec of sections) sectionNameToId[sec.name] = sec.id;
@@ -316,68 +396,89 @@ function markDynamicTables(
         if (!node) return;
         if (node.type === 'table' || node.type === 'customTable') {
             let tableHasTemplateRow = false;
+            
             if (node.content && Array.isArray(node.content)) {
                 for (const row of node.content) {
                     if (row.type !== 'tableRow' && row.type !== 'customTableRow') continue;
-                    let allCellsHaveToken = true;
-                    let hasAnyCell = false;
+
                     const rowSectionIds = new Set<number>();
+                    let hasTokens = false;
+
+                    // Рекурсивно собираем ID секций всех токенов внутри ячейки
+                    const collectTokenSections = (child: any) => {
+                        if (!child) return;
+                        if (child.type === 'token') {
+                            hasTokens = true;
+                            const secId = identifierToSectionId[child.attrs?.identifier];
+                            if (secId !== undefined && secId !== null) {
+                                rowSectionIds.add(secId);
+                            } else {
+                                // Если у токена нет секции, добавляем -1, 
+                                // чтобы гарантированно сломать условие "все в одной секции"
+                                rowSectionIds.add(-1); 
+                            }
+                        }
+                        if (child.content && Array.isArray(child.content)) {
+                            child.content.forEach(collectTokenSections);
+                        }
+                    };
+
+                    // Обходим ячейки строки
                     if (row.content && Array.isArray(row.content)) {
                         for (const cell of row.content) {
                             if (!cellTypes.includes(cell.type)) continue;
-                            hasAnyCell = true;
-                            let cellHasToken = false;
-                            const checkTokenInCell = (child: any) => {
-                                if (!child) return;
-                                if (child.type === 'token') {
-                                    cellHasToken = true;
-                                    const secId = identifierToSectionId[child.attrs?.identifier];
-                                    if (secId !== undefined && secId !== null) {
-                                        rowSectionIds.add(secId);
-                                    }
-                                }
-                                if (child.content && Array.isArray(child.content)) {
-                                    child.content.forEach(checkTokenInCell);
-                                }
-                            };
+                            
+                            // ИСПРАВЛЕНО: теперь проверяем cell.content, а не node.content
                             if (cell.content && Array.isArray(cell.content)) {
-                                cell.content.forEach(checkTokenInCell);
-                            }
-                            if (!cellHasToken) {
-                                allCellsHaveToken = false;
-                                break; 
+                                cell.content.forEach(collectTokenSections);
                             }
                         }
                     }
-                    if (hasAnyCell && allCellsHaveToken) {
-                        row.attrs = {
-                            ...(row.attrs || {}),
-                            isTemplate: true,
-                            isInjected: false,
-                        };
-                        if (rowSectionIds.size === 1) {
-                            row.attrs.sectionId = [...rowSectionIds][0];
+
+                    // ====================================================================
+                    // ПРОВЕРКА УСЛОВИЙ ДЛЯ ШАБЛОННОЙ СТРОКИ:
+                    // 1. В строке есть хотя бы один токен (hasTokens)
+                    // 2. Все токены принадлежат РОВНО ОДНОЙ секции (rowSectionIds.size === 1)
+                    // ====================================================================
+                    if (hasTokens && rowSectionIds.size === 1) {
+                        const sectionId = [...rowSectionIds][0];
+                        const targetSection = sections.find(s => s.id === sectionId);
+
+                        // 3. Секция должна иметь флаг "табличная" 
+                        // (Предполагаем, что флаг называется is_table, как у PropertyOut. 
+                        // Если у вас в SectionOut он называется иначе, например isTable - замените)
+                        if (targetSection && (targetSection as any).is_table) { 
+                            row.attrs = {
+                                ...(row.attrs || {}),
+                                isTemplate: true,
+                                isInjected: false,
+                                sectionIdentifier: targetSection.name,
+                            };
+                            tableHasTemplateRow = true;
+                            onLog(t('templateImport.tables.rowMarkedTemplate', { sectionId: targetSection.name }));
                         }
-                        tableHasTemplateRow = true;
-                        onLog(t('templateImport.tables.rowMarkedTemplate', { sectionId: row.attrs.sectionId || 'none' }));
                     }
                 }
             }
+            
             if (tableHasTemplateRow) {
                 node.attrs = { ...(node.attrs || {}), isDynamic: true };
                 onLog(t('templateImport.tables.dynamicTableFound'));
             }
         }
+        
         if (node.content && Array.isArray(node.content)) {
             node.content.forEach((child: any) => walk(child));
         }
     };
+    
     walk(json);
 }
 
 // ============================================================================
 // ОСНОВНАЯ ФУНКЦИЯ ИМПОРТА
 // ============================================================================
+
 export async function processAndSaveTemplateFromYaml(
     yamlContent: string,
     markdownBody: string,
@@ -388,13 +489,19 @@ export async function processAndSaveTemplateFromYaml(
 
     try {
         onLog(t('templateImport.import.start'));
+
+        // === ШАГ 0: Предварительная очистка Markdown ===
+        onLog('Очистка лишних отступов и пустых строк...');
+        const cleanMarkdown = normalizeMarkdownIndents(markdownBody);
+        const finalMarkdown = removeExtraBlankLines(cleanMarkdown);
+
         onLog(t('templateImport.import.sendingToBackend'));
-        
-        const importResult = await templateImportApi.importFromYaml(yamlContent, markdownBody);
+
+        const importResult = await templateImportApi.importFromYaml(yamlContent, finalMarkdown);
         console.log('[DEBUG FRONT]', t('templateImport.import.debugRawResponse'), importResult);
-        
+
         const { document_id, properties, variants, sections } = importResult;
-        
+
         onLog(t('templateImport.import.backendSuccess', { documentId: document_id }));
         onLog(t('templateImport.import.statsSections', { count: sections?.length ?? 0 }));
         onLog(t('templateImport.import.statsProperties', { count: properties?.length ?? 0 }));
@@ -406,22 +513,39 @@ export async function processAndSaveTemplateFromYaml(
             }
         }
 
-        onLog(t('templateImport.import.preparingMarkdown'));
-        const processedMarkdown = prepareMarkdownForTiptap(
+        // === ШАГ 1. Парсим markdown в чистый Tiptap JSON ===
+        onLog(t('templateImport.import.parsingMarkdown'));
+        const { json: tiptapJson } = parseMarkdownToTiptap(finalMarkdown);
+
+        onLog(t('templateImport.import.debugParsedJson'));
+        onLog(JSON.stringify(tiptapJson).substring(0, 800) + (JSON.stringify(tiptapJson).length > 800 ? '...' : ''));
+        onLog('-');
+
+        // === ШАГ 2. Заменяем плейсхолдеры на НАТИВНЫЕ ноды ===
+        onLog(t('templateImport.import.replacingPlaceholders'));
+        replacePlaceholdersWithNativeNodes(
+            tiptapJson,
+            properties ?? [],
+            variants ?? [],
+            sections ?? [],
+            onLog
+        );
+
+        // === ШАГ 3. Пост-обработка таблиц ===
+        onLog(t('templateImport.import.postProcessingTables'));
+        markDynamicTables(tiptapJson, properties ?? [], sections ?? [], onLog);
+
+        // === ШАГ 4. Валидация ===
+        validateParsedTemplate(
+            tiptapJson,
             markdownBody,
             properties ?? [],
             variants ?? [],
             sections ?? [],
             onLog
         );
-        
-        onLog(t('templateImport.import.debugProcessedMd'));
-        onLog(
-            processedMarkdown.substring(0, 800) +
-            (processedMarkdown.length > 800 ? '...' : '')
-        );
-        onLog('-');
 
+        // === ШАГ 5. Получаем HTML из обогащённого JSON через Editor ===
         onLog(t('templateImport.import.initEditor'));
         editor = new Editor({
             extensions: [
@@ -453,36 +577,21 @@ export async function processAndSaveTemplateFromYaml(
                 ListToLegalPointPlugin,
                 TextNumberToLegalPointPlugin,
             ],
-            content: processedMarkdown,
+            content: tiptapJson, // ← передаём уже готовый JSON, а не markdown
         });
 
         onLog(t('templateImport.import.extractJsonHtml'));
-        const tiptapJson = editor.getJSON();
         const tiptapHtml = editor.getHTML();
-        
+
         onLog(t('templateImport.import.debugEditorHtml'));
-        onLog(
-            tiptapHtml.substring(0, 800) +
-            (tiptapHtml.length > 800 ? '...' : '')
-        );
+        onLog(tiptapHtml.substring(0, 800) + (tiptapHtml.length > 800 ? '...' : ''));
         onLog('-');
 
-        onLog(t('templateImport.import.postProcessingTables'));
-        markDynamicTables(tiptapJson, properties ?? [], sections ?? [], onLog);
-
-        validateParsedTemplate(
-            tiptapJson, 
-            markdownBody, 
-            properties ?? [], 
-            variants ?? [], 
-            sections ?? [], 
-            onLog
-        );
-
+        // === ШАГ 6. Сохраняем ===
         onLog(t('templateImport.import.savingToDb'));
         await documentsApi.updateContent(document_id, tiptapJson, tiptapHtml);
         onLog(t('templateImport.import.success'));
-        
+
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Неизвестная ошибка';
         onLog(t('templateImport.import.criticalError', { message: errorMsg }));
@@ -520,7 +629,7 @@ export function parseMarkdownToTiptap(markdown: string): { json: any; html: stri
 
     const json = editor.getJSON();
     const html = editor.getHTML();
-    
-    editor.destroy(); 
+    editor.destroy();
+
     return { json, html };
 }

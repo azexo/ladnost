@@ -569,6 +569,42 @@ def create_formulation(
     db.refresh(new_form)
     return new_form
 
+
+@router.delete("/unused")
+def delete_unused_formulations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Удаление всех формулировок, которые не используются ни в одном комплекте."""
+    # Находим ID формулировок, которые реально привязаны к вариантам условий
+    used_ids_subq = (
+        db.query(ConditionFormulationVariant.formulation_id)
+        .distinct()
+        .subquery()
+    )
+
+    unused_formulations = (
+        db.query(Formulation)
+        .filter(~Formulation.id.in_(used_ids_subq))
+        .all()
+    )
+
+    deleted_count = len(unused_formulations)
+
+    # Каскад сам подчистит formulation_versions и formulation_variables
+    for f in unused_formulations:
+        db.delete(f)
+
+    db.commit()
+
+    return {
+        "status": "success",
+        "deleted_count": deleted_count,
+        "message": t("formulations.success.unused_deleted", deleted=deleted_count)
+                   if deleted_count > 0
+                   else t("formulations.info.nothing_to_delete"),
+    }
+
 @router.get("/{formulation_id}", response_model=FormulationSchema)
 def get_formulation(
     formulation_id: int,
@@ -587,7 +623,7 @@ def update_formulation(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    f = db.query(Formulation).filter(Formulation.id == formulation_id).first()
+    f = verify_formulation_owner(db, formulation_id, current_user.id)
     if not f:
         raise HTTPException(status_code=404, detail=t("formulations.errors.formulation_not_found"))
 
@@ -619,7 +655,7 @@ def create_version(
     current_user: User = Depends(get_current_active_user)
 ):
     """Создание новой версии формулировки"""
-    f = db.query(Formulation).filter(Formulation.id == formulation_id).first()
+    f = verify_formulation_owner(db, formulation_id, current_user.id)
     if not f:
         raise HTTPException(status_code=404, detail=t("formulations.errors.formulation_not_found"))
 
@@ -706,7 +742,7 @@ def delete_formulation(
     current_user: User = Depends(get_current_active_user)
 ):
     """Удаление формулировки"""
-    f = db.query(Formulation).filter(Formulation.id == formulation_id).first()
+    f = verify_formulation_owner(db, formulation_id, current_user.id)
     if not f:
         raise HTTPException(status_code=404, detail=t("formulations.errors.formulation_not_found"))
 
@@ -722,3 +758,5 @@ def delete_formulation(
     db.delete(f)
     db.commit()
     return {"status": "deleted"}
+
+

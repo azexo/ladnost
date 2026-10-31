@@ -617,6 +617,12 @@ export const questionnaireApi = {
 };
 
 export const formulationsApi = {
+    deleteUnused: async (): Promise<{ status: string; deleted_count: number; message: string }> => {
+        return request<{ status: string; deleted_count: number; message: string }>(
+            '/formulations/unused',
+            { method: 'DELETE' }
+        );
+    },
     deleteFormulation: async (id: number): Promise<{ status: string }> => {
         return request<{ status: string }>(`/formulations/${id}`, { method: 'DELETE' });
     },

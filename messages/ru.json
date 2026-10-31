@@ -237,13 +237,13 @@
       "errorsNone": "✅ [ОШИБКИ ВАЛИДАЦИИ] Не обнаружено.",
       "warningsTitle": "⚠️ [ПРЕДУПРЕЖДЕНИЯ ВАЛИДАЦИИ] ({count}):",
       "warningsNone": "✅ [ПРЕДУПРЕЖДЕНИЯ ВАЛИДАЦИИ] Не обнаружено.",
-      "analysisComplete": "🔍 [ВАЛИДАЦИЯ ШАБЛОНА] Анализ завершен."
+      "analysisComplete": "🔍 [ВАЛИДАЦИЯ ШАБЛОНА] Анализ завершен." 
     },
     "prepare": {
-      "insertProperty": "[Вставка #{count}] Property: \"{{ {identifier} }}\" -> TokenNode{tableSuffix}",
+      "insertProperty": "[Вставка #{count}] Property: \"{identifier}\" -> TokenNode{tableSuffix}",
       "isTableColumn": " [КОЛОНКА ТАБЛИЦЫ]",
-      "insertVariant": "[Вставка #{count}] Variant/Slot: \"{{ {identifier} }}\" -> FormulationSlot",
-      "entityNotFound": "[Вставка #{count}] ⚠️ ОШИБКА: Сущность \"{{ {identifier} }}\" НЕ НАЙДЕНА.",
+      "insertVariant": "[Вставка #{count}] Variant/Slot: \"{identifier}\" -> FormulationSlot",
+      "entityNotFound": "[Вставка #{count}] ⚠️ ОШИБКА: Сущность \"{identifier}\" НЕ НАЙДЕНА.",
       "totalProcessed": "[Парсинг] Всего обработано плейсхолдеров: {count}"
     },
     "tables": {
@@ -367,6 +367,8 @@
       "types": "Типы"
     },
     "topBar": {
+     "deleteUnused": "Удалить неиспользуемые",
+      "deleteUnusedHint": "Удалить формулировки, которые не привязаны ни к одному комплекту",
       "title": "Библиотека формулировок",
       "searchPlaceholder": "Поиск формулировок...",
       "editTypes": "Редактировать типы",
@@ -424,10 +426,24 @@
       "close": "Закрыть"
     },
     "alerts": {
+      "nothingToDelete": "Все формулировки используются — нечего удалять.",
       "fillRequired": "Заполните обязательные поля",
       "specifyReason": "Пожалуйста, укажите причину изменения формулировки"
     },
+    "errors": {
+      "formulation": {
+        "delete_unused_failed": "Не удалось удалить неиспользуемые формулировки",
+        "delete_unused": "Ошибка удаления неиспользуемых формулировок"
+      }
+    },
+    "success": {
+      "unused_deleted": "Удалено формулировок: {deleted}"
+    },
+    "info": {
+      "nothing_to_delete": "Неиспользуемых формулировок не найдено"
+    },
     "confirmations": {
+      "deleteUnused": "Удалить все формулировки, которые не используются ни в одном комплекте документов? Это действие нельзя отменить.",
       "deleteFormulation": "Вы уверены, что хотите удалить формулировку \"{name}\"?",
       "deleteType": "Вы уверены, что хотите удалить тип \"{name}\"?\n\nЕсли этот тип используется в формулировках, удаление будет отменено."
     }
@@ -797,6 +813,7 @@
     "closeButton": "Закрыть"
   },
   "DocumentEditor": {
+    "accessDeniedTitle": "Доступ ограничен",
     "documentNotSelected": "Документ не выбран",
     "uploadDocument": "Загрузить документ (DOCX, PDF, RTF)",
     "downloadDocx": "Скачать документ (DOCX)",

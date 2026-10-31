@@ -114,6 +114,17 @@ export async function POST(req: NextRequest) {
         <head>
           <meta charset="UTF-8">
           <style>
+
+            .page-break {
+              display: block;
+              page-break-after: always;
+              break-after: page;
+              height: 0;
+              margin: 0;
+              padding: 0;
+              clear: both;
+            }
+              
             /* Схлопывание границ таблицы */
             table {
               border-collapse: collapse;
@@ -123,6 +134,7 @@ export async function POST(req: NextRequest) {
             }
             table th, table td {
               padding: 6px 8px !important;
+              text-align: left;
             }
             table * {
               margin-top: 0 !important;

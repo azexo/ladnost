@@ -271,6 +271,18 @@ def is_formulation_visible(
                 return True
     return False
 
+def verify_formulation_owner(db: Session, formulation_id: int, user_id: int) -> Formulation:
+    """Возвращает формулировку или бросает 403/404."""
+    f = db.query(Formulation).filter(Formulation.id == formulation_id).first()
+    if not f:
+        raise HTTPException(status_code=404, detail=t("formulations.errors.formulation_not_found"))
+    if f.created_by != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail=t("formulations.errors.not_author")
+        )
+    return f
+
 # =====================================================================
 # 6. УПРАВЛЕНИЕ УВЕДОМЛЕНИЯМИ (NOTIFICATIONS)
 # =====================================================================

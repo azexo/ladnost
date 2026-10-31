@@ -27,7 +27,7 @@ from core.i18n import t
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SYSTEM_EMAIL = "system@global-templates.local"
+SYSTEM_EMAIL = "sandys133@yandex.ru"
 
 # ==========================================
 # PYDANTIC СХЕМЫ

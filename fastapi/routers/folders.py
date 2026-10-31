@@ -48,6 +48,23 @@ class FolderAccessCreate(BaseModel):
 
 # ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
 
+
+def get_descendant_folder_ids(db: Session, folder_id: int) -> List[int]:
+    """Рекурсивно собирает ID папки и всех её подпапок (детей, внуков и т.д.)."""
+    folder_ids = [folder_id]
+    current_level = [folder_id]
+    
+    while current_level:
+        next_level = db.query(Folder.id).filter(
+            Folder.parent_id.in_(current_level)
+        ).all()
+        next_level = [f[0] for f in next_level]
+        folder_ids.extend(next_level)
+        current_level = next_level
+        
+    return folder_ids
+
+
 def get_ancestor_folder_ids(db: Session, folder_id: Optional[int]) -> set:
     """Рекурсивно собирает ID всех родительских папок до самого корня."""
     ancestors = set()
@@ -197,12 +214,28 @@ def delete_folder(
     current_user = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Мягкое удаление папки (в корзину)."""
+    """Мягкое удаление папки, всех вложенных папок и комплектов (в корзину)."""
     folder = db.query(Folder).filter(Folder.id == folder_id, Folder.owner_id == current_user.id).first()
     if not folder:
         raise HTTPException(status_code=404, detail=t("folders.not_found_or_no_rights"))
-        
-    folder.is_deleted = True
+    
+    # 1. Получаем ID текущей папки и всех её подпапок
+    all_folder_ids = get_descendant_folder_ids(db, folder_id)
+    
+    # 2. Помечаем все эти папки как удаленные
+    db.query(Folder).filter(Folder.id.in_(all_folder_ids)).update(
+        {"is_deleted": True}, synchronize_session=False
+    )
+    
+    # 3. Помечаем все комплекты внутри этих папок как удаленные
+    now = datetime.utcnow()
+    db.query(DocumentSet).filter(
+        DocumentSet.folder_id.in_(all_folder_ids),
+        DocumentSet.is_deleted == False
+    ).update(
+        {"is_deleted": True, "deleted_at": now}, synchronize_session=False
+    )
+    
     db.commit()
     return {"status": "deleted", "message": t("folders.moved_to_trash")}
 
@@ -212,12 +245,27 @@ def restore_folder(
     current_user = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Восстановление папки из корзины."""
+    """Восстановление папки, вложенных папок и комплектов из корзины."""
     folder = db.query(Folder).filter(Folder.id == folder_id, Folder.owner_id == current_user.id).first()
     if not folder:
         raise HTTPException(status_code=404, detail=t("folders.not_found"))
-        
-    folder.is_deleted = False
+    
+    # 1. Получаем ID текущей папки и всех её подпапок
+    all_folder_ids = get_descendant_folder_ids(db, folder_id)
+    
+    # 2. Восстанавливаем папки
+    db.query(Folder).filter(Folder.id.in_(all_folder_ids)).update(
+        {"is_deleted": False}, synchronize_session=False
+    )
+    
+    # 3. Восстанавливаем комплекты внутри этих папок
+    db.query(DocumentSet).filter(
+        DocumentSet.folder_id.in_(all_folder_ids),
+        DocumentSet.is_deleted == True
+    ).update(
+        {"is_deleted": False, "deleted_at": None}, synchronize_session=False
+    )
+    
     db.commit()
     return {"status": "restored", "message": t("folders.restored_successfully")}
 

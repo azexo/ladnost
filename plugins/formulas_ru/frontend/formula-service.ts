@@ -6,15 +6,15 @@
 import { Parser } from 'hot-formula-parser';
 import petrovich from 'petrovich';
 import * as RussianNounsModule from 'russian-nouns-js';
-import { 
-    format as formatDateFns, 
-    addDays, 
-    subDays, 
-    addMonths, 
-    isWeekend, 
-    differenceInDays, 
-    differenceInMonths, 
-    differenceInYears 
+import {
+    format as formatDateFns,
+    addDays,
+    subDays,
+    addMonths,
+    isWeekend,
+    differenceInDays,
+    differenceInMonths,
+    differenceInYears
 } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
 import { convert as numberToWordsRu } from 'number-to-words-ru';
@@ -49,7 +49,7 @@ const RU_TO_EN_FUNCTIONS: Record<string, string> = {
     'МАКС': 'MAX', 'МИН': 'MIN', 'СРЗНАЧ': 'AVERAGE', 'ОКРУГЛ': 'ROUND',
     'ОКРУГЛВВЕРХ': 'ROUNDUP', 'ОКРУГЛВНИЗ': 'ROUNDDOWN', 'ЦЕЛОЕ': 'INT',
     'И': 'AND', 'ИЛИ': 'OR', 'НЕ': 'NOT',
-    
+
     // CLM-специфичные функции (Даты и сроки)
     'СКЛОНЯТЬ_НАЗВАНИЕ': 'DECLINE_TITLE',
     'СКЛОНЯТЬ_ФИО': 'DECLINE_FIO',
@@ -61,7 +61,7 @@ const RU_TO_EN_FUNCTIONS: Record<string, string> = {
     'РАБ_ДНИ': 'WORK_DAYS',
     'СЛЕД_РАБ_ДЕНЬ': 'NEXT_WORKDAY',
     'ПРЕД_РАБ_ДЕНЬ': 'PREV_WORKDAY',
-    
+
     // CLM-специфичные функции (Финансы и ответственность)
     'ФОРМАТ_ВАЛЮТЫ': 'FORMAT_CURRENCY',
     'ВЫДЕЛИТЬ_НДС': 'EXTRACT_VAT',
@@ -69,7 +69,7 @@ const RU_TO_EN_FUNCTIONS: Record<string, string> = {
     'СУММА_С_НДС': 'TOTAL_WITH_VAT',
     'РАССЧИТАТЬ_ПЕНЮ': 'CALCULATE_PENALTY',
     'СУММА_ПРОПИСЬЮ': 'SUM_IN_WORDS',
-    
+
     // CLM-специфичные функции (Текст и данные)
     'МАСКИРОВАТЬ': 'MASK_DATA',
     'ПРОПИСН': 'PROPER_CASE',
@@ -191,7 +191,7 @@ export class CLMFormulaService {
         this.parser.setFunction('DECLINE_TITLE', (params: any[]) => {
             const [text, caseName] = params;
             if (!text || !caseName) return ERR_VALUE;
-            
+
             const petrovichCase = CASE_MAP[String(caseName).toLowerCase()];
             if (!petrovichCase) return ERR_VALUE;
 
@@ -204,7 +204,7 @@ export class CLMFormulaService {
                 'instrumental': (Case as any).INS ?? (Case as any).INSTRUMENTAL ?? 'INS',
                 'prepositional': (Case as any).PREP ?? (Case as any).PREPOSITIONAL ?? 'PREP'
             };
-            
+
             const rnCase = RN_CASE_MAP[petrovichCase];
             if (!rnCase) {
                 console.error('[DECLINE_TITLE] Не удалось определить падеж для:', petrovichCase);
@@ -217,54 +217,54 @@ export class CLMFormulaService {
 
                 // Разбиваем на слова, сохраняя пробелы для корректной сборки
                 const words = str.split(/(\s+)/);
-                
+
                 // Эвристика: находим первое слово, которое успешно склоняется (меняет форму)
                 for (let i = 0; i < words.length; i++) {
                     const word = words[i];
                     if (/^\s+$/.test(word)) continue;
-                    
+
                     // Извлекаем только буквы для проверки (игнорируем прилипшие запятые, кавычки, цифры)
                     const cleanWord = word.replace(/[^а-яёa-z]/gi, '');
                     if (!cleanWord) continue;
-                    
+
                     const lowerCore = cleanWord.toLowerCase();
                     let bestDeclension = lowerCore;
-                    
+
                     // Пробуем все роды, так как библиотека требует явного указания
                     const genders = [
                         (Gender as any).MASCULINE ?? (Gender as any).MASC,
                         (Gender as any).FEMININE ?? (Gender as any).FEM,
                         (Gender as any).NEUTER ?? (Gender as any).NEU
                     ].filter(Boolean);
-                    
+
                     for (const g of genders) {
                         try {
                             const res = rne.decline({ text: lowerCore, gender: g }, rnCase);
                             // Если библиотека вернула массив и слово изменилось, считаем это успехом
                             if (res && Array.isArray(res) && res.length > 0 && res[0] !== lowerCore) {
                                 bestDeclension = res[0];
-                                break; 
+                                break;
                             }
                         } catch (e) {
                             // Игнорируем ошибки для неподходящих родов
                         }
                     }
-                    
+
                     // Если слово изменилось, применяем его, сохраняем регистр и завершаем работу
                     if (bestDeclension !== lowerCore) {
                         let finalWord = bestDeclension;
-                        
+
                         // Сохраняем регистр первой буквы исходного слова (Договор -> Договора, договор -> договора)
                         if (cleanWord[0] === cleanWord[0].toUpperCase()) {
                             finalWord = finalWord.charAt(0).toUpperCase() + finalWord.slice(1);
                         }
-                        
+
                         // Аккуратно заменяем только буквенную часть, сохраняя знаки препинания (напр., "Акт," -> "Акта,")
                         words[i] = word.replace(cleanWord, finalWord);
                         break; // Склоняем только первое подходящее слово в названии
                     }
                 }
-                
+
                 return words.join('');
             } catch (e) {
                 console.error('[DECLINE_TITLE] Критическая ошибка склонения:', e);
@@ -323,7 +323,7 @@ export class CLMFormulaService {
             const end = Number(endVisible) || 2;
             const mask = String(maskChar || '*');
             if (str.length <= start + end) return str;
-            
+
             const visibleStart = str.substring(0, start);
             const visibleEnd = str.substring(str.length - end);
             const maskLength = str.length - start - end;
@@ -402,7 +402,7 @@ export class CLMFormulaService {
             const start = this.parseDate(startDateInput);
             const end = this.parseDate(endDateInput);
             if (!start || !end) return ERR_VALUE;
-            
+
             const u = String(unit || 'days').toLowerCase();
             // Math.abs используется для безопасности, чтобы длительность контракта всегда была положительной
             if (u === 'days' || u === 'дни' || u === 'д') return Math.abs(differenceInDays(end, start));
@@ -418,11 +418,11 @@ export class CLMFormulaService {
                 const start = this.parseDate(startDateInput);
                 const end = this.parseDate(endDateInput);
                 if (!start || !end) return ERR_VALUE;
-                
+
                 let count = 0;
                 let current = start <= end ? start : end;
                 const target = start <= end ? end : start;
-                
+
                 while (current <= target) {
                     if (!isWeekend(current)) count++;
                     current = addDays(current, 1);
@@ -467,22 +467,22 @@ export class CLMFormulaService {
                 const val = Number(amount);
                 const curr = currency ? String(currency).toUpperCase() : 'RUB';
                 const symbol = curr === 'RUB' ? '₽' : curr;
-                
+
                 // 🛠 ИСПРАВЛЕНИЕ: Явное форматирование целой части в "тройки"
                 const isNegative = val < 0;
                 const absVal = Math.abs(val);
                 const intPart = Math.floor(absVal);
                 const fracPart = Math.round((absVal - intPart) * 100);
-                
+
                 let intStr = intPart.toString();
                 // Вставляем пробел каждые 3 цифры, начиная с конца
                 intStr = intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
                 const fracStr = fracPart.toString().padStart(2, '0');
-                
+
                 const formatted = `${isNegative ? '-' : ''}${intStr},${fracStr}`;
                 return `${formatted} ${symbol}`;
-            } catch (e) { 
-                return ERR_VALUE; 
+            } catch (e) {
+                return ERR_VALUE;
             }
         });
 
@@ -538,7 +538,7 @@ export class CLMFormulaService {
                 return numberToWordsRu(Number(amount), {
                     currency: curr,
                     showNumberParts: { integer: true, fractional: true },
-                    convertNumberToWords: { integer: true, fractional: true }, 
+                    convertNumberToWords: { integer: true, fractional: true },
                     showCurrency: { integer: true, fractional: true }
                 }).toLowerCase().replace(/\u00A0/g, ' ');
             } catch (e) { return ERR_ERROR; }
@@ -578,9 +578,39 @@ export class CLMFormulaService {
     }
 
     public evaluate(formula: string, context: Record<string, any> = {}): any {
-        const normalizedFormula = this.preprocessFormula(formula);
+        let normalizedFormula = this.preprocessFormula(formula);
+
+        // 🆕 ИСПРАВЛЕНИЕ: hot-formula-parser не поддерживает точечную нотацию (например, deal.BEGINDATE).
+        // Парсер не умеет резолвить object.property, он просто берет переменную object и игнорирует .property,
+        // что приводит к передаче объектов в функции вместо их полей (и ошибкам #VALUE!, NaN, null).
+        // Чтобы это обойти, мы заменяем ключи с точками на безопасные идентификаторы (с подчеркиваниями)
+        // как в самом контексте, так и в тексте формулы.
+        const safeContext: Record<string, any> = {};
         
+        // Сортируем ключи по убыванию длины, чтобы сначала заменить более длинные (например, company_requisite.0.RQ_BASE_DOC),
+        // и они не конфликтовали с более короткими (company_requisite.0)
+        const keysToReplace = Object.keys(context).filter(k => k.includes('.')).sort((a, b) => b.length - a.length);
+        
+        for (const key of keysToReplace) {
+            const safeKey = key.replace(/\./g, '_'); // deal.BEGINDATE -> deal_BEGINDATE
+            safeContext[safeKey] = context[key];
+            
+            // Заменяем в формуле, экранируя точку для регулярки
+            const escapedKey = key.replace(/\./g, '\\.');
+            // Используем \b для границ слова, чтобы не задеть части других идентификаторов
+            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
+            normalizedFormula = normalizedFormula.replace(regex, safeKey);
+        }
+        
+        // Добавляем остальные ключи без точек
         for (const [key, value] of Object.entries(context)) {
+            if (!key.includes('.')) {
+                safeContext[key] = value;
+            }
+        }
+
+        // Регистрируем все переменные в парсере (теперь все они плоские и валидные)
+        for (const [key, value] of Object.entries(safeContext)) {
             this.parser.setVariable(key, value);
         }
 
@@ -590,7 +620,6 @@ export class CLMFormulaService {
             if (normalizedFormula.startsWith('IFERROR(') && normalizedFormula.endsWith(')')) {
                 let depth = 0;
                 let lastCommaIndex = -1;
-                
                 for (let i = 0; i < normalizedFormula.length; i++) {
                     const char = normalizedFormula[i];
                     if (char === '(') depth++;
@@ -599,21 +628,19 @@ export class CLMFormulaService {
                         lastCommaIndex = i;
                     }
                 }
-
                 if (lastCommaIndex !== -1) {
                     const fallbackStr = normalizedFormula.substring(lastCommaIndex + 1, normalizedFormula.length - 1).trim();
                     const fallbackResult = this.parser.parse(fallbackStr);
-                    
                     if (!fallbackResult.error) {
                         return fallbackResult.result;
                     }
                 }
             }
-
         }
 
         return result.result;
     }
+
 }
 
 export const clmFormulaService = new CLMFormulaService();

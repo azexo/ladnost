@@ -7,6 +7,8 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useFormulationsStore, useTotalFormulations, useUsedFormulationsCount, EnrichedFormulation } from '@/store/useFormulationsStore';
 import type { FormulationPayload, FormulationVersionPayload } from '@/lib/types';
+import Link from 'next/link';
+import { useNavbarStore } from '@/store/useNavbarStore';
 
 // Палитра цветов для типов формулировок
 const typeColorPalette = [
@@ -58,6 +60,7 @@ export default function Formulations() {
         openTypeManagerModal,
         closeTypeManagerModal,
         deleteFormulation,
+        deleteUnusedFormulations,
     } = useFormulationsStore();
 
     const total = useTotalFormulations();
@@ -82,6 +85,8 @@ export default function Formulations() {
     const [formText, setFormText] = useState('');
     const [formReason, setFormReason] = useState('');
     const [newTypeName, setNewTypeName] = useState('');
+
+    const currentUser = useNavbarStore(state => state.user);
 
     // Инициализация формы при открытии модалки
     useEffect(() => {
@@ -135,6 +140,18 @@ export default function Formulations() {
     }, [filteredFormulations, filters, t]);
 
     // Обработчики
+    const handleDeleteUnused = async () => {
+        if (!window.confirm(t('confirmations.deleteUnused'))) return;
+        try {
+            const deleted = await deleteUnusedFormulations();
+            if (deleted === 0) {
+                alert(t('alerts.nothingToDelete'));
+            }
+        } catch (error) {
+            console.error('Ошибка удаления неиспользуемых формулировок:', error);
+        }
+    };
+
     const handleUsageClick = (e: React.MouseEvent, id: number) => {
         e.stopPropagation();
         fetchUsage(id);
@@ -244,6 +261,14 @@ export default function Formulations() {
                             <button onClick={openTypeManagerModal} className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                                 <i className="fa-solid fa-pen-to-square text-slate-400 text-[11px]"></i> {t('topBar.editTypes')}
                             </button>
+                            <button
+                                onClick={handleDeleteUnused}
+                                className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium text-rose-600 border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors"
+                                title={t('topBar.deleteUnusedHint')}
+                            >
+                                <i className="fa-solid fa-broom text-rose-400 text-[11px]"></i>
+                                {t('topBar.deleteUnused')}
+                            </button>
                             <button onClick={openCreateModal} className="h-8 px-4 flex items-center gap-1.5 text-xs font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shadow-sm">
                                 <i className="fa-solid fa-plus text-[11px]"></i> {t('topBar.newFormulation')}
                             </button>
@@ -307,11 +332,15 @@ export default function Formulations() {
                                                     {group.items.map(f => {
                                                         const color = getTypeColor(f.type_name, types);
                                                         const usage = usageCache[f.id];
+                                                        const isOwner = f.created_by === currentUser?.id;
                                                         return (
                                                             <div
                                                                 key={f.id}
-                                                                className="table-row cursor-pointer border-t border-slate-50 transition-colors hover:bg-slate-50 grid grid-cols-[144px_1fr_2fr_112px_64px] items-start"
-                                                                onClick={() => openEditModal(f)}
+                                                                className={`table-row ${isOwner ? 'cursor-pointer hover:bg-slate-50' : 'cursor-default opacity-75'} border-t border-slate-50 transition-colors grid grid-cols-[144px_1fr_2fr_112px_64px] items-start`}
+                                                                onClick={() => {
+                                                                    if (!isOwner) return;
+                                                                    openEditModal(f);
+                                                                }}
                                                             >
                                                                 <div className="px-4 py-3">
                                                                     <span className={`type-badge ${color.bg} ${color.text} ${color.border} border px-2 py-0.5 rounded-full text-[11px] font-medium flex items-center`}>
@@ -344,21 +373,34 @@ export default function Formulations() {
                                                                     </button>
                                                                 </div>
                                                                 <div className="px-3 py-2 flex items-center justify-end gap-3">
-                                                                    <button onClick={(e) => { e.stopPropagation(); openEditModal(f); }} className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:bg-primary-50 hover:text-primary-600 transition-all" title={t('actions.edit')}>
-                                                                        <i className="fa-solid fa-pen text-xs"></i>
-                                                                    </button>
-                                                                    <button 
-                                                                        onClick={(e) => { 
-                                                                            e.stopPropagation(); 
-                                                                            if (window.confirm(t('confirmations.deleteFormulation', { name: f.name }))) {
-                                                                                deleteFormulation(f.id);
-                                                                            }
-                                                                        }} 
-                                                                        className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all" 
-                                                                        title={t('actions.delete')}
-                                                                    >
-                                                                        <i className="fa-solid fa-trash text-xs"></i>
-                                                                    </button>
+                                                                    {isOwner ? (
+                                                                        <>
+                                                                            <button
+                                                                                onClick={(e) => { e.stopPropagation(); openEditModal(f); }}
+                                                                                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:bg-primary-50 hover:text-primary-600 transition-all"
+                                                                                title={t('actions.edit')}
+                                                                            >
+                                                                                <i className="fa-solid fa-pen text-xs"></i>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    if (window.confirm(t('confirmations.deleteFormulation', { name: f.name }))) {
+                                                                                        deleteFormulation(f.id);
+                                                                                    }
+                                                                                }}
+                                                                                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:bg-red-50 hover:text-red-500 transition-all"
+                                                                                title={t('actions.delete')}
+                                                                            >
+                                                                                <i className="fa-solid fa-trash text-xs"></i>
+                                                                            </button>
+                                                                        </>
+                                                                    ) : (
+                                                                        // Иконка замка для визуального обозначения того, что запись только для чтения
+                                                                        <span className="text-slate-300" title="Только просмотр">
+                                                                            <i className="fa-solid fa-lock text-xs"></i>
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         );
@@ -390,10 +432,19 @@ export default function Formulations() {
                         {usageCache[activePopupId] ? (
                             usageCache[activePopupId].document_sets.length > 0 ? (
                                 usageCache[activePopupId].document_sets.map(ds => (
-                                    <div key={ds.id} className="px-4 py-2 hover:bg-slate-50 flex items-center gap-2">
-                                        <i className="fa-solid fa-file-lines text-slate-400 text-xs"></i>
-                                        <span className="text-xs text-slate-700 truncate">{ds.name}</span>
-                                    </div>
+                                    <Link
+                                        key={ds.id}
+                                        href={`/editor/${ds.id}`}
+                                        onClick={() => setActivePopupId(null)}   // закрываем попап при переходе
+                                        title={ds.name}
+                                        className="group px-4 py-2 flex items-center gap-2 hover:bg-primary-50 transition-colors cursor-pointer"
+                                    >
+                                        <i className="fa-solid fa-file-lines text-slate-400 group-hover:text-primary-500 text-xs shrink-0"></i>
+                                        <span className="flex-1 min-w-0 text-xs text-slate-700 group-hover:text-primary-700 truncate">
+                                            {ds.name}
+                                        </span>
+                                        <i className="fa-solid fa-arrow-up-right-from-square text-[9px] text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"></i>
+                                    </Link>
                                 ))
                             ) : (
                                 <div className="px-4 py-2 text-xs text-slate-400">{t('popup.notUsedYet')}</div>

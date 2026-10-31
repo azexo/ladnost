@@ -1416,6 +1416,7 @@ export const useStore = create<any>((set, get) => {
       isLoading: false,
       isContentLoading: false,
       documentSet: null as any,
+      accessError: null as string | null,
       setDocumentSetMode: (mode: 'template' | 'standard' | 'non_standard' | 'file') => {
         const state = get();
         const accessLevel = state.documentPackage.currentUserAccess;
@@ -1499,7 +1500,7 @@ export const useStore = create<any>((set, get) => {
         }
       },
       loadPackage: async (setId: number) => {
-        set((s: any) => ({ documentPackage: { ...s.documentPackage, isLoading: true, setId } }));
+        set((s: any) => ({ documentPackage: { ...s.documentPackage, isLoading: true, accessError: null, setId } }));
         try {
           const docs = await documentsApi.listBySet(setId);
           const docSet = await documentSetsApi.get(setId);
@@ -1545,6 +1546,7 @@ export const useStore = create<any>((set, get) => {
               items: docs,
               activeId,
               isLoading: false,
+              accessError: null,
               documentSetMode: newDocSetMode,
               currentUserAccess: accessLevel,
               documentSet: docSet
@@ -1554,9 +1556,10 @@ export const useStore = create<any>((set, get) => {
           get().ui.setMode(defaultUiMode);
 
           if (activeId) await get().documentPackage.loadDocumentContent(activeId);
-        } catch (e) {
+        } catch (e: any) {
           console.error('Package load error', e);
-          set((s: any) => ({ documentPackage: { ...s.documentPackage, isLoading: false } }));
+          const errorMessage = e.message;
+          set((s: any) => ({ documentPackage: { ...s.documentPackage, isLoading: false, accessError: errorMessage } }));
         }
       },
       loadDocumentContent: async (docId: number) => {

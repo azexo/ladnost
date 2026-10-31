@@ -68,7 +68,7 @@ export const TableDataInjector = ({ editor }: Props) => {
     // 1. Находим все существующие инъектированные строки (по sectionIdentifier)
     const existingInjectedRows: { pos: number; sectionIdentifier: string | null }[] = [];
     doc.descendants((node, pos) => {
-      if (node.type.name === 'tableRow' && node.attrs.isInjected) {
+      if (['tableRow', 'customTableRow'].includes(node.type.name) && node.attrs.isInjected) {
         existingInjectedRows.push({ 
           pos, 
           sectionIdentifier: node.attrs.sectionIdentifier || null 
@@ -79,7 +79,7 @@ export const TableDataInjector = ({ editor }: Props) => {
     // 2. Находим все шаблонные строки (по sectionIdentifier)
     const templateRows: { pos: number; sectionIdentifier: string; node: any }[] = [];
     doc.descendants((node, pos) => {
-      if (node.type.name === 'tableRow' && node.attrs.isTemplate && node.attrs.sectionIdentifier) {
+      if (['tableRow', 'customTableRow'].includes(node.type.name) && node.attrs.isTemplate && node.attrs.sectionIdentifier) {
         templateRows.push({ 
           pos, 
           sectionIdentifier: node.attrs.sectionIdentifier, 

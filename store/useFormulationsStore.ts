@@ -80,6 +80,7 @@ interface FormulationsStore {
   closeFormulationModal: () => void;
   openTypeManagerModal: () => void;
   closeTypeManagerModal: () => void;
+  deleteUnusedFormulations: () => Promise<number>;
 }
 
 // ==========================================
@@ -112,6 +113,21 @@ export const useFormulationsStore = create<FormulationsStore>((set, get) => ({
       // Используем getT() для перевода логов
       console.error(getT()('formulations.errors.type.move_failed'), error);
     }
+  },
+
+  deleteUnusedFormulations: async () => {
+      try {
+          const result = await formulationsApi.deleteUnused();
+          // Сбрасываем usage-кэш — он больше невалиден
+          set({ usageCache: {} });
+          // Перезагружаем список
+          await get().fetchFormulations();
+          return result.deleted_count;
+      } catch (error: any) {
+          console.error(getT()('formulations.errors.formulation.delete_unused_failed'), error);
+          alert(error.message || getT()('formulations.errors.formulation.delete_unused'));
+          throw error;
+      }
   },
   
   deleteFormulation: async (id) => {
