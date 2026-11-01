@@ -71,6 +71,7 @@ const processMarkdownPlaceholders = (html: string): string => {
 // ==========================================
 export interface DocumentEditorHandle {
   insertToken: (type: 'property' | 'formulation', sourceId: number | string, label: string, value: string, identifier?: string) => void;
+  updateTokensByIdentifier: (identifier: string, newLabel: string, newValue?: string) => void;
   updateTokensBySourceId: (sourceId: number | string, newLabel: string, newValue?: string, newIdentifier?: string) => void;
   removeTokensBySourceId: (sourceId: number | string) => void;
   markSelectionAsAnchor: (anchorType?: string) => void;
@@ -646,6 +647,29 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
       insertSlot: (identifier: string) => {
         if (editor) {
           editor.chain().focus().insertContent({ type: 'formulationSlot', attrs: { identifier } }).run();
+        }
+      },
+      updateTokensByIdentifier: (identifier: string, newLabel: string, newValue?: string) => {
+        if (!editor || editor.isDestroyed) return;
+        try {
+          const { state, dispatch } = editor.view;
+          const tr = state.tr;
+          let hasChanges = false;
+          
+          state.doc.descendants((node, pos) => {
+            if (node.type.name === 'token' && node.attrs.identifier === identifier) {
+              const newAttrs = { 
+                ...node.attrs, 
+                label: newLabel,
+                ...(newValue !== undefined ? { value: newValue } : {})
+              };
+              tr.setNodeMarkup(pos, undefined, newAttrs);
+              hasChanges = true;
+            }
+          });
+          if (hasChanges) dispatch(tr);
+        } catch (e) { 
+          console.error('[DEBUG updateTokensByIdentifier] Error:', identifier, e); 
         }
       },
       updateTokensBySourceId: (sourceId, newLabel, newValue, newIdentifier?) => {

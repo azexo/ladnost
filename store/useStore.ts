@@ -330,7 +330,7 @@ export const useStore = create<any>((set, get) => {
         if (p.formula || p.value_source === 'FORMULA') {
           console.log(`  ✍️ [${p.identifier}] Токен обновлен: "${rawValue}" -> "${formattedValue}"`);
         }
-        state.editor.commands.updateTokensBySourceId(p.id, p.name, formattedValue);
+        state.editor.commands.updateTokensByIdentifier(p.identifier, p.name, formattedValue);
       }
     });
 
@@ -414,38 +414,64 @@ export const useStore = create<any>((set, get) => {
       return result;
   };
 
+  const pickVariantForIdentifier = (identifier: string) => {
+    const state = get();
+    const group = state.data.setFormulations.find((g: any) => g.identifier === identifier);
+    if (!group || !group.variants || group.variants.length === 0) return null;
+
+    let activeVariant = null;
+    let fallbackVariant = null;
+    for (const item of group.variants) {
+      const v = item.variant;
+      if (v.is_fallback) {
+        fallbackVariant = item;
+      } else if (v.condition_id && state.data.currentConditions[v.condition_id]) {
+        activeVariant = item;
+        break;
+      }
+    }
+    return activeVariant || fallbackVariant;
+  };
+
   const refreshFormulationTokens = () => {
-      const state = get();
-      const editorRef = state.editor.ref?.current;
-      if (!editorRef || editorRef.isDestroyed) return;
+    const state = get();
+    const editorRef = state.editor.ref?.current;
+    if (!editorRef || editorRef.isDestroyed) return;
 
-      const json = editorRef.getJSON();
-      const allForms = state.data.getAllFormulations();
+    const json = editorRef.getJSON();
 
-      const traverse = (node: any) => {
-          if (!node) return;
-          
-          // Ищем токены типа 'formulation'
-          if (node.type === 'token' && node.attrs?.type === 'formulation' && node.attrs?.sourceId) {
-              const formId = node.attrs.sourceId;
-              const form = allForms.find((f: any) => f.id === formId);
-              
-              if (form && form.text_content) {
-                  console.log(`%c[DEBUG REFRESH] 🔄 Найден токен формулировки "${form.name}" (ID: ${formId}). Пересчитываем...`, 'color: magenta;');
-                  const resolvedValue = resolveFormulationTemplate(form.text_content);
-                  console.log(`%c[DEBUG REFRESH] 💉 Вызываем updateTokensBySourceId для ID ${formId} со значением:`, 'color: magenta; font-weight: bold;', resolvedValue);
+    // 1. Собираем все уникальные identifier формулировок, которые реально есть в документе
+    const identifiersInDoc = new Set<string>();
+    const traverse = (node: any) => {
+      if (!node) return;
+      if (
+        (node.type === 'token' && node.attrs?.type === 'formulation' && node.attrs?.identifier) ||
+        (node.type === 'formulationSlot' && node.attrs?.identifier)
+      ) {
+        identifiersInDoc.add(node.attrs.identifier);
+      }
+      if (node.content && Array.isArray(node.content)) {
+        node.content.forEach(traverse);
+      }
+    };
+    traverse(json);
 
-                  // Обновляем токен в редакторе (обновятся все токены с этим sourceId)
-                  editorRef.updateTokensBySourceId(formId, node.attrs.label, resolvedValue);
-              }
-          }
-          
-          if (node.content && Array.isArray(node.content)) {
-              node.content.forEach(traverse);
-          }
-      };
-      
-      traverse(json);
+    if (identifiersInDoc.size === 0) return;
+
+    // 2. Для каждого identifier находим актуальную формулировку и обновляем токены
+    for (const identifier of identifiersInDoc) {
+      const variantToShow = pickVariantForIdentifier(identifier);
+      if (!variantToShow) continue;
+
+      const form = variantToShow.formulation;
+      if (!form || !form.text_content) continue;
+
+      // Резолвим шаблон с актуальными значениями из анкеты
+      const resolvedValue = resolveFormulationTemplate(form.text_content);
+
+      // 🆕 Обновляем по identifier, а не по sourceId
+      editorRef.updateTokensByIdentifier(identifier, form.name, resolvedValue);
+    }
   };
 
   return {
@@ -743,6 +769,7 @@ export const useStore = create<any>((set, get) => {
       commands: {
         removeAnchorByUuid: (uuid: string) => get().editor.ref?.current?.removeAnchorByUuid?.(uuid), // <-- ДОБАВИТЬ ЭТО
         insertToken: (type: string, sourceId: number | string, label: string, value: string, identifier?: string) => get().editor.ref?.current?.insertToken(type, sourceId, label, value, identifier),
+        updateTokensByIdentifier: (identifier: string, newLabel: string, newValue?: string) => get().editor.ref?.current?.updateTokensByIdentifier(identifier, newLabel, newValue),
         updateTokensBySourceId: (sourceId: number | string, newLabel: string, newValue?: string, newIdentifier?: string) => get().editor.ref?.current?.updateTokensBySourceId(sourceId, newLabel, newValue, newIdentifier),
         removeTokensBySourceId: (sourceId: number | string) => get().editor.ref?.current?.removeTokensBySourceId(sourceId),
         toggleReviewMode: () => get().editor.ref?.current?.toggleReviewMode() || false,

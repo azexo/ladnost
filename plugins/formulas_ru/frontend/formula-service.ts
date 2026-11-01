@@ -488,7 +488,8 @@ export class CLMFormulaService {
 
         this.parser.setFunction('EXTRACT_VAT', (params: any[]) => {
             const [amount, rate] = params;
-            if (isNaN(Number(amount)) || !rate) return ERR_VALUE;
+            // ИСПРАВЛЕНИЕ: isNaN(Number(rate)) корректно пропустит 0, но отсечет undefined/null
+            if (isNaN(Number(amount)) || isNaN(Number(rate))) return ERR_VALUE;
             try {
                 const sum = Number(amount);
                 const vatRate = Number(rate);
@@ -498,22 +499,20 @@ export class CLMFormulaService {
 
         this.parser.setFunction('ADD_VAT', (params: any[]) => {
             const [amount, rate] = params;
-            if (isNaN(Number(amount)) || !rate) return ERR_VALUE;
+            if (isNaN(Number(amount)) || isNaN(Number(rate))) return ERR_VALUE;
             try {
                 const sum = Number(amount);
                 const vatRate = Number(rate);
-                // Возвращает сумму самого НДС
                 return Math.round((sum * vatRate / 100) * 100) / 100;
             } catch (e) { return ERR_VALUE; }
         });
 
         this.parser.setFunction('TOTAL_WITH_VAT', (params: any[]) => {
             const [amount, rate] = params;
-            if (isNaN(Number(amount)) || !rate) return ERR_VALUE;
+            if (isNaN(Number(amount)) || isNaN(Number(rate))) return ERR_VALUE;
             try {
                 const sum = Number(amount);
                 const vatRate = Number(rate);
-                // Возвращает общую сумму с учетом НДС
                 return Math.round((sum * (1 + vatRate / 100)) * 100) / 100;
             } catch (e) { return ERR_VALUE; }
         });
