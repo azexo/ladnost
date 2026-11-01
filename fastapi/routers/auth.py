@@ -116,7 +116,7 @@ def ensure_workspace_and_trial(user: User, db: Session):
     """
     Проверяет, есть ли у пользователя рабочее пространство.
     Если нет, создает его, добавляет пользователя как OWNER
-    и выдает пробный период (Trial) на 14 дней.
+    и выдает пробный период (Trial).
     """
     existing_workspace = db.query(Workspace).filter(Workspace.owner_id == user.id).first()
     if existing_workspace:
@@ -155,7 +155,7 @@ def ensure_workspace_and_trial(user: User, db: Session):
         db.flush()
 
     now = datetime.utcnow()
-    trial_ends = now + timedelta(days=1)
+    trial_ends = now + timedelta(days=2)
     new_subscription = Subscription(
         workspace_id=new_workspace.id,
         tariff_plan_id=trial_tariff.id,
