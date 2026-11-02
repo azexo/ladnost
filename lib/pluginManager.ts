@@ -1,60 +1,69 @@
-// SPDX-FileCopyrightText: 2026 Andrey Soloduhin
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
-
 // lib/pluginManager.ts
-
 type Callback = (payload: any) => void;
 type FilterCallback = (data: any) => any;
 
-// Новый интерфейс для хранения хука с весом
 interface HookItem<T> {
-    callback: T;
-    weight: number;
+  callback: T;
+  weight: number;
 }
 
 class PluginManager {
-    // Изменяем типы на массивы объектов HookItem
-    private events: Record<string, HookItem<Callback>[]> = {};
-    private filters: Record<string, HookItem<FilterCallback>[]> = {};
-    
-    private pluginLogics: Record<string, any> = {};
+  private events: Record<string, HookItem<Callback>[]> = {};
+  private filters: Record<string, HookItem<FilterCallback>[]> = {};
+  private pluginLogics: Record<string, any> = {};
 
-    // --- ACTIONS ---
-    on(event: string, callback: Callback, weight: number = 10) {
-        if (!this.events[event]) this.events[event] = [];
-        this.events[event].push({ callback, weight });
-        // Сортировка по убыванию: больший вес выполняется первым
-        this.events[event].sort((a, b) => b.weight - a.weight);
-    }
+  // --- ACTIONS ---
+  on(event: string, callback: Callback, weight: number = 10) {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push({ callback, weight });
+    this.events[event].sort((a, b) => b.weight - a.weight);
+  }
 
-    emit(event: string, payload?: any) {
-        if (!this.events[event]) return;
-        this.events[event].forEach(item => item.callback(payload));
+  // 🆕 Отписка по конкретной функции
+  off(event: string, callback: Callback) {
+    if (!this.events[event]) return;
+    this.events[event] = this.events[event].filter(
+      (item) => item.callback !== callback,
+    );
+    if (this.events[event].length === 0) {
+      delete this.events[event];
     }
+  }
 
-    // --- FILTERS ---
-    addFilter(filterName: string, callback: FilterCallback, weight: number = 10) {
-        if (!this.filters[filterName]) this.filters[filterName] = [];
-        this.filters[filterName].push({ callback, weight });
-        this.filters[filterName].sort((a, b) => b.weight - a.weight);
-    }
+  // 🆕 (опционально) отписка всех слушателей события — полезно для тестов и очистки
+  offAll(event: string) {
+    delete this.events[event];
+  }
 
-    applyFilters<T>(filterName: string, data: T): T {
-        if (!this.filters[filterName]) return data;
-        return this.filters[filterName].reduce((currentData, item) => {
-            return item.callback(currentData);
-        }, data);
-    }
+  emit(event: string, payload?: any) {
+    if (!this.events[event]) return;
+    // 🆕 Копируем массив, чтобы callback'и могли безопасно отписываться во время emit
+    const listeners = [...this.events[event]];
+    listeners.forEach((item) => item.callback(payload));
+  }
 
-    // --- LOGIC REGISTRY ---
-    registerLogic(pluginName: string, logicModule: any) {
-        this.pluginLogics[pluginName] = logicModule;
-    }
+  // --- FILTERS ---
+  addFilter(filterName: string, callback: FilterCallback, weight: number = 10) {
+    if (!this.filters[filterName]) this.filters[filterName] = [];
+    this.filters[filterName].push({ callback, weight });
+    this.filters[filterName].sort((a, b) => b.weight - a.weight);
+  }
 
-    getPluginLogic<T = any>(pluginName: string): T | undefined {
-        return this.pluginLogics[pluginName];
-    }
+  applyFilters<T>(filterName: string, data: T): T {
+    if (!this.filters[filterName]) return data;
+    return this.filters[filterName].reduce((currentData, item) => {
+      return item.callback(currentData);
+    }, data);
+  }
+
+  // --- LOGIC REGISTRY ---
+  registerLogic(pluginName: string, logicModule: any) {
+    this.pluginLogics[pluginName] = logicModule;
+  }
+
+  getPluginLogic<T = any>(pluginName: string): T | undefined {
+    return this.pluginLogics[pluginName];
+  }
 }
 
 export const pluginManager = new PluginManager();

@@ -62,6 +62,9 @@ export default function ViewerPage() {
   const t = useTranslations('viewer');
 
   const setId = Number(params.setId);
+  const items = useStore((s) => s.documentPackage.items);
+  const activeId = useStore((s) => s.documentPackage.activeId);
+  const setActive = useStore((s) => s.documentPackage.setActive);
   const isLoadingPackage = useStore((s) => s.documentPackage.isLoading);
   const loadPackage = useStore((s) => s.documentPackage.loadPackage);
   const fetchInitialData = useStore((s) => s.data.fetchInitialData);
@@ -136,12 +139,22 @@ export default function ViewerPage() {
   const debouncedAnswers = useDebouncedValue(combinedAnswers, 800);
 
   useEffect(() => {
-    if (!setId || isLoadingPackage) return;
-    const preparedAnswers = prepareAnswersForBackend(debouncedAnswers.flat, debouncedAnswers.table);
+    if (!setId || !activeId || isLoadingPackage) return;
+
+    const preparedAnswers = prepareAnswersForBackend(
+      debouncedAnswers.flat,
+      debouncedAnswers.table
+    );
+
     let isMounted = true;
     setIsRendering(true);
+
     rendererApi
-      .renderHtml({ document_set_id: setId, answers: preparedAnswers })
+      .renderHtml({
+        document_set_id: setId,
+        document_id: activeId, // 🆕 Рендерим именно активный документ
+        answers: preparedAnswers,
+      })
       .then((res) => {
         if (isMounted) setRenderedHtml(res.html);
       })
@@ -151,10 +164,11 @@ export default function ViewerPage() {
       .finally(() => {
         if (isMounted) setIsRendering(false);
       });
+
     return () => {
       isMounted = false;
     };
-  }, [setId, debouncedAnswers, isLoadingPackage]);
+  }, [setId, activeId, debouncedAnswers, isLoadingPackage]);
 
   const visibleProperties = useMemo(() => {
     const tableSectionIds = new Set(sections.filter((s: any) => s.is_table).map((s: any) => s.id));
@@ -269,24 +283,55 @@ export default function ViewerPage() {
   };
 
   const handlePrepareAndSign = async () => {
-    if (!renderedHtml) {
+    if (items.length === 0) {
       alert(t('documentNotGenerated'));
       return;
     }
 
     setIsPreparingPdf(true);
+
     try {
-      const safeFileName = docTitle.replace(/[^\w\sа-яёА-ЯЁ.-]/g, '_').trim();
-      // 1. Получаем PDF в виде Blob
-      const pdfBlob = await getPdfBlobFromHtml(renderedHtml, safeFileName);
+      const preparedAnswers = prepareAnswersForBackend(currentAnswers, currentTableAnswers);
 
-      // 2. Формируем массив файлов для модалки
-      setFilesToSign([{
-        blob: pdfBlob,
-        fileName: `${safeFileName}.pdf`
-      }]);
+      // 1. Параллельно рендерим HTML для ВСЕХ документов комплекта
+      const renderResults = await Promise.all(
+        items.map((doc: any) =>
+          rendererApi.renderHtml({
+            document_set_id: setId,
+            document_id: doc.id,
+            answers: preparedAnswers,
+          })
+        )
+      );
 
-      // 3. Открываем модалку
+      // 2. Конвертируем каждый HTML в PDF и собираем файлы с version_id
+      const filesToSign: FileToSign[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const doc = items[i];
+        const renderRes = renderResults[i];
+        const html = renderRes.html;
+        if (!html) continue;
+
+        const safeFileName = (doc.name || `document_${doc.id}`)
+          .replace(/[^\w\sа-яёА-ЯЁ.-]/g, '_')
+          .trim();
+
+        const pdfBlob = await getPdfBlobFromHtml(html, safeFileName);
+
+        filesToSign.push({
+          blob: pdfBlob,
+          fileName: `${safeFileName}.pdf`,
+          document_version_id: renderRes.meta?.version_id ?? null,
+        });
+      }
+
+      if (filesToSign.length === 0) {
+        alert(t('documentNotGenerated'));
+        return;
+      }
+
+      // 3. Открываем модалку со всеми файлами
+      setFilesToSign(filesToSign);
       setIsSignModalOpen(true);
     } catch (error) {
       console.error('Ошибка подготовки PDF для подписи:', error);
@@ -308,6 +353,111 @@ export default function ViewerPage() {
       generateError: t('generateError', { extension: 'PDF' }),
     });
   };
+
+  const formContent = (
+    <div className="p-6">
+      {/* 🆕 Проверка: если нет видимых свойств, показываем заглушку */}
+      {visibleProperties.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-center py-16">
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <i className="fa-solid fa-file-circle-xmark text-3xl text-gray-400"></i>
+          </div>
+          <p className="text-gray-800 text-xl font-semibold">{t('noDataRequired')}</p>
+          <p className="text-gray-500 text-sm mt-2 max-w-xs">
+            {t('noDataRequiredDesc')}
+          </p>
+        </div>
+      ) : (
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">{t('fillData')}</h3>
+          <div className="space-y-6">
+            {sortedSections.map((sec: any) => {
+              const props = groupedProperties[String(sec.id)];
+              if (!props || props.length === 0) return null;
+              const collapseId = String(sec.id) === '0' ? 0 : Number(sec.id);
+              const isCollapsed = !!collapsedSections[collapseId];
+              return (
+                <div key={sec.id} className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={() => toggleSectionCollapse(collapseId)}
+                    className="w-full flex items-center justify-between text-left group"
+                  >
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-2 flex-1">
+                      {sec.name}
+                    </h4>
+                    <svg
+                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'
+                        } ml-2`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {!isCollapsed && (
+                    <div className="space-y-4">
+                      {props.map((prop: any) => (
+                        <div key={prop.id}>
+                          <label
+                            className="block text-sm font-medium text-gray-700 mb-1.5"
+                            htmlFor={`prop-${prop.id}`}
+                          >
+                            {prop.name} {prop.is_required && <span className="text-red-500">*</span>}
+                          </label>
+                          {renderField(prop)}
+                          {prop.hint && <p className="mt-1 text-xs text-gray-500">{prop.hint}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {groupedProperties['0'] && groupedProperties['0'].length > 0 && (
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => toggleSectionCollapse(0)}
+                  className="w-full flex items-center justify-between text-left group"
+                >
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1 flex-1">
+                    {t('noSection')}
+                  </h4>
+                  <svg
+                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${!!collapsedSections[0] ? '' : 'rotate-180'
+                      } ml-2`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {!collapsedSections[0] && (
+                  <div className="space-y-4">
+                    {groupedProperties['0'].map((prop: any) => (
+                      <div key={prop.id}>
+                        <label
+                          className="block text-sm font-medium text-gray-700 mb-1.5"
+                          htmlFor={`prop-${prop.id}`}
+                        >
+                          {prop.name} {prop.is_required && <span className="text-red-500">*</span>}
+                        </label>
+                        {renderField(prop)}
+                        {prop.hint && <p className="mt-1 text-xs text-gray-500">{prop.hint}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -374,6 +524,22 @@ export default function ViewerPage() {
               >
                 <i className="fa-solid fa-magnifying-glass-plus"></i>
               </button>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <select
+                value={activeId ?? ''}
+                onChange={(e) => setActive(Number(e.target.value))}
+                className="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 
+                 focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer
+                 max-w-[200px] truncate"
+                title="Выберите документ для просмотра"
+              >
+                {items.map((doc: any) => (
+                  <option key={doc.id} value={doc.id}>
+                    {doc.name}
+                  </option>
+                ))}
+              </select>
+
               <div className="h-4 w-px bg-gray-300"></div>
               <button
                 onClick={handleDownloadPdf}
@@ -447,127 +613,15 @@ export default function ViewerPage() {
             className={`flex-1 min-h-0 overflow-y-auto overscroll-contain pb-4 lg:pb-0 ${isMobileFormOpen ? 'block' : 'hidden'
               } lg:block`}
           >
-            <div className="p-6">
-              {/* 🆕 Проверка: если нет видимых свойств, показываем заглушку */}
-              {visibleProperties.length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center py-16">
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                    <i className="fa-solid fa-file-circle-xmark text-3xl text-gray-400"></i>
-                  </div>
-                  <p className="text-gray-800 text-xl font-semibold">{t('noDataRequired')}</p>
-                  <p className="text-gray-500 text-sm mt-2 max-w-xs">
-                    {t('noDataRequiredDesc')}
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">{t('fillData')}</h3>
-                  <div className="space-y-6">
-                    {sortedSections.map((sec: any) => {
-                      const props = groupedProperties[String(sec.id)];
-                      if (!props || props.length === 0) return null;
-                      const collapseId = String(sec.id) === '0' ? 0 : Number(sec.id);
-                      const isCollapsed = !!collapsedSections[collapseId];
-                      return (
-                        <div key={sec.id} className="space-y-4">
-                          <button
-                            type="button"
-                            onClick={() => toggleSectionCollapse(collapseId)}
-                            className="w-full flex items-center justify-between text-left group"
-                          >
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-2 flex-1">
-                              {sec.name}
-                            </h4>
-                            <svg
-                              className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'
-                                } ml-2`}
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                          {!isCollapsed && (
-                            <div className="space-y-4">
-                              {props.map((prop: any) => (
-                                <div key={prop.id}>
-                                  <label
-                                    className="block text-sm font-medium text-gray-700 mb-1.5"
-                                    htmlFor={`prop-${prop.id}`}
-                                  >
-                                    {prop.name} {prop.is_required && <span className="text-red-500">*</span>}
-                                  </label>
-                                  {renderField(prop)}
-                                  {prop.hint && <p className="mt-1 text-xs text-gray-500">{prop.hint}</p>}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {groupedProperties['0'] && groupedProperties['0'].length > 0 && (
-                      <div className="space-y-4">
-                        <button
-                          type="button"
-                          onClick={() => toggleSectionCollapse(0)}
-                          className="w-full flex items-center justify-between text-left group"
-                        >
-                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1 flex-1">
-                            {t('noSection')}
-                          </h4>
-                          <svg
-                            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${!!collapsedSections[0] ? '' : 'rotate-180'
-                              } ml-2`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        {!collapsedSections[0] && (
-                          <div className="space-y-4">
-                            {groupedProperties['0'].map((prop: any) => (
-                              <div key={prop.id}>
-                                <label
-                                  className="block text-sm font-medium text-gray-700 mb-1.5"
-                                  htmlFor={`prop-${prop.id}`}
-                                >
-                                  {prop.name} {prop.is_required && <span className="text-red-500">*</span>}
-                                </label>
-                                {renderField(prop)}
-                                {prop.hint && <p className="mt-1 text-xs text-gray-500">{prop.hint}</p>}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <PluginSlot
+              name="signatures-list"
+              documentSetId={setId}
+              fallback={formContent}
+            />
           </div>
 
           {/* Sticky Payment Bottom Block */}
           <div className="p-4 bg-white border-t border-gray-200 lg:mt-auto relative z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:shadow-none">
-            <div className="mb-2 flex items-start gap-2">
-              <input
-                type="checkbox"
-                id="consent"
-                className="mt-1 w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer"
-              />
-              <label htmlFor="consent" className="text-xs text-gray-500 cursor-pointer">
-                {t.rich('consent', {
-                  offer: (chunks) => <a href="#" className="text-primary hover:underline">{chunks}</a>,
-                  privacy: (chunks) => <a href="#" className="text-primary hover:underline">{chunks}</a>,
-                })}
-              </label>
-            </div>
-
-            {/* Кнопка запуска процесса */}
             <button
               onClick={handlePrepareAndSign}
               disabled={isRendering || !renderedHtml || isPreparingPdf}
@@ -591,6 +645,7 @@ export default function ViewerPage() {
               isOpen={isSignModalOpen}
               onClose={() => setIsSignModalOpen(false)}
               files={filesToSign}
+              documentSetId={setId}
               fallback={
                 <div className="text-center text-red-500 p-4">
                   ...

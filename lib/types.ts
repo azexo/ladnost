@@ -396,10 +396,15 @@ export interface SyncedReviewEdit {
 export interface FileToSign {
   blob: Blob;
   fileName: string;
+  document_set_id?: number; 
+  document_id?: number;
+  document_version_id?: number;
 }
 
 export interface SignModalProps {
   isOpen: boolean;
   onClose: () => void;
   files: FileToSign[];
+  onSuccess?: () => void;
+  documentSetId?: number;
 }

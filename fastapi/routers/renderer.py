@@ -593,12 +593,14 @@ def render_document_html(payload: Dict[str, Any], db: Session = Depends(get_db))
     document_set_id = payload.get("document_set_id")
     content_json = None
     target_doc_set_id = None
+    resolved_version_id = None
     
     if document_version_id:
         version = db.query(DocumentVersion).filter(DocumentVersion.id == document_version_id).first()
         if not version: raise HTTPException(status_code=404, detail=t("renderer.errors.document_version_not_found"))
         content_json = version.content_json
         target_doc_set_id = version.document.document_set_id
+        resolved_version_id = version.id 
     elif document_id:
         doc = db.query(Document).filter(Document.id == document_id).first()
         if not doc: raise HTTPException(status_code=404, detail=t("renderer.errors.document_not_found"))
@@ -606,6 +608,7 @@ def render_document_html(payload: Dict[str, Any], db: Session = Depends(get_db))
         if not version: raise HTTPException(status_code=404, detail=t("renderer.errors.current_version_not_found"))
         content_json = version.content_json
         target_doc_set_id = doc.document_set_id
+        resolved_version_id = version.id
     elif document_set_id:
         doc = db.query(Document).filter(Document.document_set_id == document_set_id, Document.document_role == DocumentRole.MAIN).first()
         if not doc: raise HTTPException(status_code=404, detail=t("renderer.errors.main_document_not_found"))
@@ -613,6 +616,7 @@ def render_document_html(payload: Dict[str, Any], db: Session = Depends(get_db))
         if not version: raise HTTPException(status_code=404, detail=t("renderer.errors.main_document_current_version_not_found"))
         content_json = version.content_json
         target_doc_set_id = document_set_id
+        resolved_version_id = version.id
     else:
         raise HTTPException(status_code=400, detail=t("renderer.errors.id_required"))
 
@@ -739,6 +743,6 @@ def render_document_html(payload: Dict[str, Any], db: Session = Depends(get_db))
         "meta": {
             "document_set_id": doc_set_id,
             "document_id": document_id,
-            "version_id": document_version_id
+            "version_id": resolved_version_id
         }
     }

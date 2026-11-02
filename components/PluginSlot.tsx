@@ -27,7 +27,7 @@ export const PluginSlot: React.FC<PluginSlotProps> = ({ name, fallback, ...props
   
   return (
     <React.Suspense fallback={<div>{t('loadingPlugin')}</div>}>
-      <PluginComponent {...props} />
+      <PluginComponent {...props} fallback={fallback} />
     </React.Suspense>
   );
 };
