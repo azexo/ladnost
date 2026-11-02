@@ -392,3 +392,14 @@ export interface SyncedReviewEdit {
     legal_point: string;
     created_at: string | null;
 }
+
+export interface FileToSign {
+  blob: Blob;
+  fileName: string;
+}
+
+export interface SignModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  files: FileToSign[];
+}

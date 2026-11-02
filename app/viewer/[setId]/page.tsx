@@ -9,6 +9,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useStore } from '@/store/useStore';
 import { rendererApi } from '@/lib/realApi';
+import { FileToSign } from '@/lib/types';
+import { PluginSlot } from '@/components/PluginSlot';
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -18,6 +20,8 @@ function useDebouncedValue<T>(value: T, delay: number): T {
   }, [value, delay]);
   return debouncedValue;
 }
+
+
 
 export const downloadFileFromHtml = async (
   endpoint: string,
@@ -56,7 +60,7 @@ export default function ViewerPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations('viewer');
-  
+
   const setId = Number(params.setId);
   const isLoadingPackage = useStore((s) => s.documentPackage.isLoading);
   const loadPackage = useStore((s) => s.documentPackage.loadPackage);
@@ -76,10 +80,14 @@ export default function ViewerPage() {
     if (typeof window !== 'undefined' && window.innerWidth < 640) return 50;
     return 100;
   });
-  
+
+  const [isSignModalOpen, setIsSignModalOpen] = useState(false);
+  const [filesToSign, setFilesToSign] = useState<FileToSign[]>([]);
+  const [isPreparingPdf, setIsPreparingPdf] = useState(false);
+
   const handleZoomIn = () => setZoomLevel((p) => Math.min(p + 10, 200));
   const handleZoomOut = () => setZoomLevel((p) => Math.max(p - 10, 50));
-  
+
   // 🆕 Состояние открытой шторки на мобильном
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
 
@@ -250,6 +258,44 @@ export default function ViewerPage() {
     return <div className="flex h-screen items-center justify-center text-gray-500">{t('loadingPackage')}</div>;
   }
 
+  const getPdfBlobFromHtml = async (html: string, fileName: string): Promise<Blob> => {
+    const response = await fetch('/backend/export-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html, fileName }),
+    });
+    if (!response.ok) throw new Error(t('exportError'));
+    return await response.blob();
+  };
+
+  const handlePrepareAndSign = async () => {
+    if (!renderedHtml) {
+      alert(t('documentNotGenerated'));
+      return;
+    }
+
+    setIsPreparingPdf(true);
+    try {
+      const safeFileName = docTitle.replace(/[^\w\sа-яёА-ЯЁ.-]/g, '_').trim();
+      // 1. Получаем PDF в виде Blob
+      const pdfBlob = await getPdfBlobFromHtml(renderedHtml, safeFileName);
+
+      // 2. Формируем массив файлов для модалки
+      setFilesToSign([{
+        blob: pdfBlob,
+        fileName: `${safeFileName}.pdf`
+      }]);
+
+      // 3. Открываем модалку
+      setIsSignModalOpen(true);
+    } catch (error) {
+      console.error('Ошибка подготовки PDF для подписи:', error);
+      alert(t('generateError', { extension: 'PDF' }));
+    } finally {
+      setIsPreparingPdf(false);
+    }
+  };
+
   const handleDownloadPdf = async () => {
     if (!renderedHtml) {
       alert(t('documentNotGenerated'));
@@ -398,9 +444,8 @@ export default function ViewerPage() {
           {/* Scrollable Content Area (Анкета) */}
           <div
             id="mobile-form-content"
-            className={`flex-1 min-h-0 overflow-y-auto overscroll-contain pb-4 lg:pb-0 ${
-              isMobileFormOpen ? 'block' : 'hidden'
-            } lg:block`}
+            className={`flex-1 min-h-0 overflow-y-auto overscroll-contain pb-4 lg:pb-0 ${isMobileFormOpen ? 'block' : 'hidden'
+              } lg:block`}
           >
             <div className="p-6">
               {/* 🆕 Проверка: если нет видимых свойств, показываем заглушку */}
@@ -434,9 +479,8 @@ export default function ViewerPage() {
                               {sec.name}
                             </h4>
                             <svg
-                              className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                                isCollapsed ? '' : 'rotate-180'
-                              } ml-2`}
+                              className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'
+                                } ml-2`}
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -474,9 +518,8 @@ export default function ViewerPage() {
                             {t('noSection')}
                           </h4>
                           <svg
-                            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                              !!collapsedSections[0] ? '' : 'rotate-180'
-                            } ml-2`}
+                            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${!!collapsedSections[0] ? '' : 'rotate-180'
+                              } ml-2`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -519,20 +562,43 @@ export default function ViewerPage() {
               <label htmlFor="consent" className="text-xs text-gray-500 cursor-pointer">
                 {t.rich('consent', {
                   offer: (chunks) => <a href="#" className="text-primary hover:underline">{chunks}</a>,
-                  privacy: (chunks) => <a href="#" className="text-primary hover:underline">{chunks}</a>
+                  privacy: (chunks) => <a href="#" className="text-primary hover:underline">{chunks}</a>,
                 })}
               </label>
             </div>
+
+            {/* Кнопка запуска процесса */}
             <button
-              id="sing-btn"
-              type="button"
-              onClick={() => alert(t('testingAlert'))}
-              className="w-full bg-primary hover:bg-primary_hover text-white font-bold py-2 px-6 rounded-xl text-md shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2"
+              onClick={handlePrepareAndSign}
+              disabled={isRendering || !renderedHtml || isPreparingPdf}
+              className="w-full px-4 py-3 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
-              <i className="fa-solid fa-lock text-sm"></i>
-              {t('sign')}
+              {isPreparingPdf ? (
+                <>
+                  <i className="fa-solid fa-spinner fa-spin"></i>
+                  {t('preparingPdf')}
+                </>
+              ) : (
+                <>
+                  <i className="fa-solid fa-signature"></i>
+                  {t('signDocument')}
+                </>
+              )}
             </button>
+
+            <PluginSlot
+              name="sign-modal"
+              isOpen={isSignModalOpen}
+              onClose={() => setIsSignModalOpen(false)}
+              files={filesToSign}
+              fallback={
+                <div className="text-center text-red-500 p-4">
+                  ...
+                </div>
+              }
+            />
           </div>
+
         </aside>
       </main>
     </>
