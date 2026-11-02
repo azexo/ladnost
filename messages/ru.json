@@ -10,8 +10,8 @@
   },
   "signaturesList": {
     "downloadPdf": "PDF",
-    "title": "Подписи документа",
-    "subtitle": "Информация о подписях",
+    "title": "Подписи комплекта документов",
+    "subtitle": "Каждый документ комплекта подписывается отдельно",
     "refresh": "Обновить",
     "signaturesTitle": "Подписи документа",
     "totalSignatures": "Всего подписей: {count}",
