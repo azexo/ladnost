@@ -41,14 +41,14 @@ export default function Tasks() {
     const t = useTranslations('tasks');
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     const {
         tasks, usersMap, selectedTaskId, taskDetails, activeTab, statusFilter,
         isLoadingTasks, isLoadingDetails, isSubmitting,
-        initialize, selectTask, setTab, setStatusFilter,
+        initialize, selectTask, setTab, setStatusFilter, setReadOnly,
         approveTask, rejectTask, requestRevision, addComment, resubmitTask, withdrawTask
     } = useTasksStore();
-    
+
     const currentUserId = useNavbarStore(state => state.user?.id);
     const [expandedTasks, setExpandedTasks] = useState<Set<number>>(new Set());
     const [subtasksMap, setSubtasksMap] = useState<Record<number, Task[]>>({});
@@ -349,31 +349,31 @@ export default function Tasks() {
                                 {/* ✅ БЛОК ИСПОЛНИТЕЛЯ (Согласование) */}
                                 {mySubtask && (
                                     <>
-                                    <button className="action-btn bg-green-600 hover:bg-green-700 text-white shadow-sm" 
+                                        <button className="action-btn bg-green-600 hover:bg-green-700 text-white shadow-sm"
                                             onClick={() => approveTask(mySubtask.id)}>
-                                        <i className="fa-solid fa-circle-check text-xs"></i> {t('panel.actions.approve')}
-                                    </button>
-                                    <button className="action-btn bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-200 text-amber-700" 
+                                            <i className="fa-solid fa-circle-check text-xs"></i> {t('panel.actions.approve')}
+                                        </button>
+                                        <button className="action-btn bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-200 text-amber-700"
                                             onClick={() => requestRevision(mySubtask.id)}>
-                                        <i className="fa-solid fa-rotate-left text-xs"></i> {t('panel.actions.requestRevision')}
-                                    </button>
-                                    <button className="action-btn bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 text-red-600" 
+                                            <i className="fa-solid fa-rotate-left text-xs"></i> {t('panel.actions.requestRevision')}
+                                        </button>
+                                        <button className="action-btn bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 text-red-600"
                                             onClick={() => rejectTask(mySubtask.id)}>
-                                        <i className="fa-solid fa-circle-xmark text-xs"></i> {t('panel.actions.reject')}
-                                    </button>
+                                            <i className="fa-solid fa-circle-xmark text-xs"></i> {t('panel.actions.reject')}
+                                        </button>
                                     </>
                                 )}
                                 {/* ✅ БЛОК ИНИЦИАТОРА (Управление процессом) */}
                                 {isInitiator && taskStatus === TaskStatus.NEEDS_REVISION && (
-                                    <button className="action-btn bg-blue-600 hover:bg-blue-700 text-white shadow-sm" 
-                                            onClick={() => resubmitTask(taskDetails!.task!.id)}>
-                                    <i className="fa-solid fa-paper-plane text-xs"></i> {t('panel.actions.resubmit')}
+                                    <button className="action-btn bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                                        onClick={() => resubmitTask(taskDetails!.task!.id)}>
+                                        <i className="fa-solid fa-paper-plane text-xs"></i> {t('panel.actions.resubmit')}
                                     </button>
                                 )}
                                 {isInitiator && (taskStatus === TaskStatus.IN_REVIEW || taskStatus === TaskStatus.NEEDS_REVISION) && (
-                                    <button className="action-btn bg-white border border-slate-200 hover:bg-slate-100 text-slate-600" 
-                                            onClick={() => withdrawTask(taskDetails!.task!.id)}>
-                                    <i className="fa-solid fa-ban text-xs"></i> {t('panel.actions.withdraw')}
+                                    <button className="action-btn bg-white border border-slate-200 hover:bg-slate-100 text-slate-600"
+                                        onClick={() => withdrawTask(taskDetails!.task!.id)}>
+                                        <i className="fa-solid fa-ban text-xs"></i> {t('panel.actions.withdraw')}
                                     </button>
                                 )}
                             </div>
@@ -420,33 +420,84 @@ export default function Tasks() {
                                             {taskDetails.task.description || t('panel.details.noDescription')}
                                         </div>
                                     </div>
+
+
                                     {/* Прикрепленные документы */}
                                     <div className="mt-6">
-                                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">{t('panel.details.attachmentsTitle')}</div>
-                                        <div className="space-y-2">
+                                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                                            {t('panel.details.attachmentsTitle')}
+                                        </div>
+                                        <div className="space-y-3">
                                             {taskDetails.attachments.length > 0 ? (
                                                 taskDetails.attachments.map(att => (
-                                                    <Link 
-                                                        key={att.id} 
-                                                        href={`/editor/${taskDetails.task?.document_set_id}`} 
-                                                        className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-blue-50/30 cursor-pointer transition-all group"
-                                                    >
-                                                        <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                                                            <i className="fa-solid fa-file-word text-blue-500 text-base"></i>
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors truncate">
-                                                                {taskDetails.documentsMap?.[att.document_version_id] || t('panel.details.document')}
+                                                    <div key={att.id} className="space-y-2">
+                                                        {/* Карточка: переход в редактор */}
+                                                        <div
+                                                            onClick={() => router.push(`/editor/${att.document_set_id}`)}
+                                                            className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-primary-300 hover:bg-blue-50/30 cursor-pointer transition-all group"
+                                                        >
+                                                            <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                                                                <i className="fa-solid fa-file-word text-blue-500 text-base"></i>
                                                             </div>
-                                                            <div className="text-[11px] text-slate-400 mt-0.5">{t('panel.details.updated')} {formatDate(att.created_at)}</div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-semibold text-slate-700 group-hover:text-primary-600 transition-colors truncate">
+                                                                    {taskDetails.documentsMap?.[att.document_set_id] || t('panel.details.document')}
+                                                                </div>
+                                                                <div className="text-[11px] text-slate-400 mt-0.5">
+                                                                    {t('panel.details.updated')} {formatDate(att.created_at)}
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </Link>
+
+                                                        {/* Кнопки действий */}
+                                                        <div className="flex items-center gap-2 pl-1">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(`/viewer/${att.document_set_id}`, '_blank');
+                                                                }}
+                                                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors"
+                                                            >
+                                                                <i className="fa-solid fa-signature text-[10px]"></i> {t('panel.details.sign')}
+                                                            </button>
+
+                                                            {taskDetails.documentSet && !taskDetails.documentSet.is_read_only && (
+                                                                <button
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        await setReadOnly(att.document_set_id, true);
+                                                                    }}
+                                                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors"
+                                                                >
+                                                                    <i className="fa-solid fa-lock text-[10px]"></i> {t('panel.details.disableEditing')}
+                                                                </button>
+                                                            )}
+
+                                                            {taskDetails.documentSet?.is_read_only && (
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-lg">
+                                                                    <i className="fa-solid fa-lock text-[10px]"></i> {t('panel.details.readOnly')}
+                                                                    <button
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            await setReadOnly(att.document_set_id, false);
+                                                                        }}
+                                                                        className="ml-1 text-slate-400 hover:text-slate-700"
+                                                                        title={t('panel.details.enableEditing')}
+                                                                    >
+                                                                        <i className="fa-solid fa-unlock text-[10px]"></i>
+                                                                    </button>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 ))
                                             ) : (
                                                 <div className="text-xs text-slate-400 italic py-2">{t('panel.details.noAttachments')}</div>
                                             )}
                                         </div>
                                     </div>
+
+
                                 </div>
                             )}
 
@@ -461,23 +512,23 @@ export default function Tasks() {
                                     </div>
                                     {/* Форма добавления главного комментария */}
                                     <div className="flex items-start gap-2.5 mb-6">
-                                        <img 
-                                            src={getUser(1)?.avatar_url || '/default-avatar.svg'} 
-                                            className="w-8 h-8 rounded-full object-cover shrink-0" 
-                                            alt="Avatar" 
+                                        <img
+                                            src={getUser(1)?.avatar_url || '/default-avatar.svg'}
+                                            className="w-8 h-8 rounded-full object-cover shrink-0"
+                                            alt="Avatar"
                                         />
                                         <div className="flex-1">
-                                            <textarea 
-                                                value={newCommentText} 
-                                                onChange={e => setNewCommentText(e.target.value)} 
-                                                className="w-full p-2.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-shadow" 
-                                                rows={2} 
+                                            <textarea
+                                                value={newCommentText}
+                                                onChange={e => setNewCommentText(e.target.value)}
+                                                className="w-full p-2.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none transition-shadow"
+                                                rows={2}
                                                 placeholder={t('panel.comments.placeholder')}
                                             ></textarea>
                                             <div className="flex items-center justify-end mt-2 gap-2">
-                                                <button 
-                                                    onClick={handleAddComment} 
-                                                    disabled={!newCommentText.trim()} 
+                                                <button
+                                                    onClick={handleAddComment}
+                                                    disabled={!newCommentText.trim()}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     <i className="fa-solid fa-paper-plane text-[10px]"></i> {t('panel.comments.send')}
@@ -496,10 +547,10 @@ export default function Tasks() {
                                                     <div key={comment.id} className="group">
                                                         {/* Родительский комментарий */}
                                                         <div className="flex items-start gap-2.5">
-                                                            <img 
-                                                                src={author?.avatar_url || '/default-avatar.svg'} 
-                                                                className="w-8 h-8 rounded-full object-cover shrink-0" 
-                                                                alt="Avatar" 
+                                                            <img
+                                                                src={author?.avatar_url || '/default-avatar.svg'}
+                                                                className="w-8 h-8 rounded-full object-cover shrink-0"
+                                                                alt="Avatar"
                                                             />
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-start justify-between gap-1.5 mb-1 flex-wrap">
@@ -514,7 +565,7 @@ export default function Tasks() {
                                                                             </span>
                                                                         )}
                                                                     </div>
-                                                                    
+
                                                                     {/* Правая часть: Документ и Время */}
                                                                     <div className="flex flex-col gap-0.5 items-end">
                                                                         <span className="text-[10px] text-slate-400">
@@ -548,10 +599,10 @@ export default function Tasks() {
                                                                 {/* Поле ввода ответа */}
                                                                 {replyingTo === comment.id && (
                                                                     <div className="mt-3 flex items-start gap-2.5">
-                                                                        <img 
-                                                                            src={getUser(1)?.avatar_url || '/default-avatar.svg'} 
-                                                                            className="w-6 h-6 rounded-full object-cover shrink-0" 
-                                                                            alt="Avatar" 
+                                                                        <img
+                                                                            src={getUser(1)?.avatar_url || '/default-avatar.svg'}
+                                                                            className="w-6 h-6 rounded-full object-cover shrink-0"
+                                                                            alt="Avatar"
                                                                         />
                                                                         <div className="flex-1">
                                                                             <textarea
@@ -563,8 +614,8 @@ export default function Tasks() {
                                                                                 autoFocus
                                                                             ></textarea>
                                                                             <div className="flex items-center justify-end mt-1.5 gap-2">
-                                                                                <button 
-                                                                                    onClick={() => setReplyingTo(null)} 
+                                                                                <button
+                                                                                    onClick={() => setReplyingTo(null)}
                                                                                     className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
                                                                                 >
                                                                                     {t('panel.comments.cancel')}
@@ -589,10 +640,10 @@ export default function Tasks() {
                                                                     const replyAuthor = getUser(reply.author_id);
                                                                     return (
                                                                         <div key={reply.id} className="flex items-start gap-2.5">
-                                                                            <img 
-                                                                                src={replyAuthor?.avatar_url || '/default-avatar.svg'} 
-                                                                                className="w-6 h-6 rounded-full object-cover shrink-0" 
-                                                                                alt="Avatar" 
+                                                                            <img
+                                                                                src={replyAuthor?.avatar_url || '/default-avatar.svg'}
+                                                                                className="w-6 h-6 rounded-full object-cover shrink-0"
+                                                                                alt="Avatar"
                                                                             />
                                                                             <div className="flex-1 min-w-0">
                                                                                 <div className="flex items-start justify-between gap-1.5 mb-1 flex-wrap">
@@ -607,7 +658,7 @@ export default function Tasks() {
                                                                                             </span>
                                                                                         )}
                                                                                     </div>
-                                                                                    
+
                                                                                     {/* Правая часть: Документ и Время */}
                                                                                     <div className="flex flex-col gap-0.5 items-end">
                                                                                         <span className="text-[10px] text-slate-400">
@@ -646,7 +697,7 @@ export default function Tasks() {
                                             let statusText = t('panel.route.notStarted');
                                             let statusBadgeClass = 'bg-slate-100 text-slate-500 border-slate-200';
                                             let statusIcon = 'fa-file-circle-plus';
-                                            
+
                                             if (stage.status === StageStatus.APPROVED) {
                                                 stepClass = 'bg-green-50 border-green-100';
                                                 iconClass = 'bg-green-500';
@@ -705,13 +756,13 @@ export default function Tasks() {
                                             let actionText = t('panel.history.action');
                                             let badgeClass = 'bg-slate-100 text-slate-600 border-slate-200';
                                             let badgeIcon = 'fa-circle-dot';
-                                            
+
                                             if (h.action === HistoryAction.APPROVED) { actionText = t('panel.history.approved'); badgeClass = 'bg-green-50 text-green-700 border-green-100'; badgeIcon = 'fa-circle-check'; }
                                             else if (h.action === HistoryAction.SENT_FOR_APPROVAL) { actionText = t('panel.history.sentForApproval'); badgeClass = 'bg-blue-50 text-blue-700 border-blue-100'; badgeIcon = 'fa-paper-plane'; }
                                             else if (h.action === HistoryAction.CREATED) { actionText = t('panel.history.created'); badgeClass = 'bg-slate-100 text-slate-600 border-slate-200'; badgeIcon = 'fa-file-circle-plus'; }
                                             else if (h.action === HistoryAction.REJECTED) { actionText = t('panel.history.rejected'); badgeClass = 'bg-red-50 text-red-700 border-red-100'; badgeIcon = 'fa-circle-xmark'; }
                                             else if (h.action === HistoryAction.NEEDS_REVISION) { actionText = t('panel.history.needsRevision'); badgeClass = 'bg-purple-50 text-purple-700 border-purple-100'; badgeIcon = 'fa-rotate'; }
-                                            
+
                                             return (
                                                 <div key={h.id} className="flex gap-3 pb-4">
                                                     <div className="shrink-0 flex flex-col items-center gap-1">

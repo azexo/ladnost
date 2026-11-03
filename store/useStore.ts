@@ -1550,6 +1550,22 @@ export const useStore = create<any>((set, get) => {
             }
           }
 
+          if (docSet.is_read_only) {
+            set((s: any) => ({
+              documentPackage: {
+                ...s.documentPackage,
+                isLoading: false,
+                accessError: 'readOnlyMessage',
+                items: docs,
+                activeId: docs[0]?.id ?? null,
+                documentSetMode: (docSet.mode as any) || 'template',
+                currentUserAccess: 'view',
+                documentSet: docSet,
+              }
+            }));
+            return; // ⬅️ ранний выход, не грузим контент
+          }
+
           const activeId = docs[0]?.id ?? null;
           const newDocSetMode = (docSet.mode as any) || 'template';
 

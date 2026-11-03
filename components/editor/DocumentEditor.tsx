@@ -830,7 +830,7 @@ const DocumentEditor = forwardRef<DocumentEditorHandle, DocumentEditorProps>(
               {t('accessDeniedTitle')}
             </h2>
             <p className="text-slate-600 mb-8 leading-relaxed">
-              {accessError}
+              {t(accessError as any)}
             </p>
           </div>
         </section>

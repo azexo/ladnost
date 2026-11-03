@@ -98,6 +98,11 @@ export default function ViewerPage() {
   const activeDoc = useStore((s) => s.documentPackage.items.find((d: any) => d.id === s.documentPackage.activeId));
   const docTitle = documentSet?.name || activeDoc?.name || 'Документ';
 
+  const activeIndex = useMemo(
+    () => items.findIndex((d: any) => d.id === activeId),
+    [items, activeId]
+  );
+
   useEffect(() => {
     if (isNaN(setId)) {
       router.replace('/workspace');
@@ -525,6 +530,14 @@ export default function ViewerPage() {
                 <i className="fa-solid fa-magnifying-glass-plus"></i>
               </button>
               <div className="h-4 w-px bg-gray-300"></div>
+              {activeIndex >= 0 && (
+                <span className="text-sm text-gray-600 whitespace-nowrap">
+                  {t('selectedDocumentOf', {
+                    current: activeIndex + 1,
+                    total: items.length,
+                  })}
+                </span>
+              )}
               <select
                 value={activeId ?? ''}
                 onChange={(e) => setActive(Number(e.target.value))}

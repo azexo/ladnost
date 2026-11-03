@@ -36,6 +36,7 @@ class DocumentSetOut(BaseModel):
     owner_id: int
     is_favorite: bool
     is_anonymous_access: bool = False
+    is_read_only: bool = False
     is_deleted: bool
     deleted_at: Optional[datetime] = None
     created_at: datetime
@@ -56,6 +57,7 @@ class DocumentSetUpdate(BaseModel):
     approval_status: Optional[ApprovalStatus] = None
     is_favorite: Optional[bool] = None
     is_anonymous_access: bool = False
+    is_read_only: Optional[bool] = None
 
 class AccessOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

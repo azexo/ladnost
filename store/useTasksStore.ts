@@ -25,6 +25,7 @@ export interface TaskDetailsState {
   comments: Comment[];
   currentVersionId: number | null;
   documentsMap: Record<number, string>;
+  documentSet: DocumentSet | null;
 }
 
 interface TasksStoreState {
@@ -45,6 +46,7 @@ interface TasksStoreState {
   initialize: () => Promise<void>;
   fetchTasks: () => Promise<void>;
   selectTask: (taskId: number | null) => Promise<void>;
+  setReadOnly: (setId: number, isReadOnly: boolean) => Promise<void>;
   setTab: (tab: TaskTab) => void;
   setStatusFilter: (status: string | null) => void;
   approveTask: (taskId: number, comment?: string) => Promise<void>;
@@ -153,7 +155,7 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
       const { activeTab, statusFilter } = get();
       const params: any = {};
       const currentUserId = getCurrentUserId();
-      
+
       if (activeTab === 'my' || activeTab === 'assigned_by_me') {
         if (!currentUserId) {
           set({ tasks: [], isLoadingTasks: false });
@@ -162,10 +164,10 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
       }
       if (activeTab === 'my') params.assignee_id = currentUserId;
       else if (activeTab === 'assigned_by_me') params.initiator_id = currentUserId;
-      
+
       params.is_root = true;
       if (statusFilter) params.status = statusFilter;
-      
+
       const tasks = await tasksApi.list(params);
       set({ tasks });
     } catch (error: any) {
@@ -189,29 +191,30 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
 
       let comments: Comment[] = [];
       let currentVersionId: number | null = null;
-      let documentsMap: Record<number, string> = {};
+      let documentsMap: Record<number, string> = {}; // ключ = document_set_id
+      let documentSet: DocumentSet | null = null;
 
       if (task.document_set_id) {
         try {
-          const docs = await documentsApi.listBySet(task.document_set_id);
-          
-          // 1. Параллельно получаем текущие версии для ВСЕХ документов комплекта
+          // ✅ Один запрос вместо N+1
+          const [set, docs] = await Promise.all([
+            documentSetsApi.get(task.document_set_id),
+            documentsApi.listBySet(task.document_set_id),
+          ]);
+          documentSet = set;
+
+          // Формируем карту: set_id → имя комплекта
+          documentsMap[task.document_set_id] = set.name;
+
           const docsVersions = await Promise.all(
             docs.map(async (doc) => {
               const versions = await documentsApi.listVersions(doc.id);
-              const currentVersion = versions.find(v => v.is_current);
-              return { doc, currentVersion };
+              return { doc, currentVersion: versions.find(v => v.is_current) };
             })
           );
 
-          // 2. Формируем карту документов и определяем версию для отправки новых комментариев
           for (const { doc, currentVersion } of docsVersions) {
             if (currentVersion) {
-              // Сохраняем имя документа по ID его версии (понадобится для UI)
-              documentsMap[currentVersion.id] = doc.name;
-              
-              // Запоминаем ID версии главного документа (или первого попавшегося), 
-              // чтобы было куда отправлять новые "общие" комментарии из панели задачи
               if (doc.document_role === 'main' && !currentVersionId) {
                 currentVersionId = currentVersion.id;
               } else if (!currentVersionId) {
@@ -220,30 +223,47 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
             }
           }
 
-          // 3. Параллельно тянем комментарии для всех найденных текущих версий
           const commentsPromises = docsVersions
             .filter(item => item.currentVersion)
             .map(item => commentsApi.list(item.currentVersion!.id));
-          
           const commentsArrays = await Promise.all(commentsPromises);
-          
-          // 4. Объединяем все комментарии в один массив и сортируем по дате (новые сверху)
-          comments = commentsArrays.flat().sort((a, b) => 
+          comments = commentsArrays.flat().sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
-
         } catch (e) {
           console.warn(getT()('tasks.errors.loadCommentsFailed'), e);
         }
       }
 
       set({
-        taskDetails: { task, subtasks, stages, history, attachments, comments, currentVersionId, documentsMap }
+        taskDetails: {
+          task, subtasks, stages, history, attachments, comments,
+          currentVersionId, documentsMap, documentSet
+        }
       });
     } catch (error: any) {
       set({ error: error.message });
     } finally {
       set({ isLoadingDetails: false });
+    }
+  },
+
+  setReadOnly: async (setId: number, isReadOnly: boolean) => {
+    try {
+      await documentSetsApi.update(setId, { is_read_only: isReadOnly });
+      set((state) => {
+        if (state.taskDetails?.documentSet) {
+          return {
+            taskDetails: {
+              ...state.taskDetails,
+              documentSet: { ...state.taskDetails.documentSet, is_read_only: isReadOnly }
+            }
+          };
+        }
+        return {};
+      });
+    } catch (error: any) {
+      set({ error: error.message });
     }
   },
 
@@ -307,7 +327,7 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
       const newComment = await commentsApi.add(versionId, {
         text_content: text,
         parent_comment_id: parentCommentId,
-        block_uuid: '', 
+        block_uuid: '',
       });
       set((state) => {
         if (state.taskDetails) {
@@ -349,13 +369,13 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
   createSubtask: async (parentTaskId, payload) => {
     set({ isSubmitting: true, error: null });
     const currentUserId = getCurrentUserId();
-    
+
     if (!currentUserId) {
       // ✅ Перевод ошибки
       set({ error: getT()('tasks.errors.unauthorized'), isSubmitting: false });
       return;
     }
-    
+
     try {
       const parentTask = await tasksApi.get(parentTaskId);
       const newTaskData: any = {
@@ -363,13 +383,13 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
         document_set_id: parentTask.document_set_id,
         name: payload.name,
         description: payload.description || '',
-        task_type: payload.task_type || TaskType.REVIEW, 
+        task_type: payload.task_type || TaskType.REVIEW,
         assignee_id: payload.assignee_id,
         deadline: payload.deadline || undefined,
         initiator_id: currentUserId,
       };
       await tasksApi.create(newTaskData);
-      
+
       if (get().selectedTaskId === parentTaskId) {
         await get().selectTask(parentTaskId);
       }
@@ -395,16 +415,9 @@ export const useTasksStore = create<TasksStoreState>((set, get) => ({
         route_type: payload.routeType
       } as any);
 
-      const docs = await documentsApi.listBySet(payload.documentSetId);
-      for (const doc of docs) {
-        const versions = await documentsApi.listVersions(doc.id);
-        const currentVersion = versions.find(v => v.is_current);
-        if (currentVersion) {
-          await tasksApi.attachDocument(newTask.id, {
-            document_version_id: currentVersion.id,
-          } as any);
-        }
-      }
+      await tasksApi.attachDocument(newTask.id, {
+        document_set_id: payload.documentSetId,
+      } as any);
 
       for (let i = 0; i < payload.participants.length; i++) {
         await tasksApi.addStage(newTask.id, {

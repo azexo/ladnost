@@ -149,6 +149,7 @@ class DocumentSet(Base):
         Boolean, default=False, index=True,
         comment="Глобальный шаблон, доступен всем"
     )
+    is_read_only: Mapped[bool] = mapped_column(Boolean, default=False, index=True, comment="Комплект доступен только для чтения")
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -411,7 +412,9 @@ class TaskAttachment(Base):
     __tablename__ = "task_attachments"
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), index=True)
-    document_version_id: Mapped[int] = mapped_column(ForeignKey("document_versions.id", ondelete="CASCADE"), index=True)
+    document_set_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("document_sets.id", ondelete="CASCADE"), index=True
+    )
     attached_by: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

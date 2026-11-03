@@ -58,7 +58,7 @@ class ApprovalStageResponse(BaseModel):
 class TaskAttachmentResponse(BaseModel):
     id: int
     task_id: int
-    document_version_id: int
+    document_set_id: int
     attached_by: int
     created_at: datetime
 
@@ -102,7 +102,7 @@ class HistoryCreateSchema(BaseModel):
     comment: Optional[str] = None
 
 class AttachmentCreateSchema(BaseModel):
-    document_version_id: int
+    document_set_id: int
 
 # ==========================================
 # Вспомогательные функции
@@ -294,7 +294,7 @@ async def add_stage(
     for att in main_attachments:
         new_att = TaskAttachment(
             task_id=subtask.id,
-            document_version_id=att.document_version_id,
+            document_set_id=att.document_set_id,
             attached_by=att.attached_by,
             created_at=datetime.utcnow()
         )
@@ -562,7 +562,7 @@ async def attach_document(
 ):
     new_att = TaskAttachment(
         task_id=task_id,
-        document_version_id=data.document_version_id,
+        document_set_id=data.document_set_id,
         attached_by=current_user.id,
         created_at=datetime.utcnow()
     )

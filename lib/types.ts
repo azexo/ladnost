@@ -55,6 +55,7 @@ export interface DocumentSet {
     owner_id: number; 
     is_favorite: boolean; 
     is_anonymous_access: boolean; // ✅ НОВОЕ ПОЛЕ
+    is_read_only: boolean;
     is_deleted: boolean; 
     deleted_at?: string; 
     created_at: string; 
@@ -91,7 +92,7 @@ export interface FormulationVariantItem { variant: ConditionFormulationVariant; 
 export interface FormulationGroupedByToken { identifier: string; variants: FormulationVariantItem[]; } 
 export interface Task { id: number; parent_task_id?: number; document_set_id: number; name: string; description?: string; task_type: TaskType; status: TaskStatus; initiator_id: number; assignee_id: number; deadline?: string; route_type?: RouteType; completed_at?: string; created_at: string; updated_at: string; }
 export interface ApprovalStage { id: number; task_id: number; stage_number: number; assignee_id: number; access_level: AccessLevel; status: StageStatus; comment?: string; completed_at?: string; created_at: string; }
-export interface TaskAttachment { id: number; task_id: number; document_version_id: number; attached_by: number; created_at: string; }
+export interface TaskAttachment { id: number; task_id: number; document_set_id: number; attached_by: number; created_at: string; }
 export interface TaskHistory { id: number; task_id: number; root_task_id: number; user_id: number; action: HistoryAction; comment?: string; created_at: string; }
 export interface ReviewEdit { id: number; document_version_id: number; task_id?: number; edit_type: EditType; old_text?: string; new_text?: string; block_uuid: string; anchor_from_uuid?: string; anchor_to_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; is_orphan: boolean; orphan_reason?: OrphanReason; author_id: number; resolution_status: ResolutionStatus; resolved_by?: number; resolved_at?: string; created_at: string; }
 export interface Comment { id: number; document_version_id: number; task_id?: number; parent_comment_id?: number | null; block_uuid: string; anchor_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; is_orphan: boolean; orphan_resolved_at?: string; text_content: string; author_id: number; is_resolved: boolean; resolved_by?: number; resolved_at?: string; created_at: string; updated_at: string; legal_point: string;}
@@ -111,6 +112,7 @@ export interface DocumentSetPayload {
     is_questionnaire_enabled?: boolean; 
     is_favorite?: boolean; 
     is_anonymous_access?: boolean; // ✅ НОВОЕ ПОЛЕ
+    is_read_only?: boolean;
 }
 export interface DocumentPayload { name: string; document_role?: DocumentRole; sort_order?: number; }
 export interface DocumentVersionPayload { content_html?: string; content_json: any; change_reason?: string; }
@@ -135,7 +137,7 @@ export interface FormulationVariablePayload { variable_name: string; }
 export interface TaskPayload { document_set_id: number; name: string; description?: string; parent_task_id?: number; initiator_id?: number; task_type?: TaskType; assignee_id: number; deadline?: string; route_type?: RouteType; }
 export interface ApprovalStagePayload { stage_number: number; assignee_id: number; access_level?: AccessLevel; comment?: string; }
 export interface TaskHistoryPayload { action: HistoryAction; comment?: string; }
-export interface TaskAttachmentPayload { document_version_id: number; } 
+export interface TaskAttachmentPayload { document_set_id: number; } 
 export interface CommentPayload { block_uuid: string; anchor_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; text_content: string; parent_comment_id?: number; task_id?: number;}
 export interface ReviewEditPayload { edit_type: EditType; old_text?: string; new_text?: string; block_uuid: string; anchor_from_uuid?: string; anchor_to_uuid?: string; char_offset_in_block?: number; char_length_in_block?: number; }
 export interface AccessPayload { user_id: number; access_type: AccessType; expires_at?: string; }

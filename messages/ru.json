@@ -218,6 +218,7 @@
     }
   },
   "viewer": {
+    "selectedDocumentOf": "Выбран документ {current} из {total}",
     "preparingPdf": "Подготовка PDF...",
     "signDocument": "Подписать документ",
     "exportError": "Ошибка экспорта",
@@ -881,6 +882,7 @@
     "closeButton": "Закрыть"
   },
   "DocumentEditor": {
+    "readOnlyMessage": "Этот документ доступен только для чтения. Редактирование запрещено.",
     "accessDeniedTitle": "Доступ ограничен",
     "documentNotSelected": "Документ не выбран",
     "uploadDocument": "Загрузить документ (DOCX, PDF, RTF)",
@@ -1288,6 +1290,9 @@
         "history": "История"
       },
       "details": {
+        "sign": "Подпись",
+        "disableEditing": "Запретить редактирование",
+        "readOnly": "Только чтение",
         "author": "Автор",
         "assignee": "Исполнитель",
         "deadline": "Дедлайн",
