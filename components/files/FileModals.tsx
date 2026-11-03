@@ -247,13 +247,13 @@ export function MoveModal() {
   const { moveModal, setMoveModal, batchAction } = useFilesStore();
   const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [breadcrumbs, setBreadcrumbs] = useState<{ id: number | null; name: string }[]>([{ id: null, name: t('myFiles') }]);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ id: number | null; name: string }[]>([{ id: null, name: t('myDocuments') }]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (moveModal) {
       setCurrentFolderId(null);
-      setBreadcrumbs([{ id: null, name: t('myFiles') }]);
+      setBreadcrumbs([{ id: null, name: t('myDocuments') }]);
     }
   }, [moveModal, t]);
 
@@ -397,7 +397,7 @@ export function CloneTemplateModal() {
   const { cloneTemplateModal, setCloneTemplateModal, cloneTemplateAsStandard } = useFilesStore();
   const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [breadcrumbs, setBreadcrumbs] = useState<{ id: number | null; name: string }[]>([{ id: null, name: t('myFiles') }]);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ id: number | null; name: string }[]>([{ id: null, name: t('myDocuments') }]);
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState('');
 
@@ -405,7 +405,7 @@ export function CloneTemplateModal() {
     if (cloneTemplateModal) {
       setNewName(cloneTemplateModal.defaultName + ' ' + t('copySuffix'));
       setCurrentFolderId(null);
-      setBreadcrumbs([{ id: null, name: t('myFiles') }]);
+      setBreadcrumbs([{ id: null, name: t('myDocuments') }]);
     }
   }, [cloneTemplateModal, t]);
 

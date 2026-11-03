@@ -112,7 +112,41 @@
   "notifications": {
     "all_marked_as_read": "Все уведомления отмечены как прочитанные",
     "marked_as_read": "Уведомление отмечено как прочитанное",
-    "not_found_or_no_access": "Уведомление не найдено или не принадлежит вам"
+    "not_found_or_no_access": "Уведомление не найдено или не принадлежит вам",
+    "email": {
+      "task_assigned": {
+        "subject": "📋 Новая задача: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{task_url}\" style=\"color: #007bff; text-decoration: none;\">Открыть задачу</a></p>"
+      },
+      "document_sent": {
+        "subject": "📨 Вам отправлен документ: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{doc_set_url}\" style=\"color: #007bff; text-decoration: none;\">Открыть комплект документов</a></p>"
+      },
+      "comment_added": {
+        "subject": "💬 Новый комментарий: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{doc_set_url}\" style=\"color: #007bff; text-decoration: none;\">Перейти к документу</a></p>"
+      },
+      "task_status_changed": {
+        "subject": "🔄 Статус задачи изменен: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{task_url}\" style=\"color: #007bff; text-decoration: none;\">Открыть задачу</a></p>"
+      },
+      "formulation_updated": {
+        "subject": "✏️ Формулировка обновлена: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p>"
+      },
+      "task_rejected": {
+        "subject": "❌ Задача отклонена: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{task_url}\" style=\"color: #007bff; text-decoration: none;\">Открыть задачу</a></p>"
+      },
+      "approval_completed": {
+        "subject": "✅ Задача согласована: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{task_url}\" style=\"color: #007bff; text-decoration: none;\">Открыть задачу</a></p>"
+      },
+      "task_needs_revision": {
+        "subject": "🔄 Задача возвращена на доработку: {title}",
+        "html": "<p>Привет, {user_name}!</p><p><b>{title}</b></p><p>{message}</p><p><a href=\"{task_url}\" style=\"color: #007bff; text-decoration: none;\">Открыть задачу</a></p>"
+      }
+    }
   },
   "questionnaire": {
     "errors": {

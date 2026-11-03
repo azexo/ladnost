@@ -218,6 +218,8 @@
     }
   },
   "viewer": {
+    "readOnlyTitle": "Документ только для чтения",
+    "readOnlyDescription": "Заполнение данных недоступны для этого документа.",
     "selectedDocumentOf": "Выбран документ {current} из {total}",
     "preparingPdf": "Подготовка PDF...",
     "signDocument": "Подписать документ",
@@ -343,6 +345,7 @@
   "files": {
     "breadcrumbs": {
       "myFiles": "Мои файлы",
+      "myDocuments": "Мои документы",
       "shared": "Общий доступ",
       "trash": "Корзина"
     },
@@ -521,6 +524,8 @@
     "brand": "Ladnost",
     "nav": {
       "myFiles": "Мои файлы",
+      "documents": "Документы",
+      "myDocuments": "Мои документы",
       "formulations": "Формулировки",
       "myTasks": "Мои задачи",
       "neuralNetwork": "Нейросеть"
@@ -762,6 +767,7 @@
     "moveModal": {
       "title": "Переместить в...",
       "myFiles": "Мои файлы",
+      "myDocuments": "Мои документы",
       "loading": "Загрузка...",
       "noSubfolders": "В этой папке нет подпапок",
       "cancel": "Отмена",
@@ -783,6 +789,7 @@
       "title": "Клонировать шаблон",
       "newNameLabel": "Новое название",
       "myFiles": "Мои файлы",
+      "myDocuments": "Мои документы",
       "selectFolder": "Выберите папку для клонирования",
       "loading": "Загрузка...",
       "noSubfolders": "В этой папке нет подпапок",
@@ -854,6 +861,7 @@
   "MyFiles": {
     "workspace": "Рабочее пространство",
     "myFiles": "Мои файлы",
+    "myDocuments": "Мои документы",
     "shared": "Общий доступ",
     "recent": "Недавние",
     "favorites": "Избранное",

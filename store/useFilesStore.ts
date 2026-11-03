@@ -97,7 +97,7 @@ export const useFilesStore = create<FilesState>((set, get) => ({
   users: [],
   selectedItems: [],
   // Используем getT() для получения перевода вне React-компонентов
-  breadcrumbs: [{ id: null, name: 'files.breadcrumbs.myFiles' }], 
+  breadcrumbs: [{ id: null, name: 'files.breadcrumbs.myDocuments' }], 
   isLoading: false,
   commentsCount: {},
   view: 'files',
@@ -276,7 +276,7 @@ export const useFilesStore = create<FilesState>((set, get) => ({
 
   setView: (view) => {
     const t = getT();
-    let rootName = t('files.breadcrumbs.myFiles');
+    let rootName = t('files.breadcrumbs.myDocuments');
     if (view === 'shared') rootName = t('files.breadcrumbs.shared');
     if (view === 'trash') rootName = t('files.breadcrumbs.trash');
 
@@ -399,7 +399,7 @@ export const useFilesStore = create<FilesState>((set, get) => ({
         // Определяем правильное имя для корневой крошки в зависимости от view
         const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : 
                         view === 'trash' ? t('files.breadcrumbs.trash') : 
-                        t('files.breadcrumbs.myFiles');
+                        t('files.breadcrumbs.myDocuments');
                         
         // Обновляем имя корневой крошки, если оно изменилось (например, при смене языка)
         if (breadcrumbs[0].name !== rootName) {
@@ -409,7 +409,7 @@ export const useFilesStore = create<FilesState>((set, get) => ({
         }
       } else {
         // На случай, если breadcrumbs пуст (хотя это не должно происходить)
-        const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : t('files.breadcrumbs.myFiles');
+        const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : t('files.breadcrumbs.myDocuments');
         set({ breadcrumbs: [{ id: null, name: rootName }] });
       }
     } catch (error) {
@@ -442,7 +442,7 @@ export const useFilesStore = create<FilesState>((set, get) => ({
     const t = getT();
     
     if (folderId === null) {
-      const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : t('files.breadcrumbs.myFiles');
+      const rootName = view === 'shared' ? t('files.breadcrumbs.shared') : t('files.breadcrumbs.myDocuments');
       set({
         currentFolderId: null,
         breadcrumbs: [{ id: null, name: rootName }]

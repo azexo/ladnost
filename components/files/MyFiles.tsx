@@ -98,7 +98,7 @@ export default function MyFiles() {
           </div>
           <div className={`sidebar-item ${view === 'files' ? 'active' : ''}`} onClick={handleOpenMyFiles}>
             <i className="fa-solid fa-folder-open w-4 text-center text-primary-500"></i>
-            <span>{t('myFiles')}</span>
+            <span>{t('myDocuments')}</span>
           </div>
           <div className={`sidebar-item ${view === 'shared' ? 'active' : ''}`} onClick={handleOpenShared}>
             <i className="fa-solid fa-share-nodes w-4 text-center text-slate-400"></i>

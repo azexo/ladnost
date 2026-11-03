@@ -87,7 +87,7 @@ export default function Navbar() {
           </div>
           <nav className="flex items-center gap-0.5">
             <Link href="/workspace" onClick={(e) => handleNavClick(e, '/workspace')} className={`nav-link ${pathname === '/workspace' || pathname.startsWith('/workspace/') ? 'active' : ''}`}>
-              {t('nav.myFiles')}
+              {t('nav.documents')}
             </Link>
             <Link href="/formulations" onClick={(e) => handleNavClick(e, '/formulations')} className={`nav-link ${pathname === '/formulations' || pathname.startsWith('/formulations/') ? 'active' : ''}`}>
               {t('nav.formulations')}

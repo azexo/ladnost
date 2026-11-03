@@ -97,6 +97,7 @@ export default function ViewerPage() {
   const documentSet = useStore((s) => s.documentPackage.documentSet);
   const activeDoc = useStore((s) => s.documentPackage.items.find((d: any) => d.id === s.documentPackage.activeId));
   const docTitle = documentSet?.name || activeDoc?.name || 'Документ';
+  const isReadOnly = documentSet?.is_read_only;
 
   const activeIndex = useMemo(
     () => items.findIndex((d: any) => d.id === activeId),
@@ -358,6 +359,20 @@ export default function ViewerPage() {
       generateError: t('generateError', { extension: 'PDF' }),
     });
   };
+
+  const readOnlyContent = (
+    <div className="p-6">
+      <div className="flex flex-col items-center justify-center text-center py-16">
+        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <i className="fa-solid fa-lock text-3xl text-gray-400"></i>
+        </div>
+        <p className="text-gray-800 text-xl font-semibold">{t('readOnlyTitle')}</p>
+        <p className="text-gray-500 text-sm mt-2 max-w-xs">
+          {t('readOnlyDescription')}
+        </p>
+      </div>
+    </div>
+  );
 
   const formContent = (
     <div className="p-6">
@@ -629,7 +644,7 @@ export default function ViewerPage() {
             <PluginSlot
               name="signatures-list"
               documentSetId={setId}
-              fallback={formContent}
+              fallback={isReadOnly ? readOnlyContent : formContent}
             />
           </div>
 

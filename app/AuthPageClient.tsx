@@ -219,11 +219,10 @@ export default function AuthPageClient({
   };
 
   const handleCheckActivation = async () => {
-    switchTab('activate');
+    // Убираем: switchTab('activate');
     setActivateStatus('loading');
     setActivateMessage(t('activate.loadingText'));
 
-    // Получаем check_token из sessionStorage
     const checkToken = typeof window !== 'undefined'
       ? sessionStorage.getItem(CHECK_TOKEN_KEY)
       : null;
@@ -236,30 +235,31 @@ export default function AuthPageClient({
 
     try {
       const response = await authApi.checkActivation(checkToken);
-
       if (!response.is_active) {
         setActivateStatus('error');
         setActivateMessage(t('activate.notYetActivated'));
         return;
       }
 
-      // 🔑 Аккаунт активирован — выполняем автоматический вход
       setActivateStatus('success');
       setActivateMessage(response.message || t('activate.successDefault'));
+      sessionStorage.removeItem(CHECK_TOKEN_KEY);
 
-      if (response.access_token) {
-        tokenUtils.setToken(response.access_token);
-
-        try {
-          await initializeAuth(); // Загрузит user и notifications
-        } catch (e) {
-          console.warn('Не удалось автоматически войти', e);
-        }
-
-        // Удаляем check_token (он больше не нужен)
-        sessionStorage.removeItem('ladnost.activation_check');
+      try {
+        await initializeAuth();
+      } catch (e) {
+        console.warn('Не удалось автоматически войти', e);
       }
 
+      setTimeout(() => {
+        const pendingRedirect = sessionStorage.getItem('redirectAfterAuth');
+        if (pendingRedirect) {
+          sessionStorage.removeItem('redirectAfterAuth');
+          router.replace(pendingRedirect);
+        } else {
+          router.replace('/workspace');
+        }
+      }, 1500);
     } catch (err: any) {
       setActivateStatus('error');
       setActivateMessage(err.message || t('activate.errorDefault'));
@@ -707,7 +707,7 @@ export default function AuthPageClient({
 
               <button
                 onClick={handleCheckActivation}
-                className="w-full py-2.5 bg-white hover:bg-slate-50 text-primary-600 border border-primary-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+                className="mt-4 w-full py-2.5 bg-white hover:bg-slate-50 text-primary-600 border border-primary-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 <i className="fa-solid fa-rotate text-xs"></i>
                 {t('success.checkActivation')}

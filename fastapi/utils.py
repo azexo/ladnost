@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Tuple
 from datetime import datetime
 from passlib.context import CryptContext
-
+from notifications import send_notification_email
 from config import get_settings
 from database import get_db
 from models import (
@@ -297,6 +297,12 @@ def create_notification(
     )
     db.add(notification)
     db.flush()
+
+    try:
+        send_notification_email(notification, db)
+    except Exception as e:
+        print(f"⚠️ Не удалось отправить email-уведомление: {e}")
+
     return notification
 
 def create_bulk_notifications(
@@ -360,7 +366,7 @@ def notify_new_comment(db: Session, recipient_id: int, doc_set_id: int, comment_
         db=db, user_id=recipient_id, notif_type=NotificationType.COMMENT_ADDED,
         title=t("utils.notifications.new_comment_title", author_name=author_name),
         message=t("utils.notifications.new_comment_msg"),
-        entity_type=RelatedEntityType.COMMENT, entity_id=comment_id
+        entity_type=RelatedEntityType.DOCUMENT_SET, entity_id=doc_set_id
     )
 
 def notify_document_sent(db: Session, recipient_id: int, doc_set_id: int, doc_set_name: str, sender_name: str):

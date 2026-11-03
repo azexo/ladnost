@@ -190,18 +190,23 @@ export const authApi = {
         token_type?: string;
         message?: string;
     }> => {
-        const response = await fetch('/auth/activation-status', {
+        const res = await request<{
+            is_active: boolean;
+            access_token?: string;
+            token_type?: string;
+            message?: string;
+        }>('/auth/activation-status', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ check_token: checkToken }),
+            skipLogout: true, // 🔹 чтобы при 401 не срабатывал глобальный logout
         });
 
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.detail || getT()('api.errors.activation_error'));
+        // 🔑 Если аккаунт активирован — сервер возвращает access_token для авто-входа
+        if (res?.is_active && res.access_token) {
+            tokenUtils.setToken(res.access_token);
         }
 
-        return response.json();
+        return res;
     },
     getMe: async (): Promise<User> => {
         return request<User>('/auth/me', { method: 'GET' });
