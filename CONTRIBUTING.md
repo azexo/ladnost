@@ -26,7 +26,3 @@ Have an idea to improve the project? That's great!
 1. First, check [existing Issues](https://github.com/azexo/ladnost/issues) to see if it's already being discussed.
 2. If not, create a new issue using the **Feature Request** template.
 3. We will discuss the idea, and only after the architecture is agreed upon should you start writing code.
-
-## 🛠 Setting Up the Development Environment
-
-1. Fork the repository and clone your copy:
