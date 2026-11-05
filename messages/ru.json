@@ -222,7 +222,7 @@
     "readOnlyDescription": "Заполнение данных недоступны для этого документа.",
     "selectedDocumentOf": "Выбран документ {current} из {total}",
     "preparingPdf": "Подготовка PDF...",
-    "signDocument": "Подписать документ",
+    "signDocumentSet": "Подписать комплект",
     "exportError": "Ошибка экспорта",
     "conversionError": "Ошибка при конвертации в {extension}",
     "generateError": "Не удалось сгенерировать {extension}.",

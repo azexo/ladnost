@@ -91,6 +91,7 @@ export default function AuthPageClient({
 
   const [activateStatus, setActivateStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [activateMessage, setActivateMessage] = useState(t('activate.loadingText'));
+  const [isShaking, setIsShaking] = useState(false);
 
   // ===== ФУНКЦИИ =====
   const switchTab = (tab: 'login' | 'register' | 'forgot' | 'reset' | 'success' | 'activate') => {
@@ -230,6 +231,7 @@ export default function AuthPageClient({
     if (!checkToken) {
       setActivateStatus('error');
       setActivateMessage(t('activate.noCheckToken'));
+      setIsShaking(true);
       return;
     }
 
@@ -238,6 +240,7 @@ export default function AuthPageClient({
       if (!response.is_active) {
         setActivateStatus('error');
         setActivateMessage(t('activate.notYetActivated'));
+        setIsShaking(true);
         return;
       }
 
@@ -263,6 +266,7 @@ export default function AuthPageClient({
     } catch (err: any) {
       setActivateStatus('error');
       setActivateMessage(err.message || t('activate.errorDefault'));
+      setIsShaking(true);
     }
   };
 
@@ -707,7 +711,8 @@ export default function AuthPageClient({
 
               <button
                 onClick={handleCheckActivation}
-                className="mt-4 w-full py-2.5 bg-white hover:bg-slate-50 text-primary-600 border border-primary-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+                onAnimationEnd={() => setIsShaking(false)}
+                className={`mt-4 w-full py-2.5 bg-white hover:bg-slate-50 text-primary-600 border border-primary-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${isShaking ? 'animate-shake' : ''}`}
               >
                 <i className="fa-solid fa-rotate text-xs"></i>
                 {t('success.checkActivation')}

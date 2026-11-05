@@ -663,7 +663,7 @@ export default function ViewerPage() {
               ) : (
                 <>
                   <i className="fa-solid fa-signature"></i>
-                  {t('signDocument')}
+                  {t('signDocumentSet')}
                 </>
               )}
             </button>
