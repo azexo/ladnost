@@ -13,7 +13,7 @@ import { SubscriptionStatus } from '@/lib/types';
 import { pluginManager } from '@/lib/pluginManager';
 
 // 🔒 Пути, которые блокируются при истёкшей подписке
-const DEFAULT_BLOCKED_PATHS = ['/workspace', '/formulations'];
+const DEFAULT_BLOCKED_PATHS = ['/workspace', '/formulations', '/tasks'];
 const DEFAULT_BYPASS_PATHS: string[] = [];
 
 export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
@@ -111,7 +111,6 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // ✅ Если подписка истекла И путь в списке заблокированных — редиректим на /trial-expired
     if (isExpired && isBlockedPath) {
       if (pathname !== '/trial-expired') {
         console.log('[SubscriptionGuard]:', t('expiredAndBlockedRedirect'));

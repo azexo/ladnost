@@ -92,15 +92,6 @@ export async function request<T>(
         throw new Error(errorMessage);
     }
 
-    // ✅ ОБРАБОТКА 402 (PAYMENT REQUIRED)
-    if (response.status === 402) {
-        if (window.location.pathname !== '/trial-expired') {
-            window.location.href = '/trial-expired';
-        }
-        // 🔹 Используем перевод
-        throw new Error(getT()('api.errors.access_limited_sales'));
-    }
-
     // Общая обработка остальных ошибок
     if (!response.ok) {
         // 🔹 Используем перевод с передачей параметра status
@@ -475,11 +466,7 @@ export const documentsApi = {
             // 🔹 Используем перевод
             throw new Error(getT()('api.errors.session_expired'));
         }
-        if (response.status === 402) {
-            window.location.href = '/trial-expired';
-            // 🔹 Используем перевод
-            throw new Error(getT()('api.errors.access_limited'));
-        }
+
         if (!response.ok) {
             // 🔹 Используем перевод с параметром
             let errorMessage = getT()('api.errors.http_error', { status: response.status });

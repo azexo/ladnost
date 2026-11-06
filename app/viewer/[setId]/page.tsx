@@ -95,9 +95,12 @@ export default function ViewerPage() {
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
 
   const documentSet = useStore((s) => s.documentPackage.documentSet);
+  const documentSetMode = useStore((s) => s.documentPackage.documentSetMode);
   const activeDoc = useStore((s) => s.documentPackage.items.find((d: any) => d.id === s.documentPackage.activeId));
   const docTitle = documentSet?.name || activeDoc?.name || 'Документ';
   const isReadOnly = documentSet?.is_read_only;
+  const isNonStandardSet = documentSetMode === 'non_standard' || documentSetMode === 'file';
+  const shouldShowReadOnly = isReadOnly || isNonStandardSet;
 
   const activeIndex = useMemo(
     () => items.findIndex((d: any) => d.id === activeId),
@@ -644,7 +647,7 @@ export default function ViewerPage() {
             <PluginSlot
               name="signatures-list"
               documentSetId={setId}
-              fallback={isReadOnly ? readOnlyContent : formContent}
+              fallback={shouldShowReadOnly ? readOnlyContent : formContent}
             />
           </div>
 
